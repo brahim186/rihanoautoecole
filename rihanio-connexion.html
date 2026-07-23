@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -311,9 +312,10 @@
     lucide.createIcons();
   });
 
-  // Demo account used for client-side validation
-  const DEMO_EMAIL = 'admin@rihanio-autoecole.ma';
-  const DEMO_PASSWORD = 'rihanio2026';
+  // ---- Configuration Supabase ----
+  const SUPABASE_URL = 'https://zenisqrgaiemicfqzudr.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_I5721kHC1W91CwMTY4GkZg_Tm2vWD5g';
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const loginForm = document.getElementById('loginForm');
   const emailField = document.getElementById('emailField');
@@ -334,7 +336,7 @@
     formAlert.classList.remove('show');
   }
 
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
 
@@ -355,17 +357,39 @@
     submitBtn.disabled = true;
     submitBtnLabel.textContent = 'Connexion en cours...';
 
-    // Simulated authentication check (no real backend connected)
-    setTimeout(() => {
-      if (email.toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD){
-        submitBtnLabel.textContent = 'Connecté ✓';
-      } else {
-        formAlertText.textContent = 'Email ou mot de passe incorrect. Veuillez réessayer.';
-        formAlert.classList.add('show');
-        submitBtn.disabled = false;
-        submitBtnLabel.textContent = 'Se connecter';
-      }
-    }, 700);
+    // Authentification réelle via Supabase
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      formAlertText.textContent = 'Email ou mot de passe incorrect. Veuillez réessayer.';
+      formAlert.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtnLabel.textContent = 'Se connecter';
+      return;
+    }
+
+    // Récupérer le profil (société + rôle) de l'utilisateur connecté
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('user_profiles')
+      .select('company_id, role, full_name')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      formAlertText.textContent = "Compte connecté mais aucun profil d'entreprise associé. Contactez l'administrateur.";
+      formAlert.classList.add('show');
+      submitBtn.disabled = false;
+      submitBtnLabel.textContent = 'Se connecter';
+      await supabaseClient.auth.signOut();
+      return;
+    }
+
+    submitBtnLabel.textContent = 'Connecté ✓';
+    // La session est automatiquement stockée par supabase-js (localStorage interne au SDK)
+    window.location.href = 'tableau-de-bord.html';
   });
 </script>
 
