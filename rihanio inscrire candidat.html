@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -556,6 +558,12 @@
 <script>
   lucide.createIcons();
 
+  requireAuth().then(profile => {
+    if (!profile) return;
+    const logoutBtn = document.querySelector('.sb-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  });
+
   document.querySelectorAll('.sb-item').forEach(item => {
     item.addEventListener('click', () => {
       document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
@@ -673,7 +681,7 @@
     });
   });
 
-  document.getElementById('candidateForm').addEventListener('submit', (e) => {
+  document.getElementById('candidateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     let allValid = true;
     requiredFields.forEach(id => { if (!validateField(id)) allValid = false; });
@@ -683,9 +691,60 @@
       return;
     }
 
+    if (!currentProfile) return; // sécurité : pas de société associée
+
+    const submitBtn = document.querySelector('#candidateForm button[type="submit"], .btn-primary');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const prix = parseFloat(fPrix.value) || 0;
+    const avance = parseFloat(fAvance.value) || 0;
+
+    // 1. Enregistrer le candidat
+    const { data: candidat, error: candidatError } = await supabaseClient
+      .from('candidats')
+      .insert({
+        company_id: currentProfile.company_id,
+        prenom: document.getElementById('fPrenom').value.trim(),
+        nom: document.getElementById('fNom').value.trim(),
+        date_naissance: document.getElementById('fNaissance').value,
+        cin: document.getElementById('fCin').value.trim(),
+        cin_expiration: document.getElementById('fCinExp').value,
+        adresse: document.getElementById('fAdresse').value.trim(),
+        prix_formation: prix,
+        avance_payee: avance,
+        date_inscription: document.getElementById('fInscription').value
+      })
+      .select()
+      .single();
+
+    if (candidatError) {
+      alert("Erreur lors de l'enregistrement du candidat : " + candidatError.message);
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    // 2. Enregistrer l'avance comme premier paiement (si > 0)
+    if (avance > 0) {
+      const { error: paiementError } = await supabaseClient
+        .from('paiements')
+        .insert({
+          company_id: currentProfile.company_id,
+          candidat_id: candidat.id,
+          montant: avance,
+          description: "Avance à l'inscription"
+        });
+      if (paiementError) {
+        console.error('Erreur enregistrement avance :', paiementError.message);
+      }
+    }
+
+    if (submitBtn) submitBtn.disabled = false;
     const toast = document.getElementById('successToast');
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3200);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      window.location.href = 'tableau-de-bord.html';
+    }, 1800);
   });
 
   document.getElementById('cancelBtn').addEventListener('click', () => {
