@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -385,10 +387,10 @@
             <span class="metric-card-badge"><i data-lucide="trending-up"></i>+12%</span>
           </div>
           <div>
-            <div class="metric-card-count num">128</div>
+            <div class="metric-card-count num" id="kpiCandidats">—</div>
             <div class="metric-card-label">Candidats actifs</div>
           </div>
-          <div class="metric-card-sub">85 Permis B · 43 Permis A, C</div>
+          <div class="metric-card-sub" id="kpiCandidatsSub">—</div>
         </div>
 
         <div class="metric-card c-2">
@@ -396,10 +398,10 @@
             <div class="metric-card-icon"><i data-lucide="clipboard-check"></i></div>
           </div>
           <div>
-            <div class="metric-card-count num">14</div>
+            <div class="metric-card-count num" id="kpiExamens">—</div>
             <div class="metric-card-label">Examens cette semaine</div>
           </div>
-          <div class="metric-card-sub">8 Code · 6 Conduite</div>
+          <div class="metric-card-sub" id="kpiExamensSub">—</div>
         </div>
 
         <div class="metric-card c-3">
@@ -407,19 +409,18 @@
             <div class="metric-card-icon"><i data-lucide="car"></i></div>
           </div>
           <div>
-            <div class="metric-card-count num">6/8</div>
+            <div class="metric-card-count num" id="kpiVehicules">—</div>
             <div class="metric-card-label">Véhicules disponibles</div>
           </div>
-          <div class="metric-card-sub">2 en maintenance</div>
+          <div class="metric-card-sub" id="kpiVehiculesSub">—</div>
         </div>
 
         <div class="metric-card c-4">
           <div class="metric-card-top">
             <div class="metric-card-icon"><i data-lucide="wallet"></i></div>
-            <span class="metric-card-badge"><i data-lucide="percent"></i>78%</span>
           </div>
           <div>
-            <div class="metric-card-count num">42 500 DH</div>
+            <div class="metric-card-count num" id="kpiRevenus">—</div>
             <div class="metric-card-label">Revenus mensuels</div>
           </div>
           <div class="metric-card-sub">vs 38 900 DH le mois dernier</div>
@@ -552,153 +553,8 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-
-              <tr>
-                <td>
-                  <div class="candidate-cell">
-                    <div class="avatar-xs" style="background:#8B6FF2;">MF</div>
-                    <div>
-                      <div class="cand-name">Maryam El Fassi</div>
-                      <div class="cand-id">#CND-2026-118</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="permit-badge">B</span></td>
-                <td>Promo janvier 2026</td>
-                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
-                <td>
-                  <div class="progress-wrap">
-                    <div class="progress-track"><div class="progress-fill" style="width:90%;"></div></div>
-                    <span class="progress-pct num">90%</span>
-                  </div>
-                </td>
-                <td><span class="status-badge active">Actif</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
-                    <button title="Modifier"><i data-lucide="pencil"></i></button>
-                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <div class="candidate-cell">
-                    <div class="avatar-xs" style="background:#5B62F4;">AH</div>
-                    <div>
-                      <div class="cand-name">Ayoub El Hassani</div>
-                      <div class="cand-id">#CND-2026-117</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="permit-badge">A</span></td>
-                <td>Promo décembre 2025</td>
-                <td><span class="doc-badge pending"><i data-lucide="alert-circle"></i>Incomplet</span></td>
-                <td>
-                  <div class="progress-wrap">
-                    <div class="progress-track"><div class="progress-fill" style="width:45%;"></div></div>
-                    <span class="progress-pct num">45%</span>
-                  </div>
-                </td>
-                <td><span class="status-badge active">Actif</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
-                    <button title="Modifier"><i data-lucide="pencil"></i></button>
-                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <div class="candidate-cell">
-                    <div class="avatar-xs" style="background:#F0A93C;">KA</div>
-                    <div>
-                      <div class="cand-name">Kenza Alaoui</div>
-                      <div class="cand-id">#CND-2026-116</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="permit-badge">B</span></td>
-                <td>Promo janvier 2026</td>
-                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
-                <td>
-                  <div class="progress-wrap">
-                    <div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>
-                    <span class="progress-pct num">100%</span>
-                  </div>
-                </td>
-                <td><span class="status-badge graduated">Reçu(e)</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
-                    <button title="Modifier"><i data-lucide="pencil"></i></button>
-                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <div class="candidate-cell">
-                    <div class="avatar-xs" style="background:#18B368;">YB</div>
-                    <div>
-                      <div class="cand-name">Yassine Bourada</div>
-                      <div class="cand-id">#CND-2026-115</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="permit-badge">C</span></td>
-                <td>Promo décembre 2025</td>
-                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
-                <td>
-                  <div class="progress-wrap">
-                    <div class="progress-track"><div class="progress-fill" style="width:60%;"></div></div>
-                    <span class="progress-pct num">60%</span>
-                  </div>
-                </td>
-                <td><span class="status-badge suspended">Suspendu</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
-                    <button title="Modifier"><i data-lucide="pencil"></i></button>
-                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <div class="candidate-cell">
-                    <div class="avatar-xs" style="background:#F0473F;">SN</div>
-                    <div>
-                      <div class="cand-name">Salma Nassiri</div>
-                      <div class="cand-id">#CND-2026-114</div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="permit-badge">B</span></td>
-                <td>Promo novembre 2025</td>
-                <td><span class="doc-badge pending"><i data-lucide="alert-circle"></i>Incomplet</span></td>
-                <td>
-                  <div class="progress-wrap">
-                    <div class="progress-track"><div class="progress-fill" style="width:25%;"></div></div>
-                    <span class="progress-pct num">25%</span>
-                  </div>
-                </td>
-                <td><span class="status-badge active">Actif</span></td>
-                <td>
-                  <div class="row-actions">
-                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
-                    <button title="Modifier"><i data-lucide="pencil"></i></button>
-                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-                  </div>
-                </td>
-              </tr>
-
+            <tbody id="candidatsTbody">
+              <tr id="candidatsLoadingRow"><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Chargement des candidats...</td></tr>
             </tbody>
           </table>
         </div>
@@ -710,6 +566,132 @@
 
 <script>
   lucide.createIcons();
+
+  requireAuth().then(profile => {
+    if (!profile) return;
+    const logoutBtn = document.querySelector('.sb-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    loadDashboardData();
+  });
+
+  function initials(prenom, nom){
+    return ((prenom?.[0] || '') + (nom?.[0] || '')).toUpperCase();
+  }
+
+  function statusBadge(statut){
+    const map = {
+      actif: '<span class="status-badge active">Actif</span>',
+      suspendu: '<span class="status-badge suspended">Suspendu</span>',
+      diplome: '<span class="status-badge graduated">Reçu(e)</span>',
+      abandonne: '<span class="status-badge suspended">Abandonné</span>'
+    };
+    return map[statut] || map.actif;
+  }
+
+  async function loadDashboardData(){
+    const companyId = currentProfile.company_id;
+
+    // ---- KPI : candidats ----
+    const { data: candidats, error: candErr } = await supabaseClient
+      .from('candidats')
+      .select('*')
+      .eq('company_id', companyId)
+      .order('created_at', { ascending: false });
+
+    if (!candErr && candidats) {
+      const actifs = candidats.filter(c => c.statut === 'actif').length;
+      document.getElementById('kpiCandidats').textContent = actifs;
+      document.getElementById('kpiCandidatsSub').textContent = candidats.length + ' candidat(s) au total';
+      renderCandidats(candidats.slice(0, 8));
+    }
+
+    // ---- KPI : examens de la semaine ----
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    const startISO = startOfWeek.toISOString().split('T')[0];
+    const { data: examens } = await supabaseClient
+      .from('examens')
+      .select('type_examen')
+      .eq('company_id', companyId)
+      .gte('date_examen', startISO);
+
+    if (examens) {
+      const code = examens.filter(e => e.type_examen === 'code').length;
+      const conduite = examens.filter(e => e.type_examen === 'conduite').length;
+      document.getElementById('kpiExamens').textContent = examens.length;
+      document.getElementById('kpiExamensSub').textContent = code + ' Code · ' + conduite + ' Conduite';
+    }
+
+    // ---- KPI : véhicules ----
+    const { data: vehicules } = await supabaseClient
+      .from('vehicules')
+      .select('statut')
+      .eq('company_id', companyId);
+
+    if (vehicules) {
+      const dispo = vehicules.filter(v => v.statut === 'disponible').length;
+      const maint = vehicules.filter(v => v.statut === 'en_maintenance').length;
+      document.getElementById('kpiVehicules').textContent = dispo + '/' + vehicules.length;
+      document.getElementById('kpiVehiculesSub').textContent = maint + ' en maintenance';
+    }
+
+    // ---- KPI : revenus du mois ----
+    const now = new Date();
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const { data: paiements } = await supabaseClient
+      .from('paiements')
+      .select('montant')
+      .eq('company_id', companyId)
+      .gte('date_paiement', firstOfMonth);
+
+    if (paiements) {
+      const total = paiements.reduce((sum, p) => sum + Number(p.montant), 0);
+      document.getElementById('kpiRevenus').textContent = total.toLocaleString('fr-FR') + ' DH';
+    }
+  }
+
+  function renderCandidats(candidats){
+    const tbody = document.getElementById('candidatsTbody');
+    if (!candidats.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucun candidat inscrit pour le moment.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = candidats.map(c => {
+      const prix = Number(c.prix_formation) || 0;
+      const avance = Number(c.avance_payee) || 0;
+      const pct = prix > 0 ? Math.min(Math.round((avance / prix) * 100), 100) : 0;
+      return `
+        <tr>
+          <td>
+            <div class="candidate-cell">
+              <div class="avatar-xs" style="background:#5B62F4;">${initials(c.prenom, c.nom)}</div>
+              <div>
+                <div class="cand-name">${c.prenom} ${c.nom}</div>
+                <div class="cand-id">#${c.id.slice(0,8)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="permit-badge">${c.categorie_permis || 'B'}</span></td>
+          <td>${c.date_inscription ? new Date(c.date_inscription).toLocaleDateString('fr-FR') : '—'}</td>
+          <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>—</span></td>
+          <td>
+            <div class="progress-wrap">
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+              <span class="progress-pct num">${pct}%</span>
+            </div>
+          </td>
+          <td>${statusBadge(c.statut)}</td>
+          <td>
+            <div class="row-actions">
+              <button title="Voir le profil"><i data-lucide="eye"></i></button>
+              <button title="Modifier"><i data-lucide="pencil"></i></button>
+              <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+  }
 
   const themeToggle = document.getElementById('themeToggle');
   themeToggle.addEventListener('click', () => {
