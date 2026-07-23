@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -598,6 +600,12 @@
 
 <script>
   lucide.createIcons();
+
+  requireAuth().then(profile => {
+    if (!profile) return;
+    const logoutBtn = document.querySelector('.sb-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  });
 
   // Nav active state
   document.querySelectorAll('.sb-item').forEach(item => {
