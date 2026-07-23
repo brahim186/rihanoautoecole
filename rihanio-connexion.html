@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Connexion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.dark{
+    --bg:#0E0F22;
+    --surface:#171933;
+    --surface-2:#1F2140;
+    --border:#2A2C52;
+    --ink:#F1F1FB;
+    --ink-soft:#A6A9C8;
+    --ink-pale:#6E7191;
+    --primary-soft:#232559;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ---------- Layout ---------- */
+  .page{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;width:100%;}
+  @media (max-width:920px){
+    .page{grid-template-columns:1fr;}
+    .side-panel{display:none;}
+  }
+
+  /* ---------- Left brand panel ---------- */
+  .side-panel{
+    position:relative;
+    background:linear-gradient(155deg,var(--sidebar) 0%,#1E2050 55%,#171933 100%);
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:48px;overflow:hidden;
+  }
+  .side-panel::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(91,98,244,.28), transparent 45%),
+      radial-gradient(circle at 85% 80%, rgba(139,111,242,.22), transparent 50%);
+    pointer-events:none;
+  }
+  .side-brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+  .side-brand-mark{
+    width:44px;height:44px;border-radius:13px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 8px 20px -6px rgba(91,98,244,.7);
+  }
+  .side-brand-mark svg{width:21px;height:21px;}
+  .side-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#fff;}
+  .side-brand-sub{font-size:12px;color:#9EA1D6;margin-top:1px;}
+
+  .side-hero{position:relative;z-index:1;max-width:420px;}
+  .side-hero-icon{
+    width:56px;height:56px;border-radius:16px;background:rgba(91,98,244,.22);
+    display:flex;align-items:center;justify-content:center;color:#B4B8FF;margin-bottom:24px;
+  }
+  .side-hero-icon svg{width:28px;height:28px;}
+  .side-hero h1{font-family:'Plus Jakarta Sans',sans-serif;font-size:27px;font-weight:800;color:#fff;line-height:1.35;margin-bottom:14px;}
+  .side-hero p{font-size:14.5px;color:#B0B3E0;line-height:1.7;}
+
+  .side-stats{display:flex;gap:28px;position:relative;z-index:1;}
+  .side-stat-value{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#fff;}
+  .side-stat-label{font-size:12px;color:#9295C8;margin-top:2px;}
+
+  /* ---------- Right form panel ---------- */
+  .form-panel{display:flex;align-items:center;justify-content:center;padding:32px;}
+  .form-box{width:100%;max-width:380px;}
+
+  .mobile-brand{display:none;align-items:center;gap:12px;margin-bottom:34px;}
+  .mobile-brand-mark{
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.6);
+  }
+  .mobile-brand-mark svg{width:19px;height:19px;}
+  .mobile-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;color:var(--ink);}
+  .mobile-brand-sub{font-size:11px;color:var(--ink-pale);}
+  @media (max-width:920px){ .mobile-brand{display:flex;} }
+
+  .form-head{margin-bottom:30px;}
+  .form-head h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:23px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+  .form-head p{font-size:13.5px;color:var(--ink-soft);}
+
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+  .field label{font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .input-wrap{position:relative;}
+  .input-wrap svg.leading-icon{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    width:17px;height:17px;color:var(--ink-pale);pointer-events:none;
+  }
+  .input-wrap input{
+    width:100%;border:1.5px solid var(--border);border-radius:12px;
+    padding:12px 14px 12px 40px;font-family:inherit;font-size:13.5px;color:var(--ink);
+    background:var(--surface);outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  .input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+  .input-wrap input::placeholder{color:var(--ink-pale);}
+  .input-wrap.has-toggle input{padding-inline-end:40px;}
+  .toggle-visibility{
+    position:absolute;right:11px;top:50%;transform:translateY(-50%);
+    width:26px;height:26px;border:none;background:transparent;color:var(--ink-pale);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;
+  }
+  .toggle-visibility:hover{color:var(--ink-soft);background:var(--surface-2);}
+  .toggle-visibility svg{width:16px;height:16px;}
+
+  .field-error{font-size:12px;color:var(--danger);display:none;align-items:center;gap:5px;}
+  .field-error svg{width:13px;height:13px;}
+  .field.invalid .input-wrap input{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft);}
+  .field.invalid .field-error{display:flex;}
+
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .remember{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);cursor:pointer;user-select:none;}
+  .remember input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;}
+  .forgot-link{font-size:13px;font-weight:700;color:var(--primary);text-decoration:none;}
+  .forgot-link:hover{text-decoration:underline;}
+
+  .btn-submit{
+    width:100%;padding:13px;border:none;border-radius:12px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+    transition:transform .12s,box-shadow .12s;
+    box-shadow:0 10px 22px -8px rgba(91,98,244,.65);
+  }
+  .btn-submit:hover{transform:translateY(-1px);box-shadow:0 14px 26px -8px rgba(91,98,244,.75);}
+  .btn-submit:active{transform:scale(.99);}
+  .btn-submit svg{width:17px;height:17px;}
+  .btn-submit:disabled{opacity:.7;cursor:not-allowed;transform:none;}
+
+  .form-alert{
+    display:none;align-items:flex-start;gap:10px;
+    background:var(--danger-soft);color:var(--danger);border-radius:12px;
+    padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:18px;
+  }
+  .form-alert.show{display:flex;}
+  .form-alert svg{width:17px;height:17px;flex-shrink:0;margin-top:1px;}
+
+  .form-footer{text-align:center;font-size:13px;color:var(--ink-soft);margin-top:22px;}
+  .form-footer a{color:var(--primary);font-weight:700;text-decoration:none;}
+  .form-footer a:hover{text-decoration:underline;}
+
+  .top-toggle{position:absolute;top:22px;right:22px;z-index:2;}
+  .theme-toggle{
+    width:40px;height:40px;border-radius:11px;border:none;
+    background:var(--surface);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 2px 10px -4px rgba(23,25,51,.1);
+  }
+  .theme-toggle svg{width:17px;height:17px;}
+</style>
+</head>
+<body>
+
+<div class="top-toggle">
+  <button class="theme-toggle" id="themeToggle" title="Changer le thème"><i data-lucide="moon"></i></button>
+</div>
+
+<div class="page">
+
+  <!-- LEFT BRAND PANEL -->
+  <div class="side-panel">
+    <div class="side-brand">
+      <div class="side-brand-mark"><i data-lucide="car-front"></i></div>
+      <div>
+        <div class="side-brand-name">Rihanio Auto-École</div>
+        <div class="side-brand-sub">Gestion du centre</div>
+      </div>
+    </div>
+
+    <div class="side-hero">
+      <div class="side-hero-icon"><i data-lucide="car"></i></div>
+      <h1>Toute votre auto-école,<br>dans un seul tableau de bord.</h1>
+      <p>Candidats, moniteurs, véhicules, paiements et planning — gérez tout votre centre de formation en un seul endroit, simplement et rapidement.</p>
+    </div>
+
+    <div class="side-stats">
+      <div>
+        <div class="side-stat-value num">240+</div>
+        <div class="side-stat-label">Candidats suivis</div>
+      </div>
+      <div>
+        <div class="side-stat-value num">8</div>
+        <div class="side-stat-label">Véhicules gérés</div>
+      </div>
+      <div>
+        <div class="side-stat-value num">98%</div>
+        <div class="side-stat-label">Satisfaction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="form-panel">
+    <div class="form-box">
+
+      <div class="mobile-brand">
+        <div class="mobile-brand-mark"><i data-lucide="car-front"></i></div>
+        <div>
+          <div class="mobile-brand-name">Rihanio Auto-École</div>
+          <div class="mobile-brand-sub">Gestion du centre</div>
+        </div>
+      </div>
+
+      <div class="form-head">
+        <h2>Connexion</h2>
+        <p>Entrez vos identifiants pour accéder à votre tableau de bord.</p>
+      </div>
+
+      <div class="form-alert" id="formAlert">
+        <i data-lucide="alert-circle"></i>
+        <span id="formAlertText">Email ou mot de passe incorrect. Veuillez réessayer.</span>
+      </div>
+
+      <form id="loginForm" novalidate>
+
+        <div class="field" id="emailField">
+          <label for="email">Adresse email</label>
+          <div class="input-wrap">
+            <i data-lucide="mail" class="leading-icon"></i>
+            <input type="email" id="email" placeholder="nom@rihanio-autoecole.ma" autocomplete="email">
+          </div>
+          <div class="field-error"><i data-lucide="alert-circle"></i>Veuillez entrer une adresse email valide.</div>
+        </div>
+
+        <div class="field" id="passwordField">
+          <label for="password">Mot de passe</label>
+          <div class="input-wrap has-toggle">
+            <i data-lucide="lock" class="leading-icon"></i>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="toggle-visibility" id="togglePassword" title="Afficher le mot de passe">
+              <i data-lucide="eye"></i>
+            </button>
+          </div>
+          <div class="field-error"><i data-lucide="alert-circle"></i>Le mot de passe doit contenir au moins 6 caractères.</div>
+        </div>
+
+        <div class="row-between">
+          <label class="remember">
+            <input type="checkbox" id="remember">
+            Se souvenir de moi
+          </label>
+          <a class="forgot-link" href="#">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span id="submitBtnLabel">Se connecter</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </form>
+
+      <div class="form-footer">
+        Besoin d'un compte ? <a href="#">Contactez votre administrateur</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    themeToggle.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+    lucide.createIcons();
+  });
+
+  // Show / hide password
+  const passwordInput = document.getElementById('password');
+  const toggleBtn = document.getElementById('togglePassword');
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    toggleBtn.innerHTML = isHidden ? '<i data-lucide="eye-off"></i>' : '<i data-lucide="eye"></i>';
+    toggleBtn.title = isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+    lucide.createIcons();
+  });
+
+  // Demo account used for client-side validation
+  const DEMO_EMAIL = 'admin@rihanio-autoecole.ma';
+  const DEMO_PASSWORD = 'rihanio2026';
+
+  const loginForm = document.getElementById('loginForm');
+  const emailField = document.getElementById('emailField');
+  const passwordField = document.getElementById('passwordField');
+  const emailInput = document.getElementById('email');
+  const formAlert = document.getElementById('formAlert');
+  const formAlertText = document.getElementById('formAlertText');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitBtnLabel = document.getElementById('submitBtnLabel');
+
+  function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function clearErrors(){
+    emailField.classList.remove('invalid');
+    passwordField.classList.remove('invalid');
+    formAlert.classList.remove('show');
+  }
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    let hasError = false;
+
+    if (!isValidEmail(email)){
+      emailField.classList.add('invalid');
+      hasError = true;
+    }
+    if (password.length < 6){
+      passwordField.classList.add('invalid');
+      hasError = true;
+    }
+    if (hasError) return;
+
+    submitBtn.disabled = true;
+    submitBtnLabel.textContent = 'Connexion en cours...';
+
+    // Simulated authentication check (no real backend connected)
+    setTimeout(() => {
+      if (email.toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD){
+        submitBtnLabel.textContent = 'Connecté ✓';
+      } else {
+        formAlertText.textContent = 'Email ou mot de passe incorrect. Veuillez réessayer.';
+        formAlert.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtnLabel.textContent = 'Se connecter';
+      }
+    }, 700);
+  });
+</script>
+
+</body>
+</html>

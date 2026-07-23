@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Calendrier des examens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --sidebar-3:#272A52;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --available:#18B368;
+    --available-soft:#E5F9EF;
+    --maintenance:#F0A93C;
+    --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6;
+    --assigned-soft:#EAF0FE;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= SHELL ================= */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:80px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    transition:width .2s ease;overflow:hidden;z-index:40;
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .sidebar:hover{width:246px;}
+  .sb-brand{display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;}
+  .sb-brand-mark{
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.65);
+  }
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;
+    padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;
+  }
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{
+    display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;
+    color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;position:relative;
+  }
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+
+  .sb-profile{display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .sb-profile-avatar{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+  }
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;}
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .search-wrap{position:relative;width:260px;flex-shrink:0;}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);}
+  .search-wrap input{
+    width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);
+    padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
+  }
+  .search-wrap input::placeholder{color:var(--ink-pale);}
+  .search-wrap input:focus{border-color:var(--primary);}
+
+  .icon-btn{
+    width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);position:relative;
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
+    border:1.5px solid var(--surface);}
+
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  .section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+  .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
+
+  /* ---------- METRICS GRID ---------- */
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1100px){ .metrics-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .metrics-grid{grid-template-columns:1fr;} }
+
+  .metric-card{
+    border-radius:20px;padding:20px;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;
+    color:#fff;position:relative;overflow:hidden;
+  }
+  .metric-card.c-1{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .metric-card.c-2{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card.c-3{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .metric-card.c-4{background:linear-gradient(150deg,#3B7CF6,#2F5FD1);}
+  .metric-card::after{
+    content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);
+    right:-40px;top:-50px;
+  }
+  .metric-card-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+  .metric-card-icon svg{width:16px;height:16px;}
+  .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
+  .metric-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
+
+  /* ---------- FILTER BAR ---------- */
+  .filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .filter-chip{
+    display:flex;align-items:center;gap:6px;padding:9px 15px;border-radius:100px;
+    background:var(--surface);border:1.5px solid var(--border);color:var(--ink-soft);
+    font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+  }
+  .filter-chip svg{width:13px;height:13px;}
+  .filter-chip:hover{border-color:var(--primary);color:var(--primary);}
+  .filter-chip.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));border-color:transparent;color:#fff;}
+
+  /* ---------- CANDIDATE LIST ---------- */
+  .exam-list{display:flex;flex-direction:column;gap:12px;}
+  .exam-card{
+    background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    transition:opacity .3s ease, transform .3s ease, max-height .3s ease, margin .3s ease, padding .3s ease;
+  }
+  .exam-card.removing{opacity:0;transform:translateX(24px) scale(.97);}
+
+  .exam-avatar{
+    width:48px;height:48px;border-radius:14px;flex-shrink:0;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;
+  }
+
+  .exam-main{flex:1;min-width:190px;}
+  .exam-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .exam-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
+  .permit-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:var(--primary-soft);color:var(--primary);}
+  .exam-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .exam-sub span{display:flex;align-items:center;gap:5px;}
+  .exam-sub svg{width:12px;height:12px;color:var(--ink-pale);}
+
+  .paid-pill{
+    font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:100px;
+    background:var(--available-soft);color:var(--available);display:inline-flex;align-items:center;gap:4px;
+  }
+  .paid-pill svg{width:11px;height:11px;}
+
+  .exam-field{display:flex;flex-direction:column;gap:4px;width:150px;flex-shrink:0;}
+  .exam-field label{font-size:10.5px;font-weight:700;color:var(--ink-pale);text-transform:uppercase;letter-spacing:.03em;}
+  .exam-field input{
+    border:1.5px solid var(--border);border-radius:10px;padding:8px 11px;
+    font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--surface-2);
+    outline:none;transition:border-color .15s;width:100%;
+  }
+  .exam-field input:focus{border-color:var(--primary);}
+
+  .exam-status-pill{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+  .exam-status-pill.scheduled{background:var(--assigned-soft);color:var(--assigned);}
+  .exam-status-pill.pending{background:var(--maintenance-soft);color:#B5720B;}
+
+  .exam-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-inline-start:auto;}
+  .btn-pass{
+    display:flex;align-items:center;gap:7px;
+    background:linear-gradient(135deg,var(--available),#0E8F52);color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12.5px;
+    padding:10px 16px;border-radius:11px;cursor:pointer;transition:transform .12s,box-shadow .12s;white-space:nowrap;
+    box-shadow:0 8px 16px -6px rgba(24,179,104,.55);
+  }
+  .btn-pass:hover{transform:translateY(-1px);}
+  .btn-pass svg{width:15px;height:15px;}
+  .btn-fail{
+    width:38px;height:38px;border-radius:11px;border:none;background:var(--surface-2);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .btn-fail:hover{color:var(--danger);background:var(--danger-soft);}
+  .btn-fail svg{width:16px;height:16px;}
+
+  .empty-state{
+    background:var(--surface);border-radius:20px;padding:60px 20px;text-align:center;
+    box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
+  }
+  .empty-state-icon{
+    width:56px;height:56px;border-radius:16px;background:var(--primary-soft);color:var(--primary);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 14px;
+  }
+  .empty-state-icon svg{width:26px;height:26px;}
+  .empty-state h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:var(--ink);margin-bottom:6px;}
+  .empty-state p{font-size:13px;color:var(--ink-soft);}
+
+  .success-toast{
+    position:fixed;bottom:24px;right:24px;z-index:100;
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,var(--available),#0E8F52);color:#fff;padding:14px 18px;border-radius:14px;
+    box-shadow:0 14px 34px -10px rgba(24,179,104,.55);
+    font-size:13.5px;font-weight:700;
+    transform:translateY(20px);opacity:0;pointer-events:none;
+    transition:transform .25s cubic-bezier(.2,.8,.25,1), opacity .25s ease;
+  }
+  .success-toast.show{transform:translateY(0);opacity:1;}
+  .success-toast svg{width:18px;height:18px;flex-shrink:0;}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .search-wrap{order:2;width:100%;}
+    .exam-card{flex-direction:column;align-items:stretch;}
+    .exam-field{width:100%;}
+    .exam-actions{margin-inline-start:0;width:100%;}
+    .btn-pass{flex:1;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="car-front"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Auto-école</div>
+      </div>
+    </div>
+
+    <div class="sb-scroll">
+      <div class="sb-cat">Vue d'ensemble</div>
+      <div class="sb-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span class="sb-item-label">Tableau de bord</span>
+      </div>
+
+      <div class="sb-cat">Candidats &amp; formation</div>
+      <div class="sb-item">
+        <i data-lucide="users"></i>
+        <span class="sb-item-label">Candidats</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="book-open"></i>
+        <span class="sb-item-label">Cours théoriques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car-front"></i>
+        <span class="sb-item-label">Cours pratiques</span>
+      </div>
+      <div class="sb-item active">
+        <i data-lucide="clipboard-check"></i>
+        <span class="sb-item-label">Examens</span>
+      </div>
+
+      <div class="sb-cat">Ressources</div>
+      <div class="sb-item">
+        <i data-lucide="user-cog"></i>
+        <span class="sb-item-label">Moniteurs</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car"></i>
+        <span class="sb-item-label">Véhicules</span>
+      </div>
+
+      <div class="sb-cat">Finance</div>
+      <div class="sb-item">
+        <i data-lucide="wallet"></i>
+        <span class="sb-item-label">Finances &amp; paiements</span>
+      </div>
+
+      <div class="sb-cat">Système</div>
+      <div class="sb-item">
+        <i data-lucide="settings"></i>
+        <span class="sb-item-label">Paramètres</span>
+      </div>
+    </div>
+
+    <div class="sb-profile">
+      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name">Saïd El Idrissi</div>
+        <div class="sb-profile-role">Directeur du centre</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Calendrier des examens</h1>
+        <p id="headingCount">Candidats ayant réglé l'intégralité des frais</p>
+      </div>
+
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un candidat...">
+      </div>
+
+      <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar">SI</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- METRICS -->
+      <section class="metrics-grid" id="metricsGrid"></section>
+
+      <!-- FILTERS -->
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" data-filter="all"><i data-lucide="list"></i>Tous</button>
+        <button class="filter-chip" data-filter="scheduled"><i data-lucide="calendar-check"></i>Date programmée</button>
+        <button class="filter-chip" data-filter="pending"><i data-lucide="calendar-x"></i>Sans date</button>
+        <button class="filter-chip" data-filter="A"><i data-lucide="bike"></i>Permis A</button>
+        <button class="filter-chip" data-filter="B"><i data-lucide="car"></i>Permis B</button>
+        <button class="filter-chip" data-filter="C"><i data-lucide="truck"></i>Permis C</button>
+      </div>
+
+      <!-- CANDIDATE LIST -->
+      <section>
+        <div class="section-heading"><h2>Candidats en attente d'examen <span class="num" id="listCount"></span></h2></div>
+        <div class="exam-list" id="examList"></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="success-toast" id="successToast">
+  <i data-lucide="check-circle-2"></i>
+  <span id="successToastText">Candidat marqué comme reçu.</span>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // Where a candidate should be sent once marked "Réussi" (passed).
+  // Point this to the graduates / candidates page once it is ready.
+  // Example: const PASS_REDIRECT_URL = 'candidats-recus.html';
+  // Left empty for now — candidates are simply removed from this list.
+  // ---------------------------------------------------------------
+  const PASS_REDIRECT_URL = '';
+
+  const avatarColors = ['#5B62F4','#8B6FF2','#18B368','#F0A93C','#3B7CF6','#F0473F','#0E8F52','#C97F14'];
+
+  // Only candidates who have paid in full appear here.
+  let candidates = [
+    { id:1, name:'Maryam El Fassi', cin:'BE482910', phone:'06 61 22 33 44', permit:'B',
+      promo:'Promo janvier 2026', examDate:'2026-08-04', score:'' },
+
+    { id:2, name:'Ayoub El Hassani', cin:'BK317755', phone:'06 72 33 44 55', permit:'A',
+      promo:'Promo décembre 2025', examDate:'', score:'' },
+
+    { id:3, name:'Kenza Alaoui', cin:'A205841', phone:'06 83 44 55 66', permit:'B',
+      promo:'Promo janvier 2026', examDate:'2026-08-06', score:'18' },
+
+    { id:4, name:'Yassine Bourada', cin:'BJ660124', phone:'06 94 55 66 77', permit:'C',
+      promo:'Promo décembre 2025', examDate:'', score:'' },
+
+    { id:5, name:'Salma Nassiri', cin:'BL903327', phone:'06 15 66 77 88', permit:'B',
+      promo:'Promo novembre 2025', examDate:'2026-07-29', score:'' },
+
+    { id:6, name:'Hamza Idrissi', cin:'BM117744', phone:'06 26 77 88 99', permit:'A',
+      promo:'Promo novembre 2025', examDate:'', score:'' },
+  ];
+
+  let searchTerm = '';
+  let activeFilter = 'all';
+
+  function initials(name){
+    return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  function fmtDateShort(iso){
+    if (!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function filteredCandidates(){
+    let list = candidates;
+    if (activeFilter === 'scheduled') list = list.filter(c => !!c.examDate);
+    else if (activeFilter === 'pending') list = list.filter(c => !c.examDate);
+    else if (['A','B','C'].includes(activeFilter)) list = list.filter(c => c.permit === activeFilter);
+
+    if (searchTerm){
+      const q = searchTerm.toLowerCase();
+      list = list.filter(c => c.name.toLowerCase().includes(q) || c.cin.toLowerCase().includes(q));
+    }
+    return list;
+  }
+
+  function renderMetrics(){
+    const total = candidates.length;
+    const scheduled = candidates.filter(c => !!c.examDate).length;
+    const pending = total - scheduled;
+    const scored = candidates.filter(c => c.score !== '' && !isNaN(parseFloat(c.score)));
+    const avgScore = scored.length
+      ? (scored.reduce((s,c) => s + parseFloat(c.score), 0) / scored.length).toFixed(1)
+      : '—';
+
+    document.getElementById('metricsGrid').innerHTML = `
+      <div class="metric-card c-1">
+        <div class="metric-card-icon"><i data-lucide="users"></i></div>
+        <div>
+          <div class="metric-card-count num">${total}</div>
+          <div class="metric-card-label">Payé intégralement</div>
+        </div>
+      </div>
+      <div class="metric-card c-2">
+        <div class="metric-card-icon"><i data-lucide="calendar-x"></i></div>
+        <div>
+          <div class="metric-card-count num">${pending}</div>
+          <div class="metric-card-label">Sans date d'examen</div>
+        </div>
+      </div>
+      <div class="metric-card c-4">
+        <div class="metric-card-icon"><i data-lucide="calendar-check"></i></div>
+        <div>
+          <div class="metric-card-count num">${scheduled}</div>
+          <div class="metric-card-label">Examens programmés</div>
+        </div>
+      </div>
+      <div class="metric-card c-3">
+        <div class="metric-card-icon"><i data-lucide="award"></i></div>
+        <div>
+          <div class="metric-card-count num">${avgScore}</div>
+          <div class="metric-card-label">Moyenne des notes saisies</div>
+        </div>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function renderList(){
+    const list = filteredCandidates();
+    document.getElementById('listCount').textContent = `(${list.length})`;
+    const wrap = document.getElementById('examList');
+
+    if (!list.length){
+      wrap.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon"><i data-lucide="clipboard-check"></i></div>
+          <h3>Aucun candidat à afficher</h3>
+          <p>Aucun candidat ayant réglé l'intégralité des frais ne correspond à ce filtre.</p>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+
+    wrap.innerHTML = list.map((c, i) => {
+      const scheduled = !!c.examDate;
+      return `
+        <div class="exam-card" data-id="${c.id}">
+          <div class="exam-avatar" style="background:${avatarColors[i % avatarColors.length]};">${initials(c.name)}</div>
+
+          <div class="exam-main">
+            <div class="exam-name-row">
+              <span class="exam-name">${c.name}</span>
+              <span class="permit-badge">${c.permit}</span>
+              <span class="paid-pill"><i data-lucide="check-circle-2"></i>Payé intégralement</span>
+            </div>
+            <div class="exam-sub">
+              <span><i data-lucide="id-card"></i>CIN ${c.cin}</span>
+              <span><i data-lucide="phone"></i>${c.phone}</span>
+              <span><i data-lucide="graduation-cap"></i>${c.promo}</span>
+            </div>
+          </div>
+
+          <div class="exam-field">
+            <label>Date d'examen</label>
+            <input type="date" class="exam-date-input" data-id="${c.id}" value="${c.examDate}">
+          </div>
+
+          <div class="exam-field">
+            <label>Points (/20)</label>
+            <input type="number" min="0" max="20" step="0.5" class="exam-score-input" data-id="${c.id}" value="${c.score}" placeholder="—">
+          </div>
+
+          <span class="exam-status-pill ${scheduled ? 'scheduled' : 'pending'}">
+            ${scheduled ? 'Programmé · ' + fmtDateShort(c.examDate) : 'Sans date'}
+          </span>
+
+          <div class="exam-actions">
+            <button class="btn-pass pass-btn" data-id="${c.id}"><i data-lucide="check"></i>Réussi</button>
+            <button class="btn-fail" title="Retirer de la liste" data-id="${c.id}"><i data-lucide="x"></i></button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    lucide.createIcons();
+    attachHandlers();
+  }
+
+  function attachHandlers(){
+    document.querySelectorAll('.exam-date-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const id = parseInt(input.dataset.id);
+        const c = candidates.find(x => x.id === id);
+        if (c){ c.examDate = input.value; renderMetrics(); renderList(); }
+      });
+    });
+
+    document.querySelectorAll('.exam-score-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const id = parseInt(input.dataset.id);
+        const c = candidates.find(x => x.id === id);
+        if (c){ c.score = input.value; renderMetrics(); }
+      });
+    });
+
+    document.querySelectorAll('.pass-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const c = candidates.find(x => x.id === id);
+        if (!c) return;
+
+        const card = document.querySelector(`.exam-card[data-id="${id}"]`);
+        if (card) card.classList.add('removing');
+
+        showToast(`${c.name} a été marqué(e) comme reçu(e).`);
+
+        setTimeout(() => {
+          candidates = candidates.filter(x => x.id !== id);
+          renderMetrics();
+          renderList();
+
+          // Send the candidate to the graduates / candidates page once defined.
+          if (PASS_REDIRECT_URL){
+            window.location.href = `${PASS_REDIRECT_URL}?candidat=${id}`;
+          }
+        }, 300);
+      });
+    });
+
+    document.querySelectorAll('.btn-fail').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const c = candidates.find(x => x.id === id);
+        if (c && confirm(`Retirer "${c.name}" de la liste des examens ?`)){
+          candidates = candidates.filter(x => x.id !== id);
+          renderMetrics();
+          renderList();
+        }
+      });
+    });
+  }
+
+  function showToast(text){
+    const toast = document.getElementById('successToast');
+    document.getElementById('successToastText').textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    renderList();
+  });
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeFilter = chip.dataset.filter;
+      renderList();
+    });
+  });
+
+  // ---------- Initial render ----------
+  renderMetrics();
+  renderList();
+</script>
+
+</body>
+</html>

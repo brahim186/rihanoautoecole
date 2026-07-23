@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Véhicules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --sidebar-3:#272A52;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --available:#18B368;
+    --available-soft:#E5F9EF;
+    --maintenance:#F0A93C;
+    --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6;
+    --assigned-soft:#EAF0FE;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= SHELL ================= */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:80px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    transition:width .2s ease;overflow:hidden;z-index:40;
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .sidebar:hover{width:246px;}
+  .sb-brand{
+    display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;
+  }
+  .sb-brand-mark{
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.65);
+  }
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;
+    padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;
+  }
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{
+    display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;
+    color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;position:relative;
+  }
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+
+  .sb-profile{
+    display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  }
+  .sb-profile-avatar{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+  }
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:18px 32px;
+    background:var(--bg);position:sticky;top:0;z-index:30;
+  }
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .search-wrap{position:relative;width:260px;flex-shrink:0;}
+  .search-wrap svg{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);
+  }
+  .search-wrap input{
+    width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);
+    padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
+  }
+  .search-wrap input::placeholder{color:var(--ink-pale);}
+  .search-wrap input:focus{border-color:var(--primary);}
+
+  .icon-btn{
+    width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);position:relative;
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
+    border:1.5px solid var(--surface);}
+
+  .btn-primary{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
+    padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;
+    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
+  .btn-primary svg{width:16px;height:16px;}
+
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  .section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+  .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
+  .section-heading .see-all{font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none;}
+
+  /* ---------- METRICS GRID (top gradient cards) ---------- */
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1100px){ .metrics-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .metrics-grid{grid-template-columns:1fr;} }
+
+  .metric-card{
+    border-radius:20px;padding:20px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;
+    color:#fff;position:relative;overflow:hidden;
+  }
+  .metric-card.c-total{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .metric-card.c-available{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .metric-card.c-maintenance{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card.c-insurance{background:linear-gradient(150deg,#F0473F,#C22E2E);}
+  .metric-card::after{
+    content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);
+    right:-40px;top:-50px;
+  }
+  .metric-card-icon{
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;position:relative;z-index:1;
+  }
+  .metric-card-icon svg{width:16px;height:16px;}
+  .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
+  .metric-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
+  .metric-card-sub{font-size:11px;opacity:.85;position:relative;z-index:1;}
+
+  /* ---------- FLEET CARD GRID ---------- */
+  .fleet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media (max-width:1180px){ .fleet-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:720px){ .fleet-grid{grid-template-columns:1fr;} }
+
+  .fleet-card{
+    background:var(--surface);border-radius:20px;padding:18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .fleet-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .fleet-thumb{
+    width:50px;height:50px;border-radius:14px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--primary-soft);color:var(--primary);
+  }
+  .fleet-thumb svg{width:24px;height:24px;}
+  .fleet-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
+  .fleet-plate{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+  .status-pill{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+  .status-pill.available{background:var(--available-soft);color:var(--available);}
+  .status-pill.assigned{background:var(--assigned-soft);color:var(--assigned);}
+  .status-pill.maintenance{background:var(--maintenance-soft);color:#B5720B;}
+
+  .fleet-meta-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);}
+  .fleet-meta-row span{display:flex;align-items:center;gap:6px;}
+  .fleet-meta-row svg{width:13px;height:13px;color:var(--ink-pale);}
+  .fleet-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);}
+
+  .insur-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;}
+  .insur-pill.ok{background:var(--available-soft);color:var(--available);}
+  .insur-pill.soon{background:var(--maintenance-soft);color:#B5720B;}
+  .insur-pill.expired{background:var(--danger-soft);color:var(--danger);}
+  .insur-pill svg{width:12px;height:12px;}
+
+  .ins-track{height:5px;border-radius:100px;background:var(--border);overflow:hidden;}
+  .ins-fill{height:100%;border-radius:100px;background:var(--available);}
+  .ins-fill.soon{background:var(--maintenance);}
+  .ins-fill.expired{background:var(--danger);}
+
+  .fleet-edit-btn{
+    width:32px;height:32px;border-radius:9px;border:none;background:var(--surface-2);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .fleet-edit-btn:hover{color:var(--primary);background:var(--primary-soft);}
+  .fleet-edit-btn svg{width:14px;height:14px;}
+
+  /* ---------- TABLE PANEL ---------- */
+  .panel{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);overflow:hidden;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+  .panel-title svg{width:17px;height:17px;color:var(--primary);}
+  .panel-link{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;text-decoration:none;background:none;border:none;}
+
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:760px;}
+  thead th{
+    text-align:left;font-size:11px;font-weight:700;color:var(--ink-pale);
+    text-transform:uppercase;letter-spacing:.04em;padding:12px 22px;border-bottom:1px solid var(--border);
+    background:var(--surface-2);white-space:nowrap;
+  }
+  tbody td{padding:14px 22px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+
+  .veh-cell{display:flex;align-items:center;gap:10px;}
+  .veh-avatar{
+    width:36px;height:36px;border-radius:11px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+  }
+  .veh-name{font-weight:700;color:var(--ink);}
+  .veh-plate{font-size:11.5px;color:var(--ink-soft);}
+
+  .permit-badge{
+    font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;
+    background:var(--primary-soft);color:var(--primary);
+  }
+
+  .row-actions{display:flex;align-items:center;gap:4px;}
+  .row-actions button{
+    width:30px;height:30px;border-radius:9px;border:none;background:transparent;color:var(--ink-pale);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .row-actions button:hover{background:var(--primary-soft);color:var(--primary);}
+  .row-actions button.danger:hover{color:var(--danger);background:var(--danger-soft);}
+  .row-actions svg{width:15px;height:15px;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(19,21,43,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    background:var(--surface);border-radius:22px;width:100%;max-width:480px;
+    max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px -20px rgba(19,21,43,.5);
+    animation:modal-in .18s cubic-bezier(.2,.8,.25,1);
+  }
+  @keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 18px;}
+  .modal-title{display:flex;align-items:center;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:16.5px;color:var(--ink);}
+  .modal-title-icon{
+    width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .modal-title-icon svg{width:17px;height:17px;}
+  .modal-close{
+    width:34px;height:34px;border-radius:10px;border:none;background:var(--surface-2);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .modal-close:hover{color:var(--danger);background:var(--danger-soft);}
+  .modal-close svg{width:16px;height:16px;}
+  .modal-body{padding:4px 24px 22px;display:flex;flex-direction:column;gap:16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+  .field input,.field select{
+    border:1.5px solid var(--border);border-radius:11px;padding:10px 13px;
+    font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface-2);
+    outline:none;transition:border-color .15s;width:100%;
+  }
+  .field input:focus,.field select:focus{border-color:var(--primary);}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:6px 24px 24px;}
+  .btn-ghost{
+    padding:10px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);font-weight:700;font-size:13.5px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--surface-2);}
+  .btn-confirm{
+    padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    font-weight:700;font-size:13.5px;
+    cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
+  }
+  .btn-confirm:hover{transform:translateY(-1px);}
+  .btn-confirm svg{width:15px;height:15px;}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .search-wrap{order:3;width:100%;}
+    .btn-primary{order:2;}
+    .topbar-profile{order:4;margin-inline-start:auto;}
+    .field-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="car-front"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Auto-école</div>
+      </div>
+    </div>
+
+    <div class="sb-scroll">
+      <div class="sb-cat">Vue d'ensemble</div>
+      <div class="sb-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span class="sb-item-label">Tableau de bord</span>
+      </div>
+
+      <div class="sb-cat">Candidats &amp; formation</div>
+      <div class="sb-item">
+        <i data-lucide="users"></i>
+        <span class="sb-item-label">Candidats</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="book-open"></i>
+        <span class="sb-item-label">Cours théoriques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car-front"></i>
+        <span class="sb-item-label">Cours pratiques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="clipboard-check"></i>
+        <span class="sb-item-label">Examens</span>
+      </div>
+
+      <div class="sb-cat">Ressources</div>
+      <div class="sb-item">
+        <i data-lucide="user-cog"></i>
+        <span class="sb-item-label">Moniteurs</span>
+      </div>
+      <div class="sb-item active">
+        <i data-lucide="car"></i>
+        <span class="sb-item-label">Véhicules</span>
+      </div>
+
+      <div class="sb-cat">Finance</div>
+      <div class="sb-item">
+        <i data-lucide="wallet"></i>
+        <span class="sb-item-label">Finances &amp; paiements</span>
+      </div>
+
+      <div class="sb-cat">Système</div>
+      <div class="sb-item">
+        <i data-lucide="settings"></i>
+        <span class="sb-item-label">Paramètres</span>
+      </div>
+    </div>
+
+    <div class="sb-profile">
+      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name">Saïd El Idrissi</div>
+        <div class="sb-profile-role">Administrateur</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Parc de véhicules</h1>
+        <p id="headingCount">8 véhicules enregistrés</p>
+      </div>
+
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un véhicule...">
+      </div>
+
+      <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+
+      <button class="btn-primary" id="btnAddVehicle">
+        <i data-lucide="plus"></i>
+        Ajouter un véhicule
+      </button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar">SI</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- METRICS -->
+      <section class="metrics-grid" id="metricsGrid"></section>
+
+      <!-- FLEET CARDS -->
+      <section>
+        <div class="section-heading"><h2>Véhicules <span class="num" id="listCount"></span></h2></div>
+        <div class="fleet-grid" id="fleetGrid"></div>
+      </section>
+
+      <!-- TABLE -->
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="car-front"></i>Liste complète des véhicules</div>
+          <button class="panel-link">Voir l'historique d'entretien →</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Véhicule</th>
+                <th>Type de permis</th>
+                <th>Moniteur assigné</th>
+                <th>Assurance</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vehiclesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Ajouter / Modifier un véhicule -->
+<div class="modal-overlay" id="vehicleModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-icon"><i data-lucide="car"></i></div>
+        <span id="vehicleModalTitle">Ajouter un véhicule</span>
+      </div>
+      <button class="modal-close" id="vehicleModalClose" title="Fermer"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <input type="hidden" id="vehId" value="">
+
+      <div class="field-row">
+        <div class="field">
+          <label for="vehName">Marque &amp; modèle</label>
+          <input type="text" id="vehName" placeholder="Ex : Dacia Sandero">
+        </div>
+        <div class="field">
+          <label for="vehPlate">Immatriculation</label>
+          <input type="text" id="vehPlate" placeholder="Ex : 45210-A-6">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="vehPermit">Type de permis</label>
+        <select id="vehPermit">
+          <option value="B">B</option>
+          <option value="A">A</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="vehMoniteur">Moniteur assigné</label>
+        <select id="vehMoniteur">
+          <option value="Non assigné">Non assigné</option>
+          <option value="Omar Chergaoui">Omar Chergaoui</option>
+          <option value="Youssef Bennali">Youssef Bennali</option>
+          <option value="Rachid El Mrabet">Rachid El Mrabet</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="vehInsuranceStart">Assurance — date de début</label>
+          <input type="date" id="vehInsuranceStart">
+        </div>
+        <div class="field">
+          <label for="vehInsuranceEnd">Assurance — date de fin</label>
+          <input type="date" id="vehInsuranceEnd">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="vehStatus">Statut</label>
+        <select id="vehStatus">
+          <option value="Disponible">Disponible</option>
+          <option value="En service">En service</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-ghost" id="vehicleCancelBtn">Annuler</button>
+      <button class="btn-confirm" id="vehicleSaveBtn">
+        <i data-lucide="check"></i>
+        <span id="vehicleSaveBtnLabel">Enregistrer le véhicule</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // ---------- Vehicle data store ----------
+  let vehicles = [
+    { id:1, name:'Renault Clio 3', plate:'12458-A-4', permit:'B',
+      moniteur:'Omar Chergaoui', insuranceStart:'2026-01-15', insuranceEnd:'2027-01-14', status:'En service' },
+
+    { id:2, name:'Peugeot 208', plate:'33017-B-6', permit:'B',
+      moniteur:'Omar Chergaoui', insuranceStart:'2025-08-01', insuranceEnd:'2026-07-31', status:'En service' },
+
+    { id:3, name:'Camion Tracteur B2', plate:'50214-C-2', permit:'C',
+      moniteur:'Rachid El Mrabet', insuranceStart:'2025-07-27', insuranceEnd:'2026-07-27', status:'Maintenance' },
+
+    { id:4, name:'Dacia Logan', plate:'67890-A-4', permit:'B',
+      moniteur:'Youssef Bennali', insuranceStart:'2026-03-01', insuranceEnd:'2027-02-28', status:'Disponible' },
+
+    { id:5, name:'Moto Yamaha YBR', plate:'14522-D-8', permit:'A',
+      moniteur:'Non assigné', insuranceStart:'2026-05-10', insuranceEnd:'2027-05-09', status:'Disponible' },
+
+    { id:6, name:'Renault Symbol', plate:'29304-B-6', permit:'B',
+      moniteur:'Youssef Bennali', insuranceStart:'2025-09-01', insuranceEnd:'2026-08-31', status:'Maintenance' },
+  ];
+  let nextId = 7;
+  let searchTerm = '';
+
+  const vehicleIcon = { 'B':'car', 'A':'bike', 'C':'truck' };
+  const statusClass = { 'Disponible':'available', 'En service':'assigned', 'Maintenance':'maintenance' };
+  const avatarColors = ['#5B62F4','#8B6FF2','#18B368','#F0A93C','#3B7CF6','#F0473F'];
+
+  function insuranceCalc(v){
+    if (!v.insuranceStart || !v.insuranceEnd){
+      return { status:'none', daysLeft:null, pct:0 };
+    }
+    const start = new Date(v.insuranceStart);
+    const end = new Date(v.insuranceEnd);
+    const now = new Date(todayStr());
+    const totalDays = Math.max(1, Math.round((end - start) / 86400000));
+    const elapsedDays = Math.round((now - start) / 86400000);
+    const daysLeft = Math.round((end - now) / 86400000);
+    const pct = Math.max(0, Math.min(100, Math.round((elapsedDays / totalDays) * 100)));
+
+    let status = 'ok';
+    if (daysLeft <= 0) status = 'expired';
+    else if (daysLeft <= 15) status = 'soon';
+
+    return { status, daysLeft, pct };
+  }
+
+  function insurancePill(v){
+    const c = insuranceCalc(v);
+    if (c.status === 'none') return `<span class="insur-pill soon"><i data-lucide="calendar-x"></i>Non renseignée</span>`;
+    if (c.status === 'expired') return `<span class="insur-pill expired"><i data-lucide="shield-x"></i>Expirée depuis ${Math.abs(c.daysLeft)} j</span>`;
+    if (c.status === 'soon') return `<span class="insur-pill soon"><i data-lucide="shield-alert"></i>Expire dans ${c.daysLeft} j</span>`;
+    return `<span class="insur-pill ok"><i data-lucide="shield-check"></i>À jour · ${c.daysLeft} j restants</span>`;
+  }
+
+  function insuranceBar(v){
+    const c = insuranceCalc(v);
+    if (c.status === 'none') return '';
+    const cls = c.status === 'ok' ? '' : ' ' + c.status;
+    const label = c.status === 'expired'
+      ? `Expirée le ${fmtDate(v.insuranceEnd)}`
+      : `Valide jusqu'au ${fmtDate(v.insuranceEnd)}`;
+    return `
+      <div>
+        <div class="fleet-meta-row"><span><i data-lucide="shield"></i>Assurance</span><span>${label}</span></div>
+        <div class="ins-track" style="margin-top:6px;"><div class="ins-fill${cls}" style="width:${c.pct}%;"></div></div>
+      </div>
+    `;
+  }
+
+  function filteredVehicles(){
+    if (!searchTerm) return vehicles;
+    const q = searchTerm.toLowerCase();
+    return vehicles.filter(v => v.name.toLowerCase().includes(q) || v.plate.toLowerCase().includes(q) || v.moniteur.toLowerCase().includes(q));
+  }
+
+  function renderMetrics(){
+    const total = vehicles.length;
+    const available = vehicles.filter(v => v.status === 'Disponible').length;
+    const maintenance = vehicles.filter(v => v.status === 'Maintenance').length;
+    const insuranceSoon = vehicles.filter(v => {
+      const c = insuranceCalc(v);
+      return c.status === 'soon' || c.status === 'expired';
+    }).length;
+
+    document.getElementById('headingCount').textContent = `${total} véhicules enregistrés`;
+
+    document.getElementById('metricsGrid').innerHTML = `
+      <div class="metric-card c-total">
+        <div class="metric-card-icon"><i data-lucide="car"></i></div>
+        <div>
+          <div class="metric-card-count num">${total}</div>
+          <div class="metric-card-label">Total véhicules</div>
+        </div>
+        <div class="metric-card-sub">Toute la flotte</div>
+      </div>
+      <div class="metric-card c-available">
+        <div class="metric-card-icon"><i data-lucide="circle-check-big"></i></div>
+        <div>
+          <div class="metric-card-count num">${available}/${total}</div>
+          <div class="metric-card-label">Disponibles</div>
+        </div>
+        <div class="metric-card-sub">Prêts à l'emploi aujourd'hui</div>
+      </div>
+      <div class="metric-card c-maintenance">
+        <div class="metric-card-icon"><i data-lucide="wrench"></i></div>
+        <div>
+          <div class="metric-card-count num">${maintenance}</div>
+          <div class="metric-card-label">En maintenance</div>
+        </div>
+        <div class="metric-card-sub">Retour prévu sous 3 jours</div>
+      </div>
+      <div class="metric-card c-insurance">
+        <div class="metric-card-icon"><i data-lucide="shield-alert"></i></div>
+        <div>
+          <div class="metric-card-count num">${insuranceSoon}</div>
+          <div class="metric-card-label">Assurances à renouveler</div>
+        </div>
+        <div class="metric-card-sub">Dans les 15 prochains jours</div>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function renderFleetCards(){
+    const list = filteredVehicles();
+    document.getElementById('listCount').textContent = `(${list.length})`;
+    const grid = document.getElementById('fleetGrid');
+
+    if (!list.length){
+      grid.innerHTML = `<div class="panel" style="grid-column:1/-1;padding:40px 10px;text-align:center;color:var(--ink-soft);font-size:13px;">Aucun véhicule ne correspond à votre recherche.</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(v => `
+        <div class="fleet-card" data-id="${v.id}">
+          <div class="fleet-card-top">
+            <div class="fleet-thumb"><i data-lucide="${vehicleIcon[v.permit] || 'car'}"></i></div>
+            <span class="status-pill ${statusClass[v.status]}">${v.status}</span>
+          </div>
+          <div>
+            <div class="fleet-name">${v.name}</div>
+            <div class="fleet-plate">${v.plate} · Permis ${v.permit}</div>
+          </div>
+          <div class="fleet-meta-row" style="font-weight:700;color:var(--ink);">
+            <span><i data-lucide="user-cog"></i>${v.moniteur}</span>
+            ${insurancePill(v)}
+          </div>
+          ${insuranceBar(v)}
+          <div class="fleet-foot" style="justify-content:flex-end;">
+            <button class="fleet-edit-btn edit-btn" data-id="${v.id}" title="Modifier"><i data-lucide="pencil"></i></button>
+          </div>
+        </div>
+      `).join('');
+    lucide.createIcons();
+    attachRowHandlers();
+  }
+
+  function renderTable(){
+    const tbody = document.getElementById('vehiclesTableBody');
+    tbody.innerHTML = vehicles.map((v, i) => `
+      <tr data-id="${v.id}">
+        <td>
+          <div class="veh-cell">
+            <div class="veh-avatar" style="background:${avatarColors[i % avatarColors.length]};"><i data-lucide="${vehicleIcon[v.permit] || 'car'}" style="width:16px;height:16px;"></i></div>
+            <div>
+              <div class="veh-name">${v.name}</div>
+              <div class="veh-plate">${v.plate}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="permit-badge">${v.permit}</span></td>
+        <td>${v.moniteur}</td>
+        <td>${insurancePill(v)}</td>
+        <td><span class="status-pill ${statusClass[v.status]}">${v.status}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="edit-btn" data-id="${v.id}" title="Modifier"><i data-lucide="pencil"></i></button>
+            <button class="danger delete-btn" data-id="${v.id}" title="Retirer"><i data-lucide="trash-2"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    lucide.createIcons();
+    attachRowHandlers();
+  }
+
+  function renderAll(){
+    renderMetrics();
+    renderFleetCards();
+    renderTable();
+  }
+
+  function attachRowHandlers(){
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openVehicleModal(parseInt(btn.dataset.id)));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const v = vehicles.find(x => x.id === id);
+        if (v && confirm(`Retirer "${v.name}" (${v.plate}) de la flotte ?`)) {
+          vehicles = vehicles.filter(x => x.id !== id);
+          renderAll();
+        }
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    renderFleetCards();
+  });
+
+  // ---------- Modal : Ajouter / Modifier un véhicule ----------
+  const vehicleModal      = document.getElementById('vehicleModal');
+  const vehicleModalTitle = document.getElementById('vehicleModalTitle');
+  const vehicleSaveBtnLabel = document.getElementById('vehicleSaveBtnLabel');
+  const btnAddVehicle     = document.getElementById('btnAddVehicle');
+  const vehicleModalClose = document.getElementById('vehicleModalClose');
+  const vehicleCancelBtn  = document.getElementById('vehicleCancelBtn');
+  const vehicleSaveBtn    = document.getElementById('vehicleSaveBtn');
+  const vehId             = document.getElementById('vehId');
+  const vehName           = document.getElementById('vehName');
+  const vehPlate          = document.getElementById('vehPlate');
+  const vehPermit         = document.getElementById('vehPermit');
+  const vehMoniteur       = document.getElementById('vehMoniteur');
+  const vehInsuranceStart = document.getElementById('vehInsuranceStart');
+  const vehInsuranceEnd   = document.getElementById('vehInsuranceEnd');
+  const vehStatus         = document.getElementById('vehStatus');
+
+  function openVehicleModal(editId){
+    if (editId){
+      const v = vehicles.find(x => x.id === editId);
+      if (!v) return;
+      vehicleModalTitle.textContent = 'Modifier le véhicule';
+      vehicleSaveBtnLabel.textContent = 'Enregistrer les modifications';
+      vehId.value = v.id;
+      vehName.value = v.name;
+      vehPlate.value = v.plate;
+      vehPermit.value = v.permit;
+      vehMoniteur.value = v.moniteur;
+      vehInsuranceStart.value = v.insuranceStart || '';
+      vehInsuranceEnd.value = v.insuranceEnd || '';
+      vehStatus.value = v.status;
+    } else {
+      vehicleModalTitle.textContent = 'Ajouter un véhicule';
+      vehicleSaveBtnLabel.textContent = 'Enregistrer le véhicule';
+      vehId.value = '';
+      vehName.value = ''; vehPlate.value = ''; vehPermit.value = 'B';
+      vehMoniteur.value = 'Non assigné';
+      vehInsuranceStart.value = ''; vehInsuranceEnd.value = ''; vehStatus.value = 'Disponible';
+    }
+    vehicleModal.classList.add('open');
+  }
+  function closeVehicleModal(){ vehicleModal.classList.remove('open'); }
+
+  if (btnAddVehicle) btnAddVehicle.addEventListener('click', () => openVehicleModal(null));
+  vehicleModalClose.addEventListener('click', closeVehicleModal);
+  vehicleCancelBtn.addEventListener('click', closeVehicleModal);
+  vehicleModal.addEventListener('click', (e) => { if (e.target === vehicleModal) closeVehicleModal(); });
+
+  vehicleSaveBtn.addEventListener('click', () => {
+    const name = vehName.value.trim() || 'Nouveau véhicule';
+    const plate = vehPlate.value.trim() || '—';
+    const permit = vehPermit.value;
+    const moniteur = vehMoniteur.value;
+    const insuranceStart = vehInsuranceStart.value;
+    const insuranceEnd = vehInsuranceEnd.value;
+    const status = vehStatus.value;
+    const editId = vehId.value ? parseInt(vehId.value) : null;
+
+    if (editId){
+      const v = vehicles.find(x => x.id === editId);
+      if (v){
+        Object.assign(v, { name, plate, permit, moniteur, insuranceStart, insuranceEnd, status });
+      }
+    } else {
+      vehicles.push({
+        id: nextId++, name, plate, permit,
+        moniteur, insuranceStart, insuranceEnd, status
+      });
+    }
+    renderAll();
+    closeVehicleModal();
+  });
+
+  // ---------- Initial render ----------
+  renderAll();
+</script>
+
+</body>
+</html>

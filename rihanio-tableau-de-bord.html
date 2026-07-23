@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --sidebar-3:#272A52;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --available:#18B368;
+    --available-soft:#E5F9EF;
+    --maintenance:#F0A93C;
+    --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6;
+    --assigned-soft:#EAF0FE;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.dark{
+    --bg:#0E0F22;
+    --surface:#171933;
+    --surface-2:#1F2140;
+    --border:#2A2C52;
+    --ink:#F1F1FB;
+    --ink-soft:#A6A9C8;
+    --ink-pale:#6E7191;
+    --primary-soft:#232559;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= SHELL ================= */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:80px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    transition:width .2s ease;overflow:hidden;z-index:40;
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .sidebar:hover{width:246px;}
+  .sb-brand{display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;}
+  .sb-brand-mark{
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.65);
+  }
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;
+    padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;
+  }
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{
+    display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;
+    color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;position:relative;
+  }
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+
+  .sb-profile{display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .sb-profile-avatar{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+  }
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;}
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .search-wrap{position:relative;width:260px;flex-shrink:0;}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);}
+  .search-wrap input{
+    width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);
+    padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
+  }
+  .search-wrap input::placeholder{color:var(--ink-pale);}
+  .search-wrap input:focus{border-color:var(--primary);}
+
+  .icon-btn{
+    width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);position:relative;
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
+    border:1.5px solid var(--surface);}
+
+  .status-pill{
+    display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--available);
+    background:var(--available-soft);padding:9px 13px;border-radius:12px;flex-shrink:0;
+  }
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--available);box-shadow:0 0 6px var(--available);}
+
+  .btn-primary{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
+    padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;
+    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;text-decoration:none;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
+  .btn-primary svg{width:16px;height:16px;}
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  /* ---------- METRICS GRID ---------- */
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1100px){ .metrics-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .metrics-grid{grid-template-columns:1fr;} }
+
+  .metric-card{
+    border-radius:20px;padding:20px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;
+    color:#fff;position:relative;overflow:hidden;
+  }
+  .metric-card.c-1{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .metric-card.c-2{background:linear-gradient(150deg,#3B7CF6,#2F5FD1);}
+  .metric-card.c-3{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .metric-card.c-4{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card::after{
+    content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);
+    right:-40px;top:-50px;
+  }
+  .metric-card-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
+  .metric-card-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;}
+  .metric-card-icon svg{width:16px;height:16px;}
+  .metric-card-badge{
+    font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;background:rgba(255,255,255,.2);
+    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+  }
+  .metric-card-badge svg{width:11px;height:11px;}
+  .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
+  .metric-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
+  .metric-card-sub{font-size:11px;opacity:.85;position:relative;z-index:1;}
+
+  /* ---------- SPLIT PANELS ---------- */
+  .split{display:grid;grid-template-columns:2.35fr 1fr;gap:20px;align-items:start;}
+  @media (max-width:1100px){ .split{grid-template-columns:1fr;} }
+
+  .panel{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);overflow:hidden;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+  .panel-title svg{width:17px;height:17px;color:var(--primary);}
+  .panel-link{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;text-decoration:none;background:none;border:none;}
+  .panel-body{padding:10px 14px 14px;}
+
+  .session-row{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:14px;transition:background .15s;}
+  .session-row:hover{background:var(--surface-2);}
+  .session-time{width:56px;flex-shrink:0;font-weight:700;font-size:13px;color:var(--ink);text-align:center;}
+  .session-type-icon{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .session-type-icon.theory{background:var(--assigned-soft);color:var(--assigned);}
+  .session-type-icon.practice{background:var(--star-soft);color:#B5720B;}
+  .session-type-icon svg{width:18px;height:18px;}
+  .session-info{flex:1;min-width:0;}
+  .session-title{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .session-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .session-status{font-size:11px;font-weight:700;padding:5px 10px;border-radius:100px;flex-shrink:0;}
+  .session-status.done{background:var(--available-soft);color:var(--available);}
+  .session-status.progress{background:var(--star-soft);color:#B5720B;}
+  .session-status.upcoming{background:var(--surface-2);color:var(--ink-pale);}
+
+  .alert-item{display:flex;gap:12px;padding:14px 10px;border-radius:14px;}
+  .alert-item:hover{background:var(--surface-2);}
+  .alert-icon{width:36px;height:36px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .alert-icon.amber{background:var(--maintenance-soft);color:#B5720B;}
+  .alert-icon.red{background:var(--danger-soft);color:var(--danger);}
+  .alert-icon.blue{background:var(--assigned-soft);color:var(--assigned);}
+  .alert-icon svg{width:17px;height:17px;}
+  .alert-title{font-size:13px;font-weight:700;color:var(--ink);}
+  .alert-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.5;}
+
+  /* ---------- TABLE ---------- */
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:820px;}
+  thead th{
+    text-align:left;font-size:11px;font-weight:700;color:var(--ink-pale);text-transform:uppercase;letter-spacing:.04em;
+    padding:12px 22px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap;
+  }
+  tbody td{padding:14px 22px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+
+  .candidate-cell{display:flex;align-items:center;gap:10px;}
+  .avatar-xs{
+    width:34px;height:34px;border-radius:11px;flex-shrink:0;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+  }
+  .cand-name{font-weight:700;color:var(--ink);}
+  .cand-id{font-size:11.5px;color:var(--ink-pale);}
+
+  .permit-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:var(--primary-soft);color:var(--primary);}
+
+  .doc-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;}
+  .doc-badge.ok{color:var(--available);}
+  .doc-badge.pending{color:#B5720B;}
+  .doc-badge svg{width:14px;height:14px;}
+
+  .progress-wrap{display:flex;align-items:center;gap:8px;min-width:110px;}
+  .progress-track{flex:1;height:6px;border-radius:100px;background:var(--border);overflow:hidden;}
+  .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--primary),var(--primary-2));}
+  .progress-pct{font-size:11.5px;font-weight:700;color:var(--ink-soft);width:32px;}
+
+  .status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;}
+  .status-badge.active{background:var(--available-soft);color:var(--available);}
+  .status-badge.graduated{background:var(--assigned-soft);color:var(--assigned);}
+  .status-badge.suspended{background:var(--danger-soft);color:var(--danger);}
+
+  .row-actions{display:flex;align-items:center;gap:4px;}
+  .row-actions button{
+    width:30px;height:30px;border-radius:9px;border:none;background:transparent;color:var(--ink-pale);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .row-actions button:hover{background:var(--primary-soft);color:var(--primary);}
+  .row-actions button.danger:hover{color:var(--danger);background:var(--danger-soft);}
+  .row-actions svg{width:15px;height:15px;}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .search-wrap{order:3;width:100%;}
+    .btn-primary{order:2;}
+    .status-pill{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="car-front"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Auto-école</div>
+      </div>
+    </div>
+
+    <div class="sb-scroll">
+      <div class="sb-cat">Vue d'ensemble</div>
+      <div class="sb-item active">
+        <i data-lucide="layout-dashboard"></i>
+        <span class="sb-item-label">Tableau de bord</span>
+      </div>
+
+      <div class="sb-cat">Candidats &amp; formation</div>
+      <div class="sb-item">
+        <i data-lucide="users"></i>
+        <span class="sb-item-label">Candidats</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="book-open"></i>
+        <span class="sb-item-label">Cours théoriques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car-front"></i>
+        <span class="sb-item-label">Cours pratiques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="clipboard-check"></i>
+        <span class="sb-item-label">Examens</span>
+      </div>
+
+      <div class="sb-cat">Ressources</div>
+      <div class="sb-item">
+        <i data-lucide="user-cog"></i>
+        <span class="sb-item-label">Moniteurs</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car"></i>
+        <span class="sb-item-label">Véhicules</span>
+      </div>
+
+      <div class="sb-cat">Finance</div>
+      <div class="sb-item">
+        <i data-lucide="wallet"></i>
+        <span class="sb-item-label">Finances &amp; paiements</span>
+      </div>
+
+      <div class="sb-cat">Système</div>
+      <div class="sb-item">
+        <i data-lucide="settings"></i>
+        <span class="sb-item-label">Paramètres</span>
+      </div>
+    </div>
+
+    <div class="sb-profile">
+      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name">Saïd El Idrissi</div>
+        <div class="sb-profile-role">Directeur du centre</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Tableau de bord</h1>
+        <p>Vue d'ensemble de votre centre aujourd'hui</p>
+      </div>
+
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" placeholder="Rechercher un candidat, un véhicule, un moniteur...">
+      </div>
+
+      <a href="inscrire-candidat.html" class="btn-primary">
+        <i data-lucide="user-plus"></i>
+        Inscrire un candidat
+      </a>
+
+      <div class="status-pill"><span class="dot"></span>Système opérationnel</div>
+
+      <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+      <button class="icon-btn" id="themeToggle" title="Mode sombre"><i data-lucide="moon"></i></button>
+    </header>
+
+    <div class="content">
+
+      <!-- METRICS -->
+      <section class="metrics-grid">
+        <div class="metric-card c-1">
+          <div class="metric-card-top">
+            <div class="metric-card-icon"><i data-lucide="users"></i></div>
+            <span class="metric-card-badge"><i data-lucide="trending-up"></i>+12%</span>
+          </div>
+          <div>
+            <div class="metric-card-count num">128</div>
+            <div class="metric-card-label">Candidats actifs</div>
+          </div>
+          <div class="metric-card-sub">85 Permis B · 43 Permis A, C</div>
+        </div>
+
+        <div class="metric-card c-2">
+          <div class="metric-card-top">
+            <div class="metric-card-icon"><i data-lucide="clipboard-check"></i></div>
+          </div>
+          <div>
+            <div class="metric-card-count num">14</div>
+            <div class="metric-card-label">Examens cette semaine</div>
+          </div>
+          <div class="metric-card-sub">8 Code · 6 Conduite</div>
+        </div>
+
+        <div class="metric-card c-3">
+          <div class="metric-card-top">
+            <div class="metric-card-icon"><i data-lucide="car"></i></div>
+          </div>
+          <div>
+            <div class="metric-card-count num">6/8</div>
+            <div class="metric-card-label">Véhicules disponibles</div>
+          </div>
+          <div class="metric-card-sub">2 en maintenance</div>
+        </div>
+
+        <div class="metric-card c-4">
+          <div class="metric-card-top">
+            <div class="metric-card-icon"><i data-lucide="wallet"></i></div>
+            <span class="metric-card-badge"><i data-lucide="percent"></i>78%</span>
+          </div>
+          <div>
+            <div class="metric-card-count num">42 500 DH</div>
+            <div class="metric-card-label">Revenus mensuels</div>
+          </div>
+          <div class="metric-card-sub">vs 38 900 DH le mois dernier</div>
+        </div>
+      </section>
+
+      <!-- SPLIT -->
+      <section class="split">
+        <!-- SCHEDULE -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><i data-lucide="calendar-clock"></i>Planning du jour</div>
+            <button class="panel-link">Voir la semaine complète →</button>
+          </div>
+          <div class="panel-body">
+
+            <div class="session-row">
+              <div class="session-time num">08:30</div>
+              <div class="session-type-icon theory"><i data-lucide="book-open"></i></div>
+              <div class="session-info">
+                <div class="session-title">Code de la route — Signalisation et priorités</div>
+                <div class="session-meta">Moniteur : Youssef Bennali · Salle 2</div>
+              </div>
+              <span class="session-status done">Terminée</span>
+            </div>
+
+            <div class="session-row">
+              <div class="session-time num">10:00</div>
+              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
+              <div class="session-info">
+                <div class="session-title">Cours pratique — Maryam El Fassi</div>
+                <div class="session-meta">Moniteur : Omar Chergaoui · Véhicule Clio 3 (12458-A-4)</div>
+              </div>
+              <span class="session-status progress">En cours</span>
+            </div>
+
+            <div class="session-row">
+              <div class="session-time num">11:15</div>
+              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
+              <div class="session-info">
+                <div class="session-title">Cours pratique — Ayoub El Hassani</div>
+                <div class="session-meta">Moniteur : Omar Chergaoui · Véhicule 208 (33017-B-6)</div>
+              </div>
+              <span class="session-status upcoming">À venir</span>
+            </div>
+
+            <div class="session-row">
+              <div class="session-time num">13:00</div>
+              <div class="session-type-icon theory"><i data-lucide="book-open"></i></div>
+              <div class="session-info">
+                <div class="session-title">Code de la route — Techniques de stationnement</div>
+                <div class="session-meta">Moniteur : Youssef Bennali · Salle 1</div>
+              </div>
+              <span class="session-status upcoming">À venir</span>
+            </div>
+
+            <div class="session-row">
+              <div class="session-time num">15:30</div>
+              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
+              <div class="session-info">
+                <div class="session-title">Cours pratique — Kenza Alaoui</div>
+                <div class="session-meta">Moniteur : Rachid El Mrabet · Véhicule Clio 3 (12458-A-4)</div>
+              </div>
+              <span class="session-status upcoming">À venir</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><i data-lucide="bell-ring"></i>Alertes &amp; rappels</div>
+          </div>
+          <div class="panel-body">
+
+            <div class="alert-item">
+              <div class="alert-icon amber"><i data-lucide="shield-alert"></i></div>
+              <div>
+                <div class="alert-title">Assurance véhicule bientôt expirée</div>
+                <div class="alert-sub">Véhicule Tracteur B2 — renouvellement dans 5 jours</div>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-icon red"><i data-lucide="banknote"></i></div>
+              <div>
+                <div class="alert-title">Retard de paiement</div>
+                <div class="alert-sub">3 candidats ont une tranche impayée depuis plus de 15 jours</div>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-icon blue"><i data-lucide="badge-check"></i></div>
+              <div>
+                <div class="alert-title">Renouvellement de licence</div>
+                <div class="alert-sub">La licence du moniteur Rachid El Mrabet expire fin de mois</div>
+              </div>
+            </div>
+
+            <div class="alert-item">
+              <div class="alert-icon amber"><i data-lucide="wrench"></i></div>
+              <div>
+                <div class="alert-title">Entretien périodique dû</div>
+                <div class="alert-sub">Le véhicule 208 (33017-B-6) dépasse 5 000 km depuis le dernier entretien</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- TABLE -->
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="users-round"></i>Derniers candidats inscrits</div>
+          <button class="panel-link">Voir tous les candidats →</button>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidat</th>
+                <th>Type de permis</th>
+                <th>Promotion</th>
+                <th>Dossier médical &amp; documents</th>
+                <th>Progression paiement</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr>
+                <td>
+                  <div class="candidate-cell">
+                    <div class="avatar-xs" style="background:#8B6FF2;">MF</div>
+                    <div>
+                      <div class="cand-name">Maryam El Fassi</div>
+                      <div class="cand-id">#CND-2026-118</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="permit-badge">B</span></td>
+                <td>Promo janvier 2026</td>
+                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
+                <td>
+                  <div class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" style="width:90%;"></div></div>
+                    <span class="progress-pct num">90%</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">Actif</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
+                    <button title="Modifier"><i data-lucide="pencil"></i></button>
+                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="candidate-cell">
+                    <div class="avatar-xs" style="background:#5B62F4;">AH</div>
+                    <div>
+                      <div class="cand-name">Ayoub El Hassani</div>
+                      <div class="cand-id">#CND-2026-117</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="permit-badge">A</span></td>
+                <td>Promo décembre 2025</td>
+                <td><span class="doc-badge pending"><i data-lucide="alert-circle"></i>Incomplet</span></td>
+                <td>
+                  <div class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" style="width:45%;"></div></div>
+                    <span class="progress-pct num">45%</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">Actif</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
+                    <button title="Modifier"><i data-lucide="pencil"></i></button>
+                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="candidate-cell">
+                    <div class="avatar-xs" style="background:#F0A93C;">KA</div>
+                    <div>
+                      <div class="cand-name">Kenza Alaoui</div>
+                      <div class="cand-id">#CND-2026-116</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="permit-badge">B</span></td>
+                <td>Promo janvier 2026</td>
+                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
+                <td>
+                  <div class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>
+                    <span class="progress-pct num">100%</span>
+                  </div>
+                </td>
+                <td><span class="status-badge graduated">Reçu(e)</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
+                    <button title="Modifier"><i data-lucide="pencil"></i></button>
+                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="candidate-cell">
+                    <div class="avatar-xs" style="background:#18B368;">YB</div>
+                    <div>
+                      <div class="cand-name">Yassine Bourada</div>
+                      <div class="cand-id">#CND-2026-115</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="permit-badge">C</span></td>
+                <td>Promo décembre 2025</td>
+                <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>Complet</span></td>
+                <td>
+                  <div class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" style="width:60%;"></div></div>
+                    <span class="progress-pct num">60%</span>
+                  </div>
+                </td>
+                <td><span class="status-badge suspended">Suspendu</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
+                    <button title="Modifier"><i data-lucide="pencil"></i></button>
+                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div class="candidate-cell">
+                    <div class="avatar-xs" style="background:#F0473F;">SN</div>
+                    <div>
+                      <div class="cand-name">Salma Nassiri</div>
+                      <div class="cand-id">#CND-2026-114</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="permit-badge">B</span></td>
+                <td>Promo novembre 2025</td>
+                <td><span class="doc-badge pending"><i data-lucide="alert-circle"></i>Incomplet</span></td>
+                <td>
+                  <div class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" style="width:25%;"></div></div>
+                    <span class="progress-pct num">25%</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">Actif</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button title="Voir le profil"><i data-lucide="eye"></i></button>
+                    <button title="Modifier"><i data-lucide="pencil"></i></button>
+                    <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    themeToggle.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+    lucide.createIcons();
+  });
+
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

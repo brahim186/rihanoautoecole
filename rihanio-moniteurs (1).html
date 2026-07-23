@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Moniteurs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --sidebar-3:#272A52;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --available:#18B368;
+    --available-soft:#E5F9EF;
+    --onduty:#5B62F4;
+    --onduty-soft:#EEEEFE;
+    --off:#9A9CB5;
+    --off-soft:#F1F1F7;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= SHELL ================= */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:80px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    transition:width .2s ease;overflow:hidden;z-index:40;
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .sidebar:hover{width:246px;}
+  .sb-brand{
+    display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;
+  }
+  .sb-brand-mark{
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.65);
+  }
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;
+    padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;
+  }
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{
+    display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;
+    color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;position:relative;
+  }
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+
+  .sb-profile{
+    display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  }
+  .sb-profile-avatar{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+  }
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:18px 32px;
+    background:var(--bg);position:sticky;top:0;z-index:30;
+  }
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .search-wrap{position:relative;width:260px;flex-shrink:0;}
+  .search-wrap svg{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);
+  }
+  .search-wrap input{
+    width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);
+    padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
+  }
+  .search-wrap input::placeholder{color:var(--ink-pale);}
+  .search-wrap input:focus{border-color:var(--primary);}
+
+  .icon-btn{
+    width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);position:relative;
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
+    border:1.5px solid var(--surface);}
+
+  .btn-primary{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
+    padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;
+    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
+  .btn-primary svg{width:16px;height:16px;}
+
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+  .topbar-profile-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;}
+  .topbar-profile-role{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  .section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+  .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
+  .section-heading .see-all{font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none;}
+
+  /* ---------- STATUS GRID (top cards) ---------- */
+  .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1100px){ .status-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .status-grid{grid-template-columns:1fr;} }
+
+  .status-card{
+    border-radius:20px;padding:20px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;
+    color:#fff;position:relative;overflow:hidden;cursor:default;
+  }
+  .status-card.c-available{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .status-card.c-onduty{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .status-card.c-off{background:linear-gradient(150deg,#494C6B,#31334F);}
+  .status-card::after{
+    content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);
+    right:-40px;top:-50px;
+  }
+  .status-card-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+  .status-card-icon{
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .status-card-icon svg{width:16px;height:16px;}
+  .status-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
+  .status-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
+  .status-card-stack{display:flex;align-items:center;gap:8px;position:relative;z-index:1;}
+  .stack-avatars{display:flex;}
+  .stack-avatar{
+    width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.9);
+    background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;font-weight:700;margin-inline-start:-8px;
+  }
+  .stack-avatar:first-child{margin-inline-start:0;}
+  .status-card-sub{font-size:11px;opacity:.85;}
+
+  .status-card.c-add{
+    background:var(--surface);color:var(--ink-soft);border:1.5px dashed #D7D9EE;
+    align-items:center;justify-content:center;text-align:center;gap:10px;cursor:pointer;
+  }
+  .status-card.c-add:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+  .status-card.c-add .add-icon{
+    width:40px;height:40px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;
+  }
+  .status-card.c-add:hover .add-icon{background:#fff;}
+  .status-card.c-add .add-icon svg{width:18px;height:18px;}
+  .status-card.c-add span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;}
+
+  /* ---------- MAIN GRID ---------- */
+  .main-grid{display:grid;grid-template-columns:290px 1fr 300px;gap:20px;align-items:start;}
+  @media (max-width:1180px){ .main-grid{grid-template-columns:1fr 300px;} .col-notif{display:none;} }
+  @media (max-width:820px){ .main-grid{grid-template-columns:1fr;} .col-schedule{display:none;} }
+
+  .panel{background:var(--surface);border-radius:20px;padding:18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);}
+
+  /* Notifications column */
+  .notif-list{display:flex;flex-direction:column;gap:10px;}
+  .notif-item{
+    display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;cursor:default;
+    transition:background .12s;
+  }
+  .notif-item:hover{background:var(--surface-2);}
+  .notif-item.cta{cursor:pointer;border:1.5px dashed #D7D9EE;}
+  .notif-item.cta:hover{border-color:var(--primary);background:var(--primary-soft);}
+  .notif-icon{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  }
+  .notif-icon svg{width:17px;height:17px;}
+  .notif-icon.i-green{background:var(--available-soft);color:var(--available);}
+  .notif-icon.i-blue{background:var(--onduty-soft);color:var(--onduty);}
+  .notif-icon.i-amber{background:var(--star-soft);color:#B5720B;}
+  .notif-icon.i-purple{background:#F1EBFE;color:#8B6FF2;}
+  .notif-text{min-width:0;}
+  .notif-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .notif-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* Moniteur list column */
+  .mon-list{display:flex;flex-direction:column;gap:10px;}
+  .mon-card{
+    background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
+    display:flex;align-items:center;gap:14px;
+  }
+  .mon-avatar{
+    width:48px;height:48px;border-radius:14px;flex-shrink:0;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;
+    position:relative;
+  }
+  .mon-avatar.available{background:linear-gradient(135deg,#18B368,#0E8F52);}
+  .mon-avatar.onduty{background:linear-gradient(135deg,var(--primary),var(--primary-2));}
+  .mon-avatar.off{background:linear-gradient(135deg,#8A8CAE,#5F6288);}
+  .mon-avatar .ring{
+    position:absolute;bottom:-3px;right:-3px;width:15px;height:15px;border-radius:50%;border:2.5px solid var(--surface);
+  }
+  .ring.available{background:var(--available);}
+  .ring.onduty{background:var(--onduty);}
+  .ring.off{background:var(--off);}
+
+  .mon-main{flex:1;min-width:0;}
+  .mon-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .mon-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
+  .mon-cin{font-size:11px;color:var(--ink-pale);font-weight:600;}
+  .mon-permits{display:flex;gap:4px;}
+  .mon-permit-badge{
+    width:19px;height:19px;border-radius:6px;background:var(--primary-soft);color:var(--primary);
+    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  }
+  .mon-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .mon-sub span{display:flex;align-items:center;gap:5px;}
+  .mon-sub svg{width:12px;height:12px;color:var(--ink-pale);}
+
+  .mon-status-pill{
+    font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;
+  }
+  .mon-status-pill.available{background:var(--available-soft);color:var(--available);}
+  .mon-status-pill.onduty{background:var(--onduty-soft);color:var(--onduty);}
+  .mon-status-pill.off{background:var(--off-soft);color:var(--off);}
+
+  .mon-actions{display:flex;gap:6px;flex-shrink:0;}
+  .mon-action-btn{
+    width:32px;height:32px;border-radius:9px;border:none;background:var(--surface-2);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .mon-action-btn:hover{color:var(--primary);background:var(--primary-soft);}
+  .mon-action-btn.danger:hover{color:var(--danger);background:var(--danger-soft);}
+  .mon-action-btn svg{width:14px;height:14px;}
+
+  .empty-state{padding:40px 10px;text-align:center;color:var(--ink-soft);font-size:13px;}
+
+  /* Schedule column */
+  .sched-list{display:flex;flex-direction:column;}
+  .sched-row{display:flex;gap:12px;padding:10px 0;}
+  .sched-time{width:44px;flex-shrink:0;font-size:11.5px;color:var(--ink-pale);font-weight:600;padding-top:12px;}
+  .sched-card{
+    flex:1;border-radius:14px;padding:12px 14px;background:var(--surface-2);min-width:0;
+  }
+  .sched-card.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;}
+  .sched-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+  .sched-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;}
+  .sched-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+    background:rgba(255,255,255,.25);color:#fff;padding:2px 8px;border-radius:100px;}
+  .sched-time-range{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .sched-card.active .sched-time-range{color:rgba(255,255,255,.85);}
+  .sched-btn{
+    margin-top:9px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:rgba(255,255,255,.18);border:none;color:#fff;font-size:11.5px;font-weight:700;
+    padding:8px;border-radius:9px;cursor:pointer;
+  }
+  .sched-btn:hover{background:rgba(255,255,255,.28);}
+  .sched-btn svg{width:12px;height:12px;}
+  .sched-divider{height:1px;background:var(--border);margin:0 0 0 56px;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(19,21,43,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    background:var(--surface);border-radius:22px;width:100%;max-width:480px;
+    max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px -20px rgba(19,21,43,.5);
+    animation:modal-in .18s cubic-bezier(.2,.8,.25,1);
+  }
+  @keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 18px;}
+  .modal-title{display:flex;align-items:center;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:16.5px;color:var(--ink);}
+  .modal-title-icon{
+    width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .modal-title-icon svg{width:17px;height:17px;}
+  .modal-close{
+    width:34px;height:34px;border-radius:10px;border:none;background:var(--surface-2);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .modal-close:hover{color:var(--danger);background:var(--danger-soft);}
+  .modal-close svg{width:16px;height:16px;}
+  .modal-body{padding:4px 24px 22px;display:flex;flex-direction:column;gap:16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+  .field input,.field select{
+    border:1.5px solid var(--border);border-radius:11px;padding:10px 13px;
+    font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface-2);
+    outline:none;transition:border-color .15s;width:100%;
+  }
+  .field input:focus,.field select:focus{border-color:var(--primary);}
+  .checkbox-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .checkbox-pill{
+    display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;
+    color:var(--ink-soft);border:1.5px solid var(--border);border-radius:11px;padding:8px 14px;cursor:pointer;
+  }
+  .checkbox-pill input{width:15px;height:15px;accent-color:var(--primary);cursor:pointer;}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:6px 24px 24px;}
+  .btn-ghost{
+    padding:10px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);font-weight:700;font-size:13.5px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--surface-2);}
+  .btn-confirm{
+    padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    font-weight:700;font-size:13.5px;
+    cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
+  }
+  .btn-confirm:hover{transform:translateY(-1px);}
+  .btn-confirm svg{width:15px;height:15px;}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .search-wrap{order:3;width:100%;}
+    .btn-primary{order:2;}
+    .topbar-profile{order:4;margin-inline-start:auto;}
+    .field-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="car-front"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Auto-école</div>
+      </div>
+    </div>
+
+    <div class="sb-scroll">
+      <div class="sb-cat">Vue d'ensemble</div>
+      <div class="sb-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span class="sb-item-label">Tableau de bord</span>
+      </div>
+
+      <div class="sb-cat">Candidats &amp; formation</div>
+      <div class="sb-item">
+        <i data-lucide="users"></i>
+        <span class="sb-item-label">Candidats</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="book-open"></i>
+        <span class="sb-item-label">Cours théoriques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car-front"></i>
+        <span class="sb-item-label">Cours pratiques</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="clipboard-check"></i>
+        <span class="sb-item-label">Examens</span>
+      </div>
+
+      <div class="sb-cat">Ressources</div>
+      <div class="sb-item active">
+        <i data-lucide="user-cog"></i>
+        <span class="sb-item-label">Moniteurs</span>
+      </div>
+      <div class="sb-item">
+        <i data-lucide="car"></i>
+        <span class="sb-item-label">Véhicules</span>
+      </div>
+
+      <div class="sb-cat">Finance</div>
+      <div class="sb-item">
+        <i data-lucide="wallet"></i>
+        <span class="sb-item-label">Finances &amp; paiements</span>
+      </div>
+
+      <div class="sb-cat">Système</div>
+      <div class="sb-item">
+        <i data-lucide="settings"></i>
+        <span class="sb-item-label">Paramètres</span>
+      </div>
+    </div>
+
+    <div class="sb-profile">
+      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name">Saïd El Idrissi</div>
+        <div class="sb-profile-role">Administrateur</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Équipe pédagogique</h1>
+        <p id="headingCount">5 moniteurs actifs</p>
+      </div>
+
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher un moniteur...">
+      </div>
+
+      <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+
+      <button class="btn-primary" id="btnAddMoniteur">
+        <i data-lucide="plus"></i>
+        Ajouter un moniteur
+      </button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar">SI</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- STATUS GRID -->
+      <section class="status-grid" id="statusGrid"></section>
+
+      <!-- MAIN GRID -->
+      <div class="main-grid">
+
+        <!-- COL 1 : Notifications -->
+        <section class="panel col-notif">
+          <div class="section-heading"><h2>Notifications</h2></div>
+          <div class="notif-list" id="notifList"></div>
+        </section>
+
+        <!-- COL 2 : Moniteur list -->
+        <section>
+          <div class="section-heading">
+            <h2>Moniteurs <span class="num" id="listCount"></span></h2>
+          </div>
+          <div class="mon-list" id="monList"></div>
+        </section>
+
+        <!-- COL 3 : Schedule -->
+        <section class="panel col-schedule">
+          <div class="section-heading">
+            <h2>Planning du jour</h2>
+            <button class="see-all">Voir tout</button>
+          </div>
+          <div class="sched-list" id="schedList"></div>
+        </section>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Ajouter / Modifier un moniteur -->
+<div class="modal-overlay" id="moniteurModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-icon"><i data-lucide="user-cog"></i></div>
+        <span id="moniteurModalTitle">Ajouter un moniteur</span>
+      </div>
+      <button class="modal-close" id="moniteurModalClose" title="Fermer"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <input type="hidden" id="monId" value="">
+
+      <div class="field-row">
+        <div class="field">
+          <label for="monName">Nom complet</label>
+          <input type="text" id="monName" placeholder="Ex : Omar Chergaoui">
+        </div>
+        <div class="field">
+          <label for="monPhone">Téléphone</label>
+          <input type="text" id="monPhone" placeholder="Ex : 06 12 34 56 78">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="monEmail">Email</label>
+        <input type="email" id="monEmail" placeholder="Ex : omar.chergaoui@rihanio-autoecole.ma">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="monCin">N° carte d'identité (CIN)</label>
+          <input type="text" id="monCin" placeholder="Ex : AB123456">
+        </div>
+        <div class="field">
+          <label for="monCnss">N° CNSS</label>
+          <input type="text" id="monCnss" placeholder="Ex : 1234567">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="monBank">N° compte bancaire (RIB)</label>
+        <input type="text" id="monBank" placeholder="Ex : 007 780 0001234567890 12">
+      </div>
+
+      <div class="field">
+        <label>Permis enseignés</label>
+        <div class="checkbox-row">
+          <label class="checkbox-pill"><input type="checkbox" value="A" class="monPermitBox"> Permis A</label>
+          <label class="checkbox-pill"><input type="checkbox" value="B" class="monPermitBox"> Permis B</label>
+          <label class="checkbox-pill"><input type="checkbox" value="C" class="monPermitBox"> Permis C</label>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="monExperience">Ancienneté (années)</label>
+          <input type="number" id="monExperience" placeholder="0" min="0" step="1">
+        </div>
+        <div class="field">
+          <label for="monStatus">Statut</label>
+          <select id="monStatus">
+            <option value="Disponible">Disponible</option>
+            <option value="En session">En session</option>
+            <option value="Hors service">Hors service</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-ghost" id="moniteurCancelBtn">Annuler</button>
+      <button class="btn-confirm" id="moniteurSaveBtn">
+        <i data-lucide="check"></i>
+        <span id="moniteurSaveBtnLabel">Enregistrer</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // Nav active state
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // ---------- Moniteur data store ----------
+  let moniteurs = [
+    { id:1, name:'Omar Chergaoui', phone:'06 12 34 56 78', email:'omar.chergaoui@rihanio-autoecole.ma',
+      cin:'BE482910', cnss:'5487123', bank:'007 780 0001234567890 12',
+      permits:['B'], experience:9, sessionsWeek:14, rating:4.8, status:'En session' },
+
+    { id:2, name:'Youssef Bennali', phone:'06 21 45 67 89', email:'youssef.bennali@rihanio-autoecole.ma',
+      cin:'BK317755', cnss:'6612348', bank:'011 450 0009876543210 45',
+      permits:['B','A'], experience:6, sessionsWeek:11, rating:4.6, status:'Disponible' },
+
+    { id:3, name:'Rachid El Mrabet', phone:'06 34 56 78 90', email:'rachid.elmrabet@rihanio-autoecole.ma',
+      cin:'A205841', cnss:'4471209', bank:'022 610 0004561237890 78',
+      permits:['C','B'], experience:12, sessionsWeek:9, rating:4.9, status:'En session' },
+
+    { id:4, name:'Nadia Zerhouni', phone:'06 45 67 89 01', email:'nadia.zerhouni@rihanio-autoecole.ma',
+      cin:'BJ660124', cnss:'7734561', bank:'190 730 0003216549870 33',
+      permits:['B'], experience:4, sessionsWeek:13, rating:4.5, status:'Disponible' },
+
+    { id:5, name:'Hicham Bouziane', phone:'06 56 78 90 12', email:'hicham.bouziane@rihanio-autoecole.ma',
+      cin:'BL903327', cnss:'3390871', bank:'230 890 0007894561230 61',
+      permits:['A'], experience:3, sessionsWeek:7, rating:4.4, status:'Hors service' },
+  ];
+  let nextId = 6;
+  let searchTerm = '';
+
+  const statusMap = {
+    'Disponible':  { cls:'available', icon:'circle-check-big', label:'Disponible' },
+    'En session':  { cls:'onduty',    icon:'car-front',        label:'En session' },
+    'Hors service':{ cls:'off',       icon:'moon',             label:'Hors service' }
+  };
+
+  function initials(name){
+    return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  function permitBadges(v){
+    return v.permits.map(p => `<span class="mon-permit-badge">${p}</span>`).join('');
+  }
+
+  function filteredMoniteurs(){
+    if (!searchTerm) return moniteurs;
+    const q = searchTerm.toLowerCase();
+    return moniteurs.filter(v => v.name.toLowerCase().includes(q));
+  }
+
+  function renderStatusGrid(){
+    const total = moniteurs.length;
+    const groups = [
+      { key:'Disponible',   cls:'c-available', icon:'circle-check-big', label:'Disponibles' },
+      { key:'En session',   cls:'c-onduty',    icon:'car-front',        label:'En session' },
+      { key:'Hors service', cls:'c-off',       icon:'moon',             label:'Hors service' },
+    ];
+
+    const cards = groups.map(g => {
+      const members = moniteurs.filter(v => v.status === g.key);
+      const avatars = members.slice(0,3).map(v => `<div class="stack-avatar">${initials(v.name)}</div>`).join('');
+      return `
+        <div class="status-card ${g.cls}">
+          <div class="status-card-top">
+            <div class="status-card-icon"><i data-lucide="${g.icon}"></i></div>
+          </div>
+          <div>
+            <div class="status-card-count num">${members.length}</div>
+            <div class="status-card-label">${g.label}</div>
+          </div>
+          <div class="status-card-stack">
+            <div class="stack-avatars">${avatars || '<span class="status-card-sub">Aucun moniteur</span>'}</div>
+            ${members.length ? `<span class="status-card-sub">sur ${total}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const addCard = `
+      <div class="status-card c-add" id="statusAddCard">
+        <div class="add-icon"><i data-lucide="user-plus"></i></div>
+        <span>Ajouter un moniteur</span>
+      </div>
+    `;
+
+    document.getElementById('statusGrid').innerHTML = cards + addCard;
+    document.getElementById('statusAddCard').addEventListener('click', () => openMoniteurModal(null));
+    lucide.createIcons();
+  }
+
+  function renderNotifications(){
+    const available = moniteurs.filter(v => v.status === 'Disponible');
+    const onDuty = moniteurs.filter(v => v.status === 'En session');
+    const topRated = [...moniteurs].sort((a,b) => b.rating - a.rating)[0];
+
+    const items = [];
+    if (onDuty[0]){
+      items.push({ icon:'car-front', cls:'i-blue', title:onDuty[0].name, sub:'En session avec un candidat' });
+    }
+    if (available[0]){
+      items.push({ icon:'circle-check-big', cls:'i-green', title:available[0].name, sub:'Disponible dès maintenant' });
+    }
+    if (topRated){
+      items.push({ icon:'star', cls:'i-amber', title:topRated.name, sub:`Meilleure note · ★ ${topRated.rating.toFixed(1)}` });
+    }
+    items.push({ icon:'calendar-clock', cls:'i-purple', title:'Planning de la semaine', sub:`${moniteurs.reduce((s,v)=>s+v.sessionsWeek,0)} sessions au total` });
+
+    const rows = items.map(it => `
+      <div class="notif-item">
+        <div class="notif-icon ${it.cls}"><i data-lucide="${it.icon}"></i></div>
+        <div class="notif-text">
+          <div class="notif-title">${it.title}</div>
+          <div class="notif-sub">${it.sub}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const cta = `
+      <div class="notif-item cta" id="notifAddCta">
+        <div class="notif-icon i-purple"><i data-lucide="user-plus"></i></div>
+        <div class="notif-text">
+          <div class="notif-title">Ajouter un moniteur</div>
+          <div class="notif-sub">Complétez votre équipe</div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('notifList').innerHTML = rows + cta;
+    document.getElementById('notifAddCta').addEventListener('click', () => openMoniteurModal(null));
+    lucide.createIcons();
+  }
+
+  function renderMonList(){
+    const list = filteredMoniteurs();
+    document.getElementById('listCount').textContent = `(${list.length})`;
+
+    if (!list.length){
+      document.getElementById('monList').innerHTML = `<div class="panel empty-state">Aucun moniteur ne correspond à votre recherche.</div>`;
+      return;
+    }
+
+    document.getElementById('monList').innerHTML = list.map(v => {
+      const s = statusMap[v.status];
+      return `
+        <div class="mon-card" data-id="${v.id}">
+          <div class="mon-avatar ${s.cls}">
+            ${initials(v.name)}
+            <span class="ring ${s.cls}"></span>
+          </div>
+          <div class="mon-main">
+            <div class="mon-name-row">
+              <span class="mon-name">${v.name}</span>
+              <span class="mon-cin num">CIN ${v.cin || '—'}</span>
+              <div class="mon-permits">${permitBadges(v)}</div>
+            </div>
+            <div class="mon-sub">
+              <span><i data-lucide="phone"></i>${v.phone}</span>
+              <span><i data-lucide="calendar"></i>${v.sessionsWeek} sessions / sem.</span>
+              <span><i data-lucide="star"></i>${v.rating.toFixed(1)}</span>
+              <span><i data-lucide="award"></i>${v.experience} ans d'exp.</span>
+              <span><i data-lucide="shield"></i>CNSS ${v.cnss || '—'}</span>
+            </div>
+          </div>
+          <span class="mon-status-pill ${s.cls}">${s.label}</span>
+          <div class="mon-actions">
+            <button class="mon-action-btn edit-btn" data-id="${v.id}" title="Modifier"><i data-lucide="pencil"></i></button>
+            <button class="mon-action-btn danger delete-btn" data-id="${v.id}" title="Retirer"><i data-lucide="trash-2"></i></button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    lucide.createIcons();
+    attachRowHandlers();
+  }
+
+  function renderSchedule(){
+    let hour = 8, minute = 0;
+    const rows = moniteurs.map(v => {
+      const startH = hour, startM = minute;
+      minute += 65;
+      if (minute >= 60){ hour += 1; minute -= 60; }
+      const endH = hour, endM = minute;
+      minute += 5;
+      if (minute >= 60){ hour += 1; minute -= 60; }
+      const fmt = (h,m) => `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const active = v.status === 'En session';
+      return `
+        <div class="sched-row">
+          <div class="sched-time">${fmt(startH,startM)}</div>
+          <div class="sched-card ${active ? 'active' : ''}" data-id="${v.id}">
+            <div class="sched-card-top">
+              <span class="sched-name">${v.name}</span>
+              ${active ? '<span class="sched-tag">Actif</span>' : ''}
+            </div>
+            <div class="sched-time-range">${fmt(startH,startM)} – ${fmt(endH,endM)} · Permis ${v.permits.join('/')}</div>
+            ${active ? `<button class="sched-btn view-btn" data-id="${v.id}"><i data-lucide="eye"></i>Voir la fiche</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('schedList').innerHTML = rows;
+    lucide.createIcons();
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => openMoniteurModal(parseInt(btn.dataset.id)));
+    });
+  }
+
+  function renderAll(){
+    document.getElementById('headingCount').textContent = `${moniteurs.length} moniteurs actifs`;
+    renderStatusGrid();
+    renderNotifications();
+    renderMonList();
+    renderSchedule();
+  }
+
+  function attachRowHandlers(){
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openMoniteurModal(parseInt(btn.dataset.id)));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id);
+        const v = moniteurs.find(x => x.id === id);
+        if (v && confirm(`Retirer "${v.name}" de la liste des moniteurs ?`)) {
+          moniteurs = moniteurs.filter(x => x.id !== id);
+          renderAll();
+        }
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    renderMonList();
+  });
+
+  // ---------- Modal ----------
+  const moniteurModal      = document.getElementById('moniteurModal');
+  const moniteurModalTitle = document.getElementById('moniteurModalTitle');
+  const moniteurSaveBtnLabel = document.getElementById('moniteurSaveBtnLabel');
+  const btnAddMoniteur     = document.getElementById('btnAddMoniteur');
+  const moniteurModalClose = document.getElementById('moniteurModalClose');
+  const moniteurCancelBtn  = document.getElementById('moniteurCancelBtn');
+  const moniteurSaveBtn    = document.getElementById('moniteurSaveBtn');
+  const monId              = document.getElementById('monId');
+  const monName            = document.getElementById('monName');
+  const monPhone           = document.getElementById('monPhone');
+  const monEmail           = document.getElementById('monEmail');
+  const monExperience      = document.getElementById('monExperience');
+  const monStatus          = document.getElementById('monStatus');
+  const monCin             = document.getElementById('monCin');
+  const monCnss            = document.getElementById('monCnss');
+  const monBank            = document.getElementById('monBank');
+  const permitCheckboxes   = () => document.querySelectorAll('.monPermitBox');
+
+  function openMoniteurModal(editId){
+    if (editId){
+      const v = moniteurs.find(x => x.id === editId);
+      if (!v) return;
+      moniteurModalTitle.textContent = 'Modifier le moniteur';
+      moniteurSaveBtnLabel.textContent = 'Enregistrer les modifications';
+      monId.value = v.id;
+      monName.value = v.name;
+      monPhone.value = v.phone;
+      monEmail.value = v.email;
+      monExperience.value = v.experience;
+      monStatus.value = v.status;
+      monCin.value = v.cin || '';
+      monCnss.value = v.cnss || '';
+      monBank.value = v.bank || '';
+      permitCheckboxes().forEach(cb => { cb.checked = v.permits.includes(cb.value); });
+    } else {
+      moniteurModalTitle.textContent = 'Ajouter un moniteur';
+      moniteurSaveBtnLabel.textContent = 'Enregistrer';
+      monId.value = '';
+      monName.value = ''; monPhone.value = ''; monEmail.value = '';
+      monExperience.value = ''; monStatus.value = 'Disponible';
+      monCin.value = ''; monCnss.value = ''; monBank.value = '';
+      permitCheckboxes().forEach(cb => { cb.checked = false; });
+    }
+    moniteurModal.classList.add('open');
+  }
+  function closeMoniteurModal(){ moniteurModal.classList.remove('open'); }
+
+  if (btnAddMoniteur) btnAddMoniteur.addEventListener('click', () => openMoniteurModal(null));
+  moniteurModalClose.addEventListener('click', closeMoniteurModal);
+  moniteurCancelBtn.addEventListener('click', closeMoniteurModal);
+  moniteurModal.addEventListener('click', (e) => { if (e.target === moniteurModal) closeMoniteurModal(); });
+
+  moniteurSaveBtn.addEventListener('click', () => {
+    const name = monName.value.trim() || 'Nouveau moniteur';
+    const phone = monPhone.value.trim() || '—';
+    const email = monEmail.value.trim() || '—';
+    const experience = parseInt(monExperience.value) || 0;
+    const status = monStatus.value;
+    const cin = monCin.value.trim() || '—';
+    const cnss = monCnss.value.trim() || '—';
+    const bank = monBank.value.trim() || '—';
+    const permits = Array.from(permitCheckboxes()).filter(cb => cb.checked).map(cb => cb.value);
+    const editId = monId.value ? parseInt(monId.value) : null;
+
+    if (permits.length === 0){
+      alert('Veuillez sélectionner au moins un permis enseigné.');
+      return;
+    }
+
+    if (editId){
+      const v = moniteurs.find(x => x.id === editId);
+      if (v){
+        Object.assign(v, { name, phone, email, experience, status, permits, cin, cnss, bank });
+      }
+    } else {
+      moniteurs.push({
+        id: nextId++, name, phone, email, experience, status, permits, cin, cnss, bank,
+        sessionsWeek: 0, rating: 5.0
+      });
+    }
+    renderAll();
+    closeMoniteurModal();
+  });
+
+  // ---------- Initial render ----------
+  renderAll();
+</script>
+
+</body>
+</html>
