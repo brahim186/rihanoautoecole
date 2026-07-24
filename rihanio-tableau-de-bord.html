@@ -750,6 +750,18 @@
       .eq('company_id', companyId)
       .gte('date_paiement', rangeStart);
 
+    const { data: depenses } = await supabaseClient
+      .from('depenses')
+      .select('montant, date_depense')
+      .eq('company_id', companyId)
+      .gte('date_depense', rangeStart);
+
+    const { data: salaires } = await supabaseClient
+      .from('salaires')
+      .select('montant, date_paiement')
+      .eq('company_id', companyId)
+      .gte('date_paiement', rangeStart);
+
     const revenueByMonth = months.map(m => {
       const total = (paiements || [])
         .filter(p => {
@@ -760,7 +772,23 @@
       return total;
     });
 
-    const lossByMonth = months.map(() => 0);
+    const lossByMonth = months.map(m => {
+      const totalDepenses = (depenses || [])
+        .filter(d => {
+          const dt = new Date(d.date_depense);
+          return dt.getFullYear() === m.year && dt.getMonth() === m.month;
+        })
+        .reduce((sum, d) => sum + Number(d.montant), 0);
+
+      const totalSalaires = (salaires || [])
+        .filter(s => {
+          const dt = new Date(s.date_paiement);
+          return dt.getFullYear() === m.year && dt.getMonth() === m.month;
+        })
+        .reduce((sum, s) => sum + Number(s.montant), 0);
+
+      return totalDepenses + totalSalaires;
+    });
 
     const ctx = document.getElementById('revenueChart').getContext('2d');
     new Chart(ctx, {
