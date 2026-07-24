@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio Auto-École | Paramètres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FD;
+    --sidebar:#13152B;
+    --sidebar-2:#1B1D3C;
+    --sidebar-3:#272A52;
+    --primary:#5B62F4;
+    --primary-2:#8B6FF2;
+    --primary-dark:#454BDB;
+    --primary-soft:#EEEEFE;
+    --ink:#171933;
+    --ink-soft:#6E7191;
+    --ink-pale:#A6A9C8;
+    --border:#EBECF7;
+    --available:#18B368;
+    --available-soft:#E5F9EF;
+    --maintenance:#F0A93C;
+    --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6;
+    --assigned-soft:#EAF0FE;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
+    --danger:#F0473F;
+    --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* ================= SHELL ================= */
+  .shell{display:flex;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:80px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+    transition:width .2s ease;overflow:hidden;z-index:40;
+    border-right:1px solid rgba(255,255,255,.04);
+  }
+  .sidebar:hover{width:246px;}
+  .sb-brand{
+    display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;
+  }
+  .sb-brand-mark{
+    width:38px;height:38px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 6px 16px -4px rgba(91,98,244,.65);
+  }
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;
+    padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;
+  }
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{
+    display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;
+    color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;
+    white-space:nowrap;position:relative;
+  }
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+
+  .sb-profile{
+    display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  }
+  .sb-profile-avatar{
+    width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+  }
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:18px 32px;
+    background:var(--bg);position:sticky;top:0;z-index:30;
+  }
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+
+  .icon-btn{
+    width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);position:relative;
+  }
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
+    border:1.5px solid var(--surface);}
+
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:22px;max-width:880px;width:100%;margin:0 auto;}
+
+  /* ---------- PANELS ---------- */
+  .panel{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);overflow:hidden;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);gap:10px;}
+  .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+  .panel-title svg{width:17px;height:17px;color:var(--primary);}
+  .panel-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .panel-body{padding:22px 24px;display:flex;flex-direction:column;gap:18px;}
+
+  /* Profile summary row */
+  .profile-row{display:flex;align-items:center;gap:16px;}
+  .profile-avatar-big{
+    width:64px;height:64px;border-radius:18px;flex-shrink:0;color:#fff;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:21px;
+    box-shadow:0 10px 22px -8px rgba(91,98,244,.55);
+  }
+  .profile-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16.5px;color:var(--ink);}
+  .profile-email{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .profile-role-badge{
+    display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:100px;background:var(--primary-soft);color:var(--primary);margin-top:8px;
+  }
+
+  /* Form styles */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;}
+  .form-group{display:flex;flex-direction:column;gap:7px;}
+  .form-group.full{grid-column:1 / -1;}
+  .form-label{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:4px;}
+  .form-input{
+    width:100%;padding:11px 14px;
+    border:1.5px solid var(--border);border-radius:11px;
+    background:var(--surface-2);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);
+    outline:none;transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .form-input:focus{border-color:var(--primary);background:#fff;}
+  .form-input::placeholder{color:var(--ink-pale);}
+  .form-input.invalid{border-color:var(--danger);}
+  .form-input[readonly]{color:var(--ink-soft);cursor:not-allowed;}
+  .field-error{font-size:11.5px;color:var(--danger);font-weight:600;display:none;align-items:center;gap:4px;}
+  .field-error svg{width:12px;height:12px;}
+  .field-error.show{display:flex;}
+  .form-hint{font-size:11.5px;color:var(--ink-pale);font-weight:500;}
+
+  .panel-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);}
+  .btn-ghost{
+    padding:10px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);font-weight:700;font-size:13.5px;font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--surface-2);}
+  .btn-confirm{
+    padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    font-weight:700;font-size:13.5px;font-family:'Inter',sans-serif;
+    cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
+  }
+  .btn-confirm:hover{transform:translateY(-1px);}
+  .btn-confirm:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+  .btn-confirm svg{width:15px;height:15px;}
+
+  .banner{
+    display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;font-size:12.5px;font-weight:600;
+    display:none;
+  }
+  .banner.show{display:flex;}
+  .banner.success{background:var(--available-soft);color:var(--available);}
+  .banner.error{background:var(--danger-soft);color:var(--danger);}
+  .banner svg{width:15px;height:15px;flex-shrink:0;}
+
+  /* Danger zone */
+  .danger-row{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;
+    border-radius:14px;background:var(--danger-soft);
+  }
+  .danger-row-title{font-size:13px;font-weight:700;color:var(--ink);}
+  .danger-row-sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .btn-danger{
+    padding:9px 16px;border-radius:10px;border:none;background:var(--danger);color:#fff;
+    font-weight:700;font-size:12.5px;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:6px;
+  }
+  .btn-danger:hover{background:#D63A32;}
+  .btn-danger svg{width:14px;height:14px;}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .topbar-profile{order:2;margin-inline-start:auto;}
+    .form-grid{grid-template-columns:1fr;}
+    .danger-row{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="car-front"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Auto-école</div>
+      </div>
+    </div>
+
+    <div class="sb-scroll">
+      <div class="sb-cat">Actions</div>
+      <a href="rihanio-inscrire-candidat.html" class="sb-item">
+        <i data-lucide="user-plus"></i>
+        <span class="sb-item-label">Inscrire un candidat</span>
+      </a>
+
+      <div class="sb-cat">Vue d'ensemble</div>
+      <a href="rihanio-tableau-de-bord.html" class="sb-item">
+        <i data-lucide="layout-dashboard"></i>
+        <span class="sb-item-label">Tableau de bord</span>
+      </a>
+
+      <div class="sb-cat">Candidats &amp; formation</div>
+      <a href="rihanio-candidats.html" class="sb-item">
+        <i data-lucide="users"></i>
+        <span class="sb-item-label">Candidats</span>
+      </a>
+      <a href="archive.html" class="sb-item">
+        <i data-lucide="archive"></i>
+        <span class="sb-item-label">Archive candidats</span>
+      </a>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+        <i data-lucide="book-open"></i>
+        <span class="sb-item-label">Cours théoriques</span>
+      </div>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+        <i data-lucide="car-front"></i>
+        <span class="sb-item-label">Cours pratiques</span>
+      </div>
+      <a href="rihanio-calendrier-examens.html" class="sb-item">
+        <i data-lucide="clipboard-check"></i>
+        <span class="sb-item-label">Examens</span>
+      </a>
+
+      <div class="sb-cat">Ressources</div>
+      <a href="rihanio-moniteurs.html" class="sb-item">
+        <i data-lucide="user-cog"></i>
+        <span class="sb-item-label">Moniteurs</span>
+      </a>
+      <a href="rihanio-vehicules.html" class="sb-item">
+        <i data-lucide="car"></i>
+        <span class="sb-item-label">Véhicules</span>
+      </a>
+
+      <div class="sb-cat">Finance</div>
+      <a href="rihanio-finances.html" class="sb-item">
+        <i data-lucide="wallet"></i>
+        <span class="sb-item-label">Finances &amp; paiements</span>
+      </a>
+      <a href="rihanio-salaires.html" class="sb-item">
+        <i data-lucide="banknote"></i>
+        <span class="sb-item-label">Salaires</span>
+      </a>
+      <a href="rihanio-depenses.html" class="sb-item">
+        <i data-lucide="receipt"></i>
+        <span class="sb-item-label">Dépenses</span>
+      </a>
+
+      <div class="sb-cat">Système</div>
+      <a href="rihanio-parametres.html" class="sb-item active">
+        <i data-lucide="settings"></i>
+        <span class="sb-item-label">Paramètres</span>
+      </a>
+    </div>
+
+    <div class="sb-profile">
+      <div class="sb-profile-avatar" id="sbProfileAvatar">—</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name" id="sbProfileName">—</div>
+        <div class="sb-profile-role">Administrateur</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Paramètres</h1>
+        <p>Gérez votre compte et vos préférences</p>
+      </div>
+
+      <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar" id="topbarAvatar">—</div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ---------- PROFIL ---------- -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title"><i data-lucide="user"></i>Profil</div>
+            <div class="panel-sub">Vos informations de compte</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="profile-row">
+            <div class="profile-avatar-big" id="profileAvatarBig">—</div>
+            <div>
+              <div class="profile-name" id="profileName">—</div>
+              <div class="profile-email" id="profileEmail">—</div>
+              <span class="profile-role-badge"><i data-lucide="shield-check" style="width:12px;height:12px;"></i>Administrateur</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- SÉCURITÉ ---------- -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title"><i data-lucide="lock"></i>Sécurité</div>
+            <div class="panel-sub">Modifiez le mot de passe de votre compte</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="banner" id="pwdBanner"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Nouveau mot de passe</label>
+              <input type="password" class="form-input" id="newPassword" placeholder="••••••••" autocomplete="new-password">
+              <span class="field-error" id="errNewPassword"><i data-lucide="alert-circle"></i>Au moins 6 caractères.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirmer le mot de passe</label>
+              <input type="password" class="form-input" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+              <span class="field-error" id="errConfirmPassword"><i data-lucide="alert-circle"></i>Les mots de passe ne correspondent pas.</span>
+            </div>
+          </div>
+          <div class="form-hint">Vous resterez connecté(e) sur cet appareil après la modification.</div>
+        </div>
+        <div class="panel-foot">
+          <button class="btn-ghost" id="pwdCancelBtn">Annuler</button>
+          <button class="btn-confirm" id="pwdSaveBtn">
+            <i data-lucide="check"></i>
+            <span id="pwdSaveBtnLabel">Mettre à jour le mot de passe</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- SESSION ---------- -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title"><i data-lucide="log-out"></i>Session</div>
+            <div class="panel-sub">Gérez votre session active</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="danger-row">
+            <div>
+              <div class="danger-row-title">Se déconnecter</div>
+              <div class="danger-row-sub">Vous devrez vous reconnecter pour accéder à votre espace.</div>
+            </div>
+            <button class="btn-danger" id="settingsLogoutBtn">
+              <i data-lucide="log-out"></i>
+              Déconnexion
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  requireAuth().then(profile => {
+    if (!profile) return;
+
+    const logoutBtn = document.querySelector('.sb-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    document.getElementById('settingsLogoutBtn').addEventListener('click', logout);
+
+    const displayName = profile.full_name || profile.email;
+    const initials = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+    const nameEl = document.getElementById('sbProfileName');
+    const avatarEl = document.getElementById('sbProfileAvatar');
+    if (nameEl) nameEl.textContent = displayName;
+    if (avatarEl) avatarEl.textContent = initials;
+
+    document.getElementById('topbarAvatar').textContent = initials;
+    document.getElementById('profileAvatarBig').textContent = initials;
+    document.getElementById('profileName').textContent = displayName;
+    document.getElementById('profileEmail').textContent = profile.email || '—';
+  });
+
+  document.querySelectorAll('.sb-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // ---------- Changer le mot de passe ----------
+  const newPasswordInput = document.getElementById('newPassword');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const errNewPassword = document.getElementById('errNewPassword');
+  const errConfirmPassword = document.getElementById('errConfirmPassword');
+  const pwdBanner = document.getElementById('pwdBanner');
+  const pwdSaveBtn = document.getElementById('pwdSaveBtn');
+
+  function showBanner(type, message){
+    pwdBanner.className = 'banner show ' + type;
+    pwdBanner.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle-2' : 'alert-circle'}"></i>${message}`;
+    lucide.createIcons();
+  }
+  function hideBanner(){
+    pwdBanner.className = 'banner';
+    pwdBanner.innerHTML = '';
+  }
+
+  document.getElementById('pwdCancelBtn').addEventListener('click', () => {
+    newPasswordInput.value = '';
+    confirmPasswordInput.value = '';
+    newPasswordInput.classList.remove('invalid');
+    confirmPasswordInput.classList.remove('invalid');
+    errNewPassword.classList.remove('show');
+    errConfirmPassword.classList.remove('show');
+    hideBanner();
+  });
+
+  pwdSaveBtn.addEventListener('click', async () => {
+    hideBanner();
+    const newPwd = newPasswordInput.value;
+    const confirmPwd = confirmPasswordInput.value;
+
+    let valid = true;
+    if (!newPwd || newPwd.length < 6){
+      newPasswordInput.classList.add('invalid');
+      errNewPassword.classList.add('show');
+      valid = false;
+    } else {
+      newPasswordInput.classList.remove('invalid');
+      errNewPassword.classList.remove('show');
+    }
+    if (!confirmPwd || confirmPwd !== newPwd){
+      confirmPasswordInput.classList.add('invalid');
+      errConfirmPassword.classList.add('show');
+      valid = false;
+    } else {
+      confirmPasswordInput.classList.remove('invalid');
+      errConfirmPassword.classList.remove('show');
+    }
+    if (!valid) return;
+
+    pwdSaveBtn.disabled = true;
+    document.getElementById('pwdSaveBtnLabel').textContent = 'Mise à jour...';
+
+    const { error } = await supabaseClient.auth.updateUser({ password: newPwd });
+
+    pwdSaveBtn.disabled = false;
+    document.getElementById('pwdSaveBtnLabel').textContent = 'Mettre à jour le mot de passe';
+
+    if (error){
+      showBanner('error', 'Erreur : ' + error.message);
+      return;
+    }
+
+    newPasswordInput.value = '';
+    confirmPasswordInput.value = '';
+    showBanner('success', 'Mot de passe mis à jour avec succès.');
+  });
+</script>
+
+</body>
+</html>
