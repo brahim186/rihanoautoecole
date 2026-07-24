@@ -620,6 +620,106 @@
   </div>
 </div>
 
+<!-- MODAL : Modifier les informations du candidat -->
+<div class="modal-overlay" id="editCandidatModal">
+  <div class="modal-card wide">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-icon"><i data-lucide="pencil"></i></div>
+        <span>Modifier les informations</span>
+      </div>
+      <button class="modal-close" id="editCandidatModalClose" title="Fermer"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editCandId" value="">
+
+      <div class="field-row">
+        <div class="field">
+          <label for="eNom">Nom</label>
+          <input type="text" id="eNom" placeholder="Ex : El Fassi">
+        </div>
+        <div class="field">
+          <label for="ePrenom">Prénom</label>
+          <input type="text" id="ePrenom" placeholder="Ex : Maryam">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="eCin">N° CIN</label>
+          <input type="text" id="eCin" placeholder="Ex : AB123456">
+        </div>
+        <div class="field">
+          <label for="eCinExp">Expiration CIN</label>
+          <input type="date" id="eCinExp">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="eTelephone">Téléphone</label>
+          <input type="text" id="eTelephone" placeholder="Ex : 06 12 34 56 78">
+        </div>
+        <div class="field">
+          <label for="eEmail">Email</label>
+          <input type="email" id="eEmail" placeholder="Ex : maryam@email.com">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="eAdresse">Adresse</label>
+        <input type="text" id="eAdresse" placeholder="Ex : 12 Rue Ibn Sina, Kénitra">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="eDateNaissance">Date de naissance</label>
+          <input type="date" id="eDateNaissance">
+        </div>
+        <div class="field">
+          <label for="eDateInscription">Date d'inscription</label>
+          <input type="date" id="eDateInscription">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="eCategoriePermis">Type de permis</label>
+          <select id="eCategoriePermis">
+            <option value="B">B</option>
+            <option value="A">A</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="eStatut">Statut</label>
+          <select id="eStatut">
+            <option value="actif">Actif</option>
+            <option value="suspendu">Suspendu</option>
+            <option value="diplome">Diplômé</option>
+            <option value="abandonne">Abandonné</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="ePrixFormation">Prix de la formation (DH)</label>
+          <input type="number" min="0" step="1" id="ePrixFormation" placeholder="Ex : 4500">
+        </div>
+        <div class="field">
+          <label for="eAvancePayee">Avance payée à l'inscription (DH)</label>
+          <input type="number" min="0" step="1" id="eAvancePayee" placeholder="Ex : 1500">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="editCandidatCancelBtn">Annuler</button>
+      <button class="btn-confirm" id="editCandidatSaveBtn"><i data-lucide="check"></i>Enregistrer les modifications</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL : Modifier la date d'examen -->
 <div class="modal-overlay" id="examModal">
   <div class="modal-card">
@@ -902,7 +1002,79 @@
   ficheModal.addEventListener('click', (e) => { if (e.target === ficheModal) closeFiche(); });
 
   document.getElementById('ficheEditBtn').addEventListener('click', () => {
-    alert("Modification des informations du candidat à venir.");
+    if (ficheCandId) openEditCandidatModal(ficheCandId);
+  });
+
+  // ---------- Modifier les informations du candidat ----------
+  const editCandidatModal = document.getElementById('editCandidatModal');
+  let editCandId = null;
+
+  function openEditCandidatModal(id){
+    const c = candidats.find(x => x.id === id);
+    if (!c) return;
+    editCandId = id;
+    document.getElementById('editCandId').value = id;
+    document.getElementById('eNom').value = c.nom;
+    document.getElementById('ePrenom').value = c.prenom;
+    document.getElementById('eCin').value = c.cin === '—' ? '' : c.cin;
+    document.getElementById('eCinExp').value = c.cinExpiration || '';
+    document.getElementById('eTelephone').value = c.telephone === '—' ? '' : c.telephone;
+    document.getElementById('eEmail').value = c.email === '—' ? '' : c.email;
+    document.getElementById('eAdresse').value = c.adresse === '—' ? '' : c.adresse;
+    document.getElementById('eDateNaissance').value = c.dateNaissance || '';
+    document.getElementById('eDateInscription').value = c.dateInscription || '';
+    document.getElementById('eCategoriePermis').value = c.categoriePermis || 'B';
+    document.getElementById('eStatut').value = c.statut || 'actif';
+    document.getElementById('ePrixFormation').value = c.prixFormation || '';
+    document.getElementById('eAvancePayee').value = c.avancePayee || '';
+    editCandidatModal.classList.add('open');
+  }
+  function closeEditCandidatModal(){ editCandidatModal.classList.remove('open'); }
+
+  document.getElementById('editCandidatModalClose').addEventListener('click', closeEditCandidatModal);
+  document.getElementById('editCandidatCancelBtn').addEventListener('click', closeEditCandidatModal);
+  editCandidatModal.addEventListener('click', (e) => { if (e.target === editCandidatModal) closeEditCandidatModal(); });
+
+  document.getElementById('editCandidatSaveBtn').addEventListener('click', async () => {
+    if (!editCandId) return;
+
+    const nom = document.getElementById('eNom').value.trim();
+    const prenom = document.getElementById('ePrenom').value.trim();
+    if (!nom || !prenom){
+      alert('Le nom et le prénom sont obligatoires.');
+      return;
+    }
+
+    const payload = {
+      nom,
+      prenom,
+      cin: document.getElementById('eCin').value.trim() || null,
+      cin_expiration: document.getElementById('eCinExp').value || null,
+      telephone: document.getElementById('eTelephone').value.trim() || null,
+      email: document.getElementById('eEmail').value.trim() || null,
+      adresse: document.getElementById('eAdresse').value.trim() || null,
+      date_naissance: document.getElementById('eDateNaissance').value || null,
+      date_inscription: document.getElementById('eDateInscription').value || null,
+      categorie_permis: document.getElementById('eCategoriePermis').value,
+      statut: document.getElementById('eStatut').value,
+      prix_formation: parseFloat(document.getElementById('ePrixFormation').value) || 0,
+      avance_payee: parseFloat(document.getElementById('eAvancePayee').value) || 0
+    };
+
+    const btn = document.getElementById('editCandidatSaveBtn');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('candidats').update(payload).eq('id', editCandId);
+    btn.disabled = false;
+
+    if (error){ alert('Erreur : ' + error.message); return; }
+
+    closeEditCandidatModal();
+    await loadCandidats();
+
+    // Si la fiche de ce candidat est ouverte, la rafraîchir avec les nouvelles infos
+    if (ficheCandId === editCandId){
+      await openFiche(editCandId);
+    }
   });
 
   async function refreshFichePayments(c){
