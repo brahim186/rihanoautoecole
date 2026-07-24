@@ -190,11 +190,6 @@
   .metric-card-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
   .metric-card-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;}
   .metric-card-icon svg{width:16px;height:16px;}
-  .metric-card-badge{
-    font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;background:rgba(255,255,255,.2);
-    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
-  }
-  .metric-card-badge svg{width:11px;height:11px;}
   .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
   .metric-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
   .metric-card-sub{font-size:11px;opacity:.85;position:relative;z-index:1;}
@@ -209,21 +204,6 @@
   .panel-title svg{width:17px;height:17px;color:var(--primary);}
   .panel-link{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;text-decoration:none;background:none;border:none;}
   .panel-body{padding:10px 14px 14px;}
-
-  .session-row{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:14px;transition:background .15s;}
-  .session-row:hover{background:var(--surface-2);}
-  .session-time{width:56px;flex-shrink:0;font-weight:700;font-size:13px;color:var(--ink);text-align:center;}
-  .session-type-icon{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .session-type-icon.theory{background:var(--assigned-soft);color:var(--assigned);}
-  .session-type-icon.practice{background:var(--star-soft);color:#B5720B;}
-  .session-type-icon svg{width:18px;height:18px;}
-  .session-info{flex:1;min-width:0;}
-  .session-title{font-size:13.5px;font-weight:700;color:var(--ink);}
-  .session-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
-  .session-status{font-size:11px;font-weight:700;padding:5px 10px;border-radius:100px;flex-shrink:0;}
-  .session-status.done{background:var(--available-soft);color:var(--available);}
-  .session-status.progress{background:var(--star-soft);color:#B5720B;}
-  .session-status.upcoming{background:var(--surface-2);color:var(--ink-pale);}
 
   .alert-item{display:flex;gap:12px;padding:14px 10px;border-radius:14px;}
   .alert-item:hover{background:var(--surface-2);}
@@ -256,17 +236,12 @@
 
   .permit-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:var(--primary-soft);color:var(--primary);}
 
-  .doc-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;}
-  .doc-badge.ok{color:var(--available);}
-  .doc-badge.pending{color:#B5720B;}
-  .doc-badge svg{width:14px;height:14px;}
-
   .progress-wrap{display:flex;align-items:center;gap:8px;min-width:110px;}
   .progress-track{flex:1;height:6px;border-radius:100px;background:var(--border);overflow:hidden;}
   .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--primary),var(--primary-2));}
   .progress-pct{font-size:11.5px;font-weight:700;color:var(--ink-soft);width:32px;}
 
-  .status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;}
+  .status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;display:inline-block;}
   .status-badge.active{background:var(--available-soft);color:var(--available);}
   .status-badge.graduated{background:var(--assigned-soft);color:var(--assigned);}
   .status-badge.suspended{background:var(--danger-soft);color:var(--danger);}
@@ -462,7 +437,7 @@
         </div>
       </section>
 
-      <!-- TABLE -->
+      <!-- TABLE: Derniers candidats -->
       <section class="panel">
         <div class="panel-head">
           <div class="panel-title"><i data-lucide="users-round"></i>Derniers candidats inscrits</div>
@@ -475,9 +450,9 @@
               <tr>
                 <th>Candidat</th>
                 <th>Type de permis</th>
-                <th>Promotion</th>
-                <th>Dossier médical &amp; documents</th>
-                <th>Progression paiement</th>
+                <th>Date d'inscription</th>
+                <th>Suivi de Paiement</th>
+                <th>Progression %</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -541,18 +516,33 @@
   async function loadDashboardData(){
     const companyId = currentProfile.company_id;
 
-    // ---- KPI : candidats ----
+    // 1. جلب بيانات المرشحين
     const { data: candidats, error: candErr } = await supabaseClient
       .from('candidats')
       .select('*')
       .eq('company_id', companyId)
       .order('created_at', { ascending: false });
 
+    // 2. جلب مدفوعات كل مرشح لحساب إجمالي المبالغ المسددة ديناميكياً
+    const { data: paiements, error: payErr } = await supabaseClient
+      .from('paiements')
+      .select('candidat_id, montant')
+      .eq('company_id', companyId);
+
+    const paidByCandidat = {};
+    if (paiements) {
+      paiements.forEach(p => {
+        paidByCandidat[p.candidat_id] = (paidByCandidat[p.candidat_id] || 0) + Number(p.montant);
+      });
+    }
+
     if (!candErr && candidats) {
       const actifs = candidats.filter(c => c.statut === 'actif').length;
       document.getElementById('kpiCandidats').textContent = actifs;
       document.getElementById('kpiCandidatsSub').textContent = candidats.length + ' candidat(s) au total';
-      renderCandidats(candidats.slice(0, 8));
+      
+      // العرض مع المبالغ المحسوبة ديناميكياً
+      renderCandidats(candidats.slice(0, 8), paidByCandidat);
     }
 
     // ---- KPI : examens de la semaine ----
@@ -588,16 +578,79 @@
     // ---- KPI : revenus du mois ----
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const { data: paiements } = await supabaseClient
+    const { data: paiementsMois } = await supabaseClient
       .from('paiements')
       .select('montant')
       .eq('company_id', companyId)
       .gte('date_paiement', firstOfMonth);
 
-    if (paiements) {
-      const total = paiements.reduce((sum, p) => sum + Number(p.montant), 0);
+    if (paiementsMois) {
+      const total = paiementsMois.reduce((sum, p) => sum + Number(p.montant), 0);
       document.getElementById('kpiRevenus').textContent = total.toLocaleString('fr-FR') + ' DH';
     }
+  }
+
+  function renderCandidats(candidats, paidByCandidat = {}) {
+    const tbody = document.getElementById('candidatsTbody');
+    if (!candidats || !candidats.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucun candidat inscrit pour le moment.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = candidats.map(c => {
+      const prixTotal = Number(c.prix_formation) || 0;
+      
+      // إجمالي المدفوعات الحقيقية من جدول paiements (أو استخدام avance_payee كقيمة احتياطية)
+      const totalPaye = paidByCandidat[c.id] !== undefined 
+        ? paidByCandidat[c.id] 
+        : (Number(c.avance_payee) || 0);
+
+      // نسبة الدفع المئوية
+      const pct = prixTotal > 0 ? Math.min(Math.round((totalPaye / prixTotal) * 100), 100) : 0;
+      
+      // حساب المتبقي وحالة الدفع النهائية
+      const reste = Math.max(0, prixTotal - totalPaye);
+      const estPayeComplet = prixTotal > 0 && reste === 0;
+
+      // شارة حالة الدفع
+      const paymentBadge = estPayeComplet
+        ? `<span class="status-badge active" style="font-size:11px;">Réglé (${totalPaye.toLocaleString('fr-FR')} DH)</span>`
+        : `<span class="status-badge" style="font-size:11px; background:var(--maintenance-soft); color:#B5720B;">Reste: ${reste.toLocaleString('fr-FR')} DH</span>`;
+
+      return `
+        <tr>
+          <td>
+            <div class="candidate-cell">
+              <div class="avatar-xs" style="background:#5B62F4;">${initials(c.prenom, c.nom)}</div>
+              <div>
+                <div class="cand-name">${c.prenom} ${c.nom}</div>
+                <div class="cand-id">#${c.id.slice(0,8)}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="permit-badge">${c.categorie_permis || 'B'}</span></td>
+          <td>${c.date_inscription ? new Date(c.date_inscription).toLocaleDateString('fr-FR') : '—'}</td>
+          <td>${paymentBadge}</td>
+          <td>
+            <div class="progress-wrap" title="${totalPaye.toLocaleString('fr-FR')} DH / ${prixTotal.toLocaleString('fr-FR')} DH">
+              <div class="progress-track">
+                <div class="progress-fill" style="width:${pct}%; ${estPayeComplet ? 'background:var(--available);' : ''}"></div>
+              </div>
+              <span class="progress-pct num">${pct}%</span>
+            </div>
+          </td>
+          <td>${statusBadge(c.statut)}</td>
+          <td>
+            <div class="row-actions">
+              <button title="Voir le profil"><i data-lucide="eye"></i></button>
+              <button title="Modifier"><i data-lucide="pencil"></i></button>
+              <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    
+    lucide.createIcons();
   }
 
   async function loadRealAlerts(){
@@ -683,7 +736,6 @@
   async function loadRevenueChart(){
     const companyId = currentProfile.company_id;
 
-    // آخر 6 أشهر (بما فيهم الشهر الحالي)
     const now = new Date();
     const months = [];
     for (let i = 5; i >= 0; i--){
@@ -708,7 +760,6 @@
       return total;
     });
 
-    // TODO: الخسائر/المصاريف — رابط جدول "depenses" لي غادي يتزاد من بعد
     const lossByMonth = months.map(() => 0);
 
     const ctx = document.getElementById('revenueChart').getContext('2d');
@@ -755,49 +806,6 @@
         }
       }
     });
-  }
-
-  function renderCandidats(candidats){
-    const tbody = document.getElementById('candidatsTbody');
-    if (!candidats.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucun candidat inscrit pour le moment.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = candidats.map(c => {
-      const prix = Number(c.prix_formation) || 0;
-      const avance = Number(c.avance_payee) || 0;
-      const pct = prix > 0 ? Math.min(Math.round((avance / prix) * 100), 100) : 0;
-      return `
-        <tr>
-          <td>
-            <div class="candidate-cell">
-              <div class="avatar-xs" style="background:#5B62F4;">${initials(c.prenom, c.nom)}</div>
-              <div>
-                <div class="cand-name">${c.prenom} ${c.nom}</div>
-                <div class="cand-id">#${c.id.slice(0,8)}</div>
-              </div>
-            </div>
-          </td>
-          <td><span class="permit-badge">${c.categorie_permis || 'B'}</span></td>
-          <td>${c.date_inscription ? new Date(c.date_inscription).toLocaleDateString('fr-FR') : '—'}</td>
-          <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>—</span></td>
-          <td>
-            <div class="progress-wrap">
-              <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-              <span class="progress-pct num">${pct}%</span>
-            </div>
-          </td>
-          <td>${statusBadge(c.statut)}</td>
-          <td>
-            <div class="row-actions">
-              <button title="Voir le profil"><i data-lucide="eye"></i></button>
-              <button title="Modifier"><i data-lucide="pencil"></i></button>
-              <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-            </div>
-          </td>
-        </tr>`;
-    }).join('');
-    lucide.createIcons();
   }
 
   const themeToggle = document.getElementById('themeToggle');
