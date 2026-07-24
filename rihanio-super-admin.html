@@ -253,6 +253,39 @@
           </table>
         </div>
       </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="banknote"></i>Justificatifs de paiement en attente</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Entreprise</th>
+                <th>Justificatif</th>
+                <th>Note</th>
+                <th>Envoyé le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="paymentSubsTbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--ink-pale);padding:24px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Aperçu justificatif -->
+<div class="modal-overlay" id="proofModal">
+  <div class="modal" style="max-width:440px;text-align:center;">
+    <h2 style="margin-bottom:16px;">Justificatif de paiement</h2>
+    <img id="proofImage" src="" alt="Justificatif" style="width:100%;border-radius:14px;border:1px solid var(--border);margin-bottom:18px;">
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" id="closeProofModal">Fermer</button>
     </div>
   </div>
 </div>
@@ -347,6 +380,7 @@
     document.getElementById('f_start').value = new Date().toISOString().split('T')[0];
     loadCompanies();
     loadSentNotifications();
+    loadPaymentSubmissions();
   });
 
   function computeStatus(c){
@@ -576,6 +610,74 @@
     const { error } = await supabaseClient.from('notifications').delete().eq('id', id);
     if (error) { alert('خطأ: ' + error.message); return; }
     loadSentNotifications();
+  };
+
+  // ============ Justificatifs de paiement ============
+  async function loadPaymentSubmissions(){
+    const tbody = document.getElementById('paymentSubsTbody');
+    const { data, error } = await supabaseClient
+      .from('payment_submissions')
+      .select('id, company_id, file_path, note, status, created_at, companies(name)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true })
+      .limit(50);
+
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:24px;">${error.message}</td></tr>`;
+      return;
+    }
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucun justificatif en attente.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(s => `
+      <tr>
+        <td><div class="co-name">${(s.companies && s.companies.name) || '—'}</div></td>
+        <td><button class="btn-ghost" style="padding:7px 12px;font-size:12px;" onclick="viewProof('${s.file_path}')"><i data-lucide="image"></i> Voir</button></td>
+        <td style="max-width:200px;"><div class="co-addr" style="white-space:normal;">${s.note ? s.note : '—'}</div></td>
+        <td>${new Date(s.created_at).toLocaleString('fr-FR')}</td>
+        <td>
+          <div class="row-actions">
+            <button title="Accepter et réactiver" onclick="reviewPayment('${s.id}', '${s.company_id}', 'approved')"><i data-lucide="check"></i></button>
+            <button class="danger" title="Refuser" onclick="reviewPayment('${s.id}', '${s.company_id}', 'rejected')"><i data-lucide="x"></i></button>
+          </div>
+        </td>
+      </tr>`).join('');
+    lucide.createIcons();
+  }
+
+  window.viewProof = async function(filePath){
+    const { data, error } = await supabaseClient.storage.from('payment-proofs').createSignedUrl(filePath, 3600);
+    if (error) { alert('خطأ فتحميل الصورة: ' + error.message); return; }
+    document.getElementById('proofImage').src = data.signedUrl;
+    document.getElementById('proofModal').classList.add('open');
+  };
+  document.getElementById('closeProofModal').addEventListener('click', () => document.getElementById('proofModal').classList.remove('open'));
+
+  window.reviewPayment = async function(subId, companyId, decision){
+    const confirmMsg = decision === 'approved'
+      ? 'واش متأكد باغي تقبل هاد الأداء وتعاود تفعيل الاشتراك؟'
+      : 'واش متأكد باغي ترفض هاد الإثبات؟';
+    if (!confirm(confirmMsg)) return;
+
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    const { error: subError } = await supabaseClient
+      .from('payment_submissions')
+      .update({ status: decision, reviewed_at: new Date().toISOString(), reviewed_by: session.user.id })
+      .eq('id', subId);
+    if (subError) { alert('خطأ: ' + subError.message); return; }
+
+    if (decision === 'approved') {
+      const { error: coError } = await supabaseClient
+        .from('companies')
+        .update({ subscription_start_date: new Date().toISOString().split('T')[0], is_suspended: false })
+        .eq('id', companyId);
+      if (coError) { alert('خطأ فتفعيل الاشتراك: ' + coError.message); return; }
+    }
+
+    loadPaymentSubmissions();
+    loadCompanies();
   };
 
   const themeToggle = document.getElementById('themeToggle');
