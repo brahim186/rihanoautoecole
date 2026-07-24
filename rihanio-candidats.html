@@ -362,6 +362,12 @@
     </div>
 
     <div class="sb-scroll">
+      <div class="sb-cat">Actions</div>
+      <a href="rihanio-inscrire-candidat.html" class="sb-item">
+        <i data-lucide="user-plus"></i>
+        <span class="sb-item-label">Inscrire un candidat</span>
+      </a>
+
       <div class="sb-cat">Vue d'ensemble</div>
       <a href="rihanio-tableau-de-bord.html" class="sb-item">
         <i data-lucide="layout-dashboard"></i>
@@ -373,11 +379,15 @@
         <i data-lucide="users"></i>
         <span class="sb-item-label">Candidats</span>
       </a>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <a href="archive.html" class="sb-item">
+        <i data-lucide="archive"></i>
+        <span class="sb-item-label">Archive candidats</span>
+      </a>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="book-open"></i>
         <span class="sb-item-label">Cours théoriques</span>
       </div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="car-front"></i>
         <span class="sb-item-label">Cours pratiques</span>
       </div>
@@ -397,13 +407,21 @@
       </a>
 
       <div class="sb-cat">Finance</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <a href="rihanio-finances.html" class="sb-item">
         <i data-lucide="wallet"></i>
         <span class="sb-item-label">Finances &amp; paiements</span>
-      </div>
+      </a>
+      <a href="rihanio-salaires.html" class="sb-item">
+        <i data-lucide="banknote"></i>
+        <span class="sb-item-label">Salaires</span>
+      </a>
+      <a href="rihanio-depenses.html" class="sb-item">
+        <i data-lucide="receipt"></i>
+        <span class="sb-item-label">Dépenses</span>
+      </a>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
       </div>
@@ -636,11 +654,11 @@
       <div class="field-row">
         <div class="field">
           <label for="eNom">Nom</label>
-          <input type="text" id="eNom" placeholder="Ex : El Fassi">
+          <input type="text" id="eNom">
         </div>
         <div class="field">
           <label for="ePrenom">Prénom</label>
-          <input type="text" id="ePrenom" placeholder="Ex : Maryam">
+          <input type="text" id="ePrenom">
         </div>
       </div>
 
