@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -27,11 +29,14 @@
     --available-soft:#E5F9EF;
     --maintenance:#F0A93C;
     --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6;
+    --assigned-soft:#EAF0FE;
+    --star:#FFB020;
+    --star-soft:#FFF4E0;
     --danger:#F0473F;
     --danger-soft:#FDECEB;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
   body{
     font-family:'Inter',sans-serif;
     background:var(--bg);
@@ -102,18 +107,22 @@
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;display:flex;flex-direction:column;}
 
-  .topbar{display:flex;align-items:center;gap:14px;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;}
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:18px 32px;
+    background:var(--bg);position:sticky;top:0;z-index:30;
+  }
   .back-link{
-    display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;flex-shrink:0;
-    background:var(--surface);color:var(--ink-soft);text-decoration:none;cursor:pointer;
-    box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
+    display:flex;align-items:center;justify-content:center;
+    width:42px;height:42px;border-radius:12px;flex-shrink:0;
+    background:var(--surface);border:none;color:var(--ink-soft);
+    text-decoration:none;cursor:pointer;box-shadow:0 2px 10px -4px rgba(23,25,51,.08);
   }
   .back-link:hover{color:var(--primary);}
-  .back-link svg{width:18px;height:18px;}
-  .topbar-titles{flex:1;min-width:0;}
-  .breadcrumb{font-size:12px;color:var(--ink-soft);font-weight:600;display:flex;align-items:center;gap:6px;}
-  .breadcrumb svg{width:12px;height:12px;}
-  .topbar-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:19px;font-weight:800;color:var(--ink);margin-top:2px;}
+  .back-link svg{width:17px;height:17px;}
+
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
 
   .icon-btn{
     width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);
@@ -125,46 +134,60 @@
   .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
     border:1.5px solid var(--surface);}
 
-  /* ---------- Content ---------- */
+  .btn-primary{
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
+    padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;
+    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;text-decoration:none;
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
+  .btn-primary svg{width:16px;height:16px;}
+
+  .btn-secondary{
+    display:flex;align-items:center;gap:8px;background:var(--surface-2);color:var(--ink-soft);border:1.5px solid var(--border);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+    padding:10px 16px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;
+  }
+  .btn-secondary:hover{background:var(--surface);color:var(--primary);}
+  .btn-secondary svg{width:15px;height:15px;}
+
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+
   .content{padding:6px 32px 50px;display:flex;justify-content:center;}
-  .form-shell{width:100%;max-width:920px;display:flex;flex-direction:column;gap:20px;}
+  .form-shell{width:100%;max-width:900px;display:flex;flex-direction:column;gap:22px;}
 
-  .card{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);}
-
-  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
-  .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;display:flex;align-items:center;gap:9px;}
-  .panel-title svg{width:18px;height:18px;color:var(--primary);}
-  .panel-desc{font-size:12.5px;color:var(--ink-soft);margin-top:3px;font-weight:500;}
-
+  /* ---------- PANEL / CARD ---------- */
+  .panel{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);overflow:hidden;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+  .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+  .panel-title svg{width:17px;height:17px;color:var(--primary);}
+  .panel-desc{font-size:12px;color:var(--ink-soft);margin-top:3px;font-weight:500;}
   .panel-body{padding:24px;}
 
-  /* Photo uploader */
-  .photo-row{display:flex;align-items:center;gap:20px;}
-  .photo-drop{
-    width:104px;height:104px;border-radius:50%;flex-shrink:0;
-    border:2px dashed var(--border);
-    display:flex;align-items:center;justify-content:center;
-    position:relative;overflow:hidden;cursor:pointer;background:var(--surface-2);
-    transition:border-color .15s, background .15s;
-  }
-  .photo-drop:hover{border-color:var(--primary);background:var(--primary-soft);}
-  .photo-drop svg{width:26px;height:26px;color:var(--ink-pale);}
-  .photo-drop img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
-  .photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .photo-remove{
-    position:absolute;top:0;right:2px;width:26px;height:26px;border-radius:50%;
-    background:var(--danger);color:#fff;border:2px solid #fff;display:none;
-    align-items:center;justify-content:center;cursor:pointer;z-index:2;
-  }
-  .photo-remove svg{width:13px;height:13px;}
-  .photo-remove.show{display:flex;}
-  .photo-info-title{font-size:13.5px;font-weight:700;color:var(--ink);}
-  .photo-info-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;line-height:1.6;}
   .optional-tag{
     display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;
     color:var(--ink-pale);background:var(--surface-2);border:1px solid var(--border);
     padding:2px 8px;border-radius:100px;margin-left:8px;text-transform:uppercase;letter-spacing:.03em;
   }
+
+  /* Avatar (initiales, remplace la photo) */
+  .avatar-row{display:flex;align-items:center;gap:20px;}
+  .form-avatar{
+    width:104px;height:104px;border-radius:50%;flex-shrink:0;color:#fff;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:34px;
+    box-shadow:0 10px 22px -8px rgba(91,98,244,.55);letter-spacing:.02em;
+    transition:background .2s ease;
+  }
+  .avatar-info-title{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .avatar-info-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;line-height:1.6;}
 
   /* Form grid */
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;}
@@ -173,59 +196,26 @@
   .form-label{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:4px;}
   .req-star{color:var(--danger);font-weight:700;}
   .form-hint{font-size:11.5px;color:var(--ink-pale);font-weight:500;}
-  .form-input{
+  .form-input, .form-select{
     width:100%;padding:11px 14px;
     border:1.5px solid var(--border);border-radius:11px;
-    background:var(--surface-2);font-family:inherit;font-size:13.5px;color:var(--ink);
+    background:var(--surface-2);font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);
     outline:none;transition:border-color .15s, box-shadow .15s, background .15s;
   }
-  .form-input:focus{border-color:var(--primary);background:#fff;}
+  .form-input:focus, .form-select:focus{border-color:var(--primary);background:#fff;}
   .form-input::placeholder{color:var(--ink-pale);}
   .form-input[type="date"]{color-scheme:light;}
-  .form-input.invalid{border-color:var(--danger);}
+  .form-input.invalid, .form-select.invalid{border-color:var(--danger);}
+  .form-select{
+    appearance:none;-webkit-appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23A6A9C8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;
+  }
   .field-error{font-size:11.5px;color:var(--danger);font-weight:600;display:none;align-items:center;gap:4px;}
   .field-error svg{width:12px;height:12px;}
   .field-error.show{display:flex;}
 
   .divider{height:1px;background:var(--border);margin:4px 0 2px;}
-
-  /* File dropzone */
-  .dropzone{
-    border:1.5px dashed var(--border);border-radius:14px;
-    padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:8px;text-align:center;cursor:pointer;position:relative;background:var(--surface-2);
-    transition:border-color .15s, background .15s;
-  }
-  .dropzone:hover, .dropzone.dragover{border-color:var(--primary);background:var(--primary-soft);}
-  .dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .dropzone-icon{
-    width:44px;height:44px;border-radius:12px;background:var(--primary-soft);color:var(--primary);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .dropzone-icon svg{width:21px;height:21px;}
-  .dropzone-title{font-size:13.5px;font-weight:700;color:var(--ink);}
-  .dropzone-sub{font-size:12px;color:var(--ink-soft);}
-  .dropzone-sub b{color:var(--primary);font-weight:700;}
-
-  .file-chip{
-    display:flex;align-items:center;gap:12px;
-    border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;background:var(--surface-2);
-  }
-  .file-chip-icon{
-    width:38px;height:38px;border-radius:11px;flex-shrink:0;
-    background:var(--danger-soft);color:var(--danger);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .file-chip-icon svg{width:18px;height:18px;}
-  .file-chip-info{flex:1;min-width:0;}
-  .file-chip-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .file-chip-size{font-size:11.5px;color:var(--ink-pale);margin-top:1px;}
-  .file-chip-remove{
-    width:30px;height:30px;border-radius:9px;border:none;background:transparent;color:var(--ink-pale);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
-  }
-  .file-chip-remove:hover{background:var(--danger-soft);color:var(--danger);}
-  .file-chip-remove svg{width:16px;height:16px;}
 
   /* Enrollment date footer */
   .enroll-row{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
@@ -234,45 +224,43 @@
     flex:1;min-width:220px;font-size:12px;color:var(--ink-soft);
     display:flex;align-items:center;gap:7px;line-height:1.5;
   }
-  .enroll-note svg{width:15px;height:15px;color:var(--primary);flex-shrink:0;}
+  .enroll-note svg{width:15px;height:15px;color:var(--maintenance);flex-shrink:0;}
+
+  /* Solde */
+  .balance-box{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--maintenance-soft);border:1px solid var(--maintenance);border-radius:12px;padding:12px 16px;
+  }
+  .balance-box .lbl{font-size:13px;font-weight:700;color:#B5720B;display:flex;align-items:center;gap:8px;}
+  .balance-box .lbl svg{width:16px;height:16px;}
+  .balance-box .val{font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--primary-dark);}
 
   /* Actions */
-  .actions-bar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:18px 24px;}
-  .btn-primary{
-    display:flex;align-items:center;gap:8px;
-    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
-    padding:12px 22px;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;
-    font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;
-    transition:transform .15s, box-shadow .15s;box-shadow:0 10px 20px -8px rgba(91,98,244,.65);
+  .actions-bar{
+    display:flex;align-items:center;justify-content:flex-end;gap:10px;
+    padding:18px 24px;border-top:1px solid var(--border);
   }
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
-  .btn-primary svg{width:16px;height:16px;}
-  .btn-secondary{
-    display:flex;align-items:center;gap:8px;
-    background:var(--surface);color:var(--ink-soft);border:1.5px solid var(--border);
-    padding:12px 20px;border-radius:12px;font-family:inherit;
-    font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;
-    transition:background .15s, color .15s;
-  }
-  .btn-secondary:hover{background:var(--surface-2);color:var(--ink);}
 
   .success-toast{
     position:fixed;bottom:24px;right:24px;z-index:100;
     display:flex;align-items:center;gap:10px;
-    background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;padding:14px 18px;border-radius:14px;
-    box-shadow:0 14px 34px -10px rgba(91,98,244,.55);
+    background:var(--sidebar);color:#fff;padding:14px 18px;border-radius:12px;
+    box-shadow:0 14px 34px -10px rgba(19,21,43,.45);
     font-size:13.5px;font-weight:700;
     transform:translateY(20px);opacity:0;pointer-events:none;
     transition:transform .25s cubic-bezier(.2,.8,.25,1), opacity .25s ease;
   }
   .success-toast.show{transform:translateY(0);opacity:1;}
-  .success-toast svg{width:18px;height:18px;flex-shrink:0;}
+  .success-toast svg{width:18px;height:18px;color:var(--available);flex-shrink:0;}
 
-  @media (max-width:700px){
-    .form-grid{grid-template-columns:1fr;}
+  @media (max-width:760px){
     .content{padding:6px 16px 40px;}
-    .photo-row{flex-direction:column;align-items:flex-start;}
-    .topbar{padding:14px 16px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .btn-primary{order:2;}
+    .topbar-profile{order:4;margin-inline-start:auto;}
+    .form-grid{grid-template-columns:1fr;}
+    .avatar-row{flex-direction:column;align-items:flex-start;}
   }
 </style>
 </head>
@@ -298,57 +286,61 @@
       </div>
 
       <div class="sb-cat">Vue d'ensemble</div>
-      <div class="sb-item">
+      <a href="rihanio-tableau-de-bord.html" class="sb-item">
         <i data-lucide="layout-dashboard"></i>
         <span class="sb-item-label">Tableau de bord</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Candidats &amp; formation</div>
-      <div class="sb-item">
+      <a href="rihanio-candidats.html" class="sb-item">
         <i data-lucide="users"></i>
         <span class="sb-item-label">Candidats</span>
-      </div>
-      <div class="sb-item">
+      </a>
+      <a href="archive.html" class="sb-item">
+        <i data-lucide="archive"></i>
+        <span class="sb-item-label">Archive candidats</span>
+      </a>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="book-open"></i>
         <span class="sb-item-label">Cours théoriques</span>
       </div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="car-front"></i>
         <span class="sb-item-label">Cours pratiques</span>
       </div>
-      <div class="sb-item">
+      <a href="rihanio-calendrier-examens.html" class="sb-item">
         <i data-lucide="clipboard-check"></i>
         <span class="sb-item-label">Examens</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Ressources</div>
-      <div class="sb-item">
+      <a href="rihanio-moniteurs.html" class="sb-item">
         <i data-lucide="user-cog"></i>
         <span class="sb-item-label">Moniteurs</span>
-      </div>
-      <div class="sb-item">
+      </a>
+      <a href="rihanio-vehicules.html" class="sb-item">
         <i data-lucide="car"></i>
         <span class="sb-item-label">Véhicules</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Finance</div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="wallet"></i>
         <span class="sb-item-label">Finances &amp; paiements</span>
       </div>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
       </div>
     </div>
 
     <div class="sb-profile">
-      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-avatar" id="sbProfileAvatar">—</div>
       <div class="sb-profile-text">
-        <div class="sb-profile-name">Saïd El Idrissi</div>
-        <div class="sb-profile-role">Directeur du centre</div>
+        <div class="sb-profile-name" id="sbProfileName">—</div>
+        <div class="sb-profile-role">Administrateur</div>
       </div>
       <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
     </div>
@@ -356,23 +348,26 @@
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- TOPBAR -->
     <header class="topbar">
-      <a href="tableau-de-bord.html" class="back-link" title="Retour"><i data-lucide="arrow-left"></i></a>
-      <div class="topbar-titles">
-        <div class="breadcrumb"><i data-lucide="user-plus"></i> Inscription d'un nouveau candidat</div>
-        <div class="topbar-title">Inscrire un candidat</div>
+  <a href="rihanio-tableau-de-bord.html" class="back-link" title="Retour"><i data-lucide="arrow-left"></i></a>
+
+      <div class="page-title-mini">
+        <h1>Inscrire un candidat</h1>
+        <p>Renseignez les informations pour créer un nouveau dossier</p>
       </div>
+
       <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar" id="topbarAvatar">SI</div>
+      </div>
     </header>
 
-    <!-- CONTENT -->
     <div class="content">
       <form class="form-shell" id="candidateForm" novalidate>
 
         <!-- IDENTITÉ -->
-        <section class="card">
+        <section class="panel">
           <div class="panel-head">
             <div>
               <div class="panel-title"><i data-lucide="user-round"></i>Identité du candidat</div>
@@ -382,20 +377,13 @@
 
           <div class="panel-body" style="display:flex;flex-direction:column;gap:22px;">
 
-            <!-- Photo -->
-            <div class="photo-row">
-              <div class="photo-drop" id="photoDrop">
-                <i data-lucide="camera" id="photoIcon"></i>
-                <img id="photoPreview" style="display:none;" alt="Photo du candidat">
-                <input type="file" id="photoInput" accept="image/*">
-              </div>
+            <!-- Avatar (initiales générées automatiquement) -->
+            <div class="avatar-row">
+              <div class="form-avatar" id="formAvatar">—</div>
               <div>
-                <div class="photo-info-title">Photo du candidat <span class="optional-tag">Optionnel</span></div>
-                <div class="photo-info-sub">Format JPG ou PNG, 5 Mo maximum.<br>Utilisée sur la fiche et le dossier du candidat.</div>
+                <div class="avatar-info-title">Avatar du candidat</div>
+                <div class="avatar-info-sub">Généré automatiquement à partir des initiales du prénom et du nom.<br>Utilisé sur la fiche et le dossier du candidat.</div>
               </div>
-              <button type="button" class="photo-remove" id="photoRemove" title="Retirer la photo">
-                <i data-lucide="x"></i>
-              </button>
             </div>
 
             <div class="divider"></div>
@@ -421,6 +409,16 @@
               </div>
 
               <div class="form-group">
+                <label class="form-label" for="fSexe">Sexe <span class="req-star">*</span></label>
+                <select class="form-select" id="fSexe" required>
+                  <option value="" disabled selected>Sélectionner</option>
+                  <option value="M">Homme</option>
+                  <option value="F">Femme</option>
+                </select>
+                <span class="field-error" id="errSexe"><i data-lucide="alert-circle"></i>Le sexe est obligatoire.</span>
+              </div>
+
+              <div class="form-group">
                 <label class="form-label" for="fCin">N° de la CIN <span class="req-star">*</span></label>
                 <input type="text" class="form-input" id="fCin" placeholder="Ex : AB123456" required>
                 <span class="field-error" id="errCin"><i data-lucide="alert-circle"></i>Le numéro de la CIN est obligatoire.</span>
@@ -432,6 +430,23 @@
                 <span class="field-error" id="errCinExp"><i data-lucide="alert-circle"></i>La date d'expiration est obligatoire.</span>
               </div>
 
+              <div class="form-group">
+                <label class="form-label" for="fPermis">Type de permis <span class="req-star">*</span></label>
+                <select class="form-select" id="fPermis" required>
+                  <option value="" disabled selected>Sélectionner un type de permis</option>
+                  <option value="AM">Permis AM — Cyclomoteur</option>
+                  <option value="A1">Permis A1 — Motocyclette légère</option>
+                  <option value="A">Permis A — Motocyclette</option>
+                  <option value="B">Permis B — Véhicule léger</option>
+                  <option value="EB">Permis EB — Véhicule léger avec remorque</option>
+                  <option value="C">Permis C — Poids lourd</option>
+                  <option value="EC">Permis EC — Poids lourd avec remorque</option>
+                  <option value="D">Permis D — Transport en commun</option>
+                  <option value="ED">Permis ED — Transport en commun avec remorque</option>
+                </select>
+                <span class="field-error" id="errPermis"><i data-lucide="alert-circle"></i>Le type de permis est obligatoire.</span>
+              </div>
+
               <div class="form-group full">
                 <label class="form-label" for="fAdresse">Adresse <span class="req-star">*</span></label>
                 <input type="text" class="form-input" id="fAdresse" placeholder="Ex : 12 Rue Ibn Sina, Kénitra" required>
@@ -441,42 +456,8 @@
           </div>
         </section>
 
-        <!-- DOCUMENTS -->
-        <section class="card">
-          <div class="panel-head">
-            <div>
-              <div class="panel-title"><i data-lucide="file-text"></i>Documents</div>
-              <div class="panel-desc">Copie numérique de la carte d'identité nationale.</div>
-            </div>
-          </div>
-
-          <div class="panel-body">
-            <div class="form-group">
-              <label class="form-label">Copie de la CIN (PDF) <span class="optional-tag">Optionnel</span></label>
-
-              <div class="dropzone" id="pdfDrop">
-                <div class="dropzone-icon"><i data-lucide="upload-cloud"></i></div>
-                <div class="dropzone-title">Glissez le fichier ici</div>
-                <div class="dropzone-sub">ou <b>cliquez pour parcourir</b> — PDF, 10 Mo maximum</div>
-                <input type="file" id="pdfInput" accept="application/pdf">
-              </div>
-
-              <div class="file-chip" id="pdfChip" style="display:none;">
-                <div class="file-chip-icon"><i data-lucide="file-text"></i></div>
-                <div class="file-chip-info">
-                  <div class="file-chip-name" id="pdfName">—</div>
-                  <div class="file-chip-size" id="pdfSize">—</div>
-                </div>
-                <button type="button" class="file-chip-remove" id="pdfRemove" title="Retirer le fichier">
-                  <i data-lucide="trash-2"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <!-- PAIEMENT -->
-        <section class="card">
+        <section class="panel">
           <div class="panel-head">
             <div>
               <div class="panel-title"><i data-lucide="wallet"></i>Paiement</div>
@@ -500,11 +481,9 @@
               </div>
 
               <div class="form-group full" id="balanceBox" style="display:none;">
-                <div style="display:flex;align-items:center;justify-content:space-between;background:var(--primary-soft);border:1.5px solid var(--primary);border-radius:12px;padding:12px 16px;">
-                  <span style="font-size:13px;font-weight:700;color:var(--primary-dark);display:flex;align-items:center;gap:8px;">
-                    <i data-lucide="banknote" style="width:16px;height:16px;"></i>Reste à payer
-                  </span>
-                  <span class="num" id="balanceValue" style="font-size:16px;font-weight:800;color:var(--ink);">0 DH</span>
+                <div class="balance-box">
+                  <span class="lbl"><i data-lucide="banknote"></i>Reste à payer</span>
+                  <span class="num val" id="balanceValue">0 DH</span>
                 </div>
               </div>
             </div>
@@ -512,7 +491,7 @@
         </section>
 
         <!-- INSCRIPTION -->
-        <section class="card">
+        <section class="panel">
           <div class="panel-head">
             <div>
               <div class="panel-title"><i data-lucide="calendar-check"></i>Date d'inscription</div>
@@ -556,85 +535,34 @@
 <script>
   lucide.createIcons();
 
-  document.querySelectorAll('.sb-item').forEach(item => {
-    item.addEventListener('click', () => {
-      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    });
-  });
-
   // ---------- Default enrollment date = today, editable ----------
   const todayISO = new Date().toISOString().split('T')[0];
   document.getElementById('fInscription').value = todayISO;
 
-  // ---------- Photo upload (optional) ----------
-  const photoInput = document.getElementById('photoInput');
-  const photoPreview = document.getElementById('photoPreview');
-  const photoIcon = document.getElementById('photoIcon');
-  const photoRemove = document.getElementById('photoRemove');
+  // ---------- Avatar initiales (généré depuis Prénom + Nom) + couleur selon le sexe ----------
+  const fPrenom = document.getElementById('fPrenom');
+  const fNom = document.getElementById('fNom');
+  const fSexe = document.getElementById('fSexe');
+  const formAvatar = document.getElementById('formAvatar');
 
-  photoInput.addEventListener('change', () => {
-    const file = photoInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      photoPreview.src = e.target.result;
-      photoPreview.style.display = 'block';
-      photoIcon.style.display = 'none';
-      photoRemove.classList.add('show');
-    };
-    reader.readAsDataURL(file);
-  });
-
-  photoRemove.addEventListener('click', (e) => {
-    e.stopPropagation();
-    photoInput.value = '';
-    photoPreview.style.display = 'none';
-    photoIcon.style.display = 'block';
-    photoRemove.classList.remove('show');
-  });
-
-  // ---------- CIN PDF upload (optional, drag & drop) ----------
-  const pdfDrop = document.getElementById('pdfDrop');
-  const pdfInput = document.getElementById('pdfInput');
-  const pdfChip = document.getElementById('pdfChip');
-  const pdfName = document.getElementById('pdfName');
-  const pdfSize = document.getElementById('pdfSize');
-  const pdfRemove = document.getElementById('pdfRemove');
-
-  function formatSize(bytes){
-    if (bytes < 1024) return bytes + ' o';
-    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' Ko';
-    return (bytes/(1024*1024)).toFixed(1) + ' Mo';
+  function updateAvatarInitials(){
+    const p = fPrenom.value.trim();
+    const n = fNom.value.trim();
+    const initials = ((p[0] || '') + (n[0] || '')).toUpperCase();
+    formAvatar.textContent = initials || '—';
   }
-
-  function handlePdfFile(file){
-    if (!file) return;
-    if (file.type !== 'application/pdf') return;
-    pdfName.textContent = file.name;
-    pdfSize.textContent = formatSize(file.size);
-    pdfChip.style.display = 'flex';
-    pdfDrop.style.display = 'none';
+  function updateAvatarColor(){
+    if (fSexe.value === 'M') {
+      formAvatar.style.background = 'linear-gradient(135deg,#3B82F6,#2563EB)';
+    } else if (fSexe.value === 'F') {
+      formAvatar.style.background = 'linear-gradient(135deg,#EC4899,#DB2777)';
+    } else {
+      formAvatar.style.background = 'linear-gradient(135deg,var(--primary),var(--primary-2))';
+    }
   }
-
-  pdfInput.addEventListener('change', () => handlePdfFile(pdfInput.files[0]));
-
-  ['dragenter','dragover'].forEach(evt => {
-    pdfDrop.addEventListener(evt, (e) => { e.preventDefault(); pdfDrop.classList.add('dragover'); });
-  });
-  ['dragleave','drop'].forEach(evt => {
-    pdfDrop.addEventListener(evt, (e) => { e.preventDefault(); pdfDrop.classList.remove('dragover'); });
-  });
-  pdfDrop.addEventListener('drop', (e) => {
-    const file = e.dataTransfer.files[0];
-    if (file) { pdfInput.files = e.dataTransfer.files; handlePdfFile(file); }
-  });
-
-  pdfRemove.addEventListener('click', () => {
-    pdfInput.value = '';
-    pdfChip.style.display = 'none';
-    pdfDrop.style.display = 'flex';
-  });
+  fPrenom.addEventListener('input', updateAvatarInitials);
+  fNom.addEventListener('input', updateAvatarInitials);
+  fSexe.addEventListener('change', updateAvatarColor);
 
   // ---------- Live balance calculation (Prix - Avance) ----------
   const fPrix = document.getElementById('fPrix');
@@ -654,7 +582,7 @@
   fAvance.addEventListener('input', updateBalance);
 
   // ---------- Validation ----------
-  const requiredFields = ['fPrenom','fNom','fNaissance','fCin','fCinExp','fAdresse','fPrix','fAvance','fInscription'];
+  const requiredFields = ['fPrenom','fNom','fNaissance','fSexe','fCin','fCinExp','fPermis','fAdresse','fPrix','fAvance','fInscription'];
 
   function validateField(id){
     const el = document.getElementById(id);
@@ -671,34 +599,102 @@
     el.addEventListener('input', () => {
       if (el.classList.contains('invalid')) validateField(id);
     });
+    if (el.tagName === 'SELECT') {
+      el.addEventListener('change', () => validateField(id));
+    }
   });
 
-  document.getElementById('candidateForm').addEventListener('submit', (e) => {
+  document.getElementById('candidateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     let allValid = true;
     requiredFields.forEach(id => { if (!validateField(id)) allValid = false; });
 
     if (!allValid) {
-      document.querySelector('.form-input.invalid')?.scrollIntoView({ behavior:'smooth', block:'center' });
+      document.querySelector('.form-input.invalid, .form-select.invalid')?.scrollIntoView({ behavior:'smooth', block:'center' });
       return;
     }
 
+    if (!currentProfile) return; // sécurité : pas de société associée
+
+    const submitBtn = document.querySelector('#candidateForm button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const prix = parseFloat(fPrix.value) || 0;
+    const avance = parseFloat(fAvance.value) || 0;
+
+    // 1. Enregistrer le candidat
+    const { data: candidat, error: candidatError } = await supabaseClient
+      .from('candidats')
+      .insert({
+        company_id: currentProfile.company_id,
+        prenom: fPrenom.value.trim(),
+        nom: fNom.value.trim(),
+        date_naissance: document.getElementById('fNaissance').value,
+        sexe: fSexe.value,
+        cin: document.getElementById('fCin').value.trim(),
+        cin_expiration: document.getElementById('fCinExp').value,
+        categorie_permis: document.getElementById('fPermis').value,
+        adresse: document.getElementById('fAdresse').value.trim(),
+        prix_formation: prix,
+        avance_payee: avance,
+        date_inscription: document.getElementById('fInscription').value
+      })
+      .select()
+      .single();
+
+    if (candidatError) {
+      alert("Erreur lors de l'enregistrement du candidat : " + candidatError.message);
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
+
+    // 2. Enregistrer l'avance comme premier paiement (si > 0)
+    if (avance > 0) {
+      const { error: paiementError } = await supabaseClient
+        .from('paiements')
+        .insert({
+          company_id: currentProfile.company_id,
+          candidat_id: candidat.id,
+          montant: avance,
+          description: "Avance à l'inscription"
+        });
+      if (paiementError) console.error('Erreur enregistrement avance :', paiementError.message);
+    }
+
+    if (submitBtn) submitBtn.disabled = false;
     const toast = document.getElementById('successToast');
     toast.classList.add('show');
+    document.getElementById('candidateForm').reset();
+    document.getElementById('fInscription').value = todayISO;
+    updateAvatarInitials();
+    updateAvatarColor();
+    balanceBox.style.display = 'none';
     setTimeout(() => toast.classList.remove('show'), 3200);
   });
 
   document.getElementById('cancelBtn').addEventListener('click', () => {
     document.getElementById('candidateForm').reset();
     document.getElementById('fInscription').value = todayISO;
-    photoRemove.click();
-    pdfRemove.click();
+    updateAvatarInitials();
+    updateAvatarColor();
     balanceBox.style.display = 'none';
     requiredFields.forEach(id => {
       document.getElementById(id).classList.remove('invalid');
       const errEl = document.getElementById('err' + id.slice(1));
       if (errEl) errEl.classList.remove('show');
     });
+  });
+
+  // ---------- Profil connecté (sidebar / topbar) — connexion réelle ----------
+  requireAuth().then(profile => {
+    if (!profile) return;
+    const logoutBtn = document.querySelector('.sb-logout');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    const displayName = profile.full_name || profile.email;
+    const initials = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('sbProfileAvatar').textContent = initials;
+    document.getElementById('sbProfileName').textContent = displayName;
+    document.getElementById('topbarAvatar').textContent = initials;
   });
 </script>
 
