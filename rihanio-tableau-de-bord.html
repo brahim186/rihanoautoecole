@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rihanio Auto-École | Tableau de bord</title>
+<title>Rihanio Auto-École | Véhicules</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="rihanio-config.js"></script>
 <style>
   :root{
@@ -38,23 +37,12 @@
     --danger-soft:#FDECEB;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{scroll-behavior:smooth;}
   body{
     font-family:'Inter',sans-serif;
     background:var(--bg);
     color:var(--ink);
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
-  }
-  body.dark{
-    --bg:#0E0F22;
-    --surface:#171933;
-    --surface-2:#1F2140;
-    --border:#2A2C52;
-    --ink:#F1F1FB;
-    --ink-soft:#A6A9C8;
-    --ink-pale:#6E7191;
-    --primary-soft:#232559;
   }
   .display{font-family:'Plus Jakarta Sans',sans-serif;}
   .num{font-variant-numeric:tabular-nums;}
@@ -70,7 +58,9 @@
     border-right:1px solid rgba(255,255,255,.04);
   }
   .sidebar:hover{width:246px;}
-  .sb-brand{display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;}
+  .sb-brand{
+    display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;
+  }
   .sb-brand-mark{
     width:38px;height:38px;border-radius:12px;flex-shrink:0;
     background:linear-gradient(135deg,var(--primary),var(--primary-2));
@@ -101,7 +91,9 @@
   .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
   .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
 
-  .sb-profile{display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .sb-profile{
+    display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  }
   .sb-profile-avatar{
     width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
@@ -119,13 +111,18 @@
   /* ---------- Main ---------- */
   .main{flex:1;min-width:0;display:flex;flex-direction:column;}
 
-  .topbar{display:flex;align-items:center;gap:14px;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;}
+  .topbar{
+    display:flex;align-items:center;gap:14px;padding:18px 32px;
+    background:var(--bg);position:sticky;top:0;z-index:30;
+  }
   .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
   .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
   .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
 
   .search-wrap{position:relative;width:260px;flex-shrink:0;}
-  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);}
+  .search-wrap svg{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);
+  }
   .search-wrap input{
     width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);
     padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;
@@ -144,33 +141,30 @@
   .icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--danger);
     border:1.5px solid var(--surface);}
 
-  .status-pill{
-    display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--available);
-    background:var(--available-soft);padding:9px 13px;border-radius:12px;flex-shrink:0;
-  }
-  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--available);box-shadow:0 0 6px var(--available);}
-
   .btn-primary{
     display:flex;align-items:center;gap:8px;
     background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
     font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;
     padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;
-    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;text-decoration:none;
+    box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;
   }
   .btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 24px -8px rgba(91,98,244,.75);}
   .btn-primary svg{width:16px;height:16px;}
 
+  .topbar-profile{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-inline-start:6px;}
+  .topbar-profile-avatar{
+    width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
+    box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
+  }
+
   .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
 
-  /* ---------- CHART PANEL ---------- */
-  .chart-legend{display:flex;align-items:center;gap:16px;}
-  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-soft);}
-  .legend-dot{width:9px;height:9px;border-radius:3px;}
-  .legend-dot.rev{background:var(--available);}
-  .legend-dot.loss{background:var(--danger);}
-  .chart-wrap{position:relative;height:280px;width:100%;}
+  .section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+  .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
+  .section-heading .see-all{font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none;}
 
-  /* ---------- METRICS GRID ---------- */
+  /* ---------- METRICS GRID (top gradient cards) ---------- */
   .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   @media (max-width:1100px){ .metrics-grid{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:560px){ .metrics-grid{grid-template-columns:1fr;} }
@@ -179,97 +173,100 @@
     border-radius:20px;padding:20px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;
     color:#fff;position:relative;overflow:hidden;
   }
-  .metric-card.c-1{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
-  .metric-card.c-2{background:linear-gradient(150deg,#3B7CF6,#2F5FD1);}
-  .metric-card.c-3{background:linear-gradient(150deg,#18B368,#0E8F52);}
-  .metric-card.c-4{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card.c-total{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .metric-card.c-available{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .metric-card.c-maintenance{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card.c-insurance{background:linear-gradient(150deg,#F0473F,#C22E2E);}
   .metric-card::after{
     content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);
     right:-40px;top:-50px;
   }
-  .metric-card-top{display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;}
-  .metric-card-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;}
-  .metric-card-icon svg{width:16px;height:16px;}
-  .metric-card-badge{
-    font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;background:rgba(255,255,255,.2);
-    display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+  .metric-card-icon{
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;position:relative;z-index:1;
   }
-  .metric-card-badge svg{width:11px;height:11px;}
+  .metric-card-icon svg{width:16px;height:16px;}
   .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:26px;position:relative;z-index:1;}
   .metric-card-label{font-size:12.5px;opacity:.85;margin-top:2px;position:relative;z-index:1;}
   .metric-card-sub{font-size:11px;opacity:.85;position:relative;z-index:1;}
 
-  /* ---------- SPLIT PANELS ---------- */
-  .split{display:grid;grid-template-columns:2.35fr 1fr;gap:20px;align-items:start;}
-  @media (max-width:1100px){ .split{grid-template-columns:1fr;} }
+  /* ---------- FLEET CARD GRID ---------- */
+  .fleet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media (max-width:1180px){ .fleet-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:720px){ .fleet-grid{grid-template-columns:1fr;} }
 
+  .fleet-card{
+    background:var(--surface);border-radius:20px;padding:18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .fleet-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .fleet-thumb{
+    width:50px;height:50px;border-radius:14px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--primary-soft);color:var(--primary);
+  }
+  .fleet-thumb svg{width:24px;height:24px;}
+  .fleet-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
+  .fleet-plate{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+  .status-pill{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
+  .status-pill.available{background:var(--available-soft);color:var(--available);}
+  .status-pill.assigned{background:var(--assigned-soft);color:var(--assigned);}
+  .status-pill.maintenance{background:var(--maintenance-soft);color:#B5720B;}
+
+  .fleet-meta-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);}
+  .fleet-meta-row span{display:flex;align-items:center;gap:6px;}
+  .fleet-meta-row svg{width:13px;height:13px;color:var(--ink-pale);}
+  .fleet-foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border);}
+
+  .insur-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:100px;}
+  .insur-pill.ok{background:var(--available-soft);color:var(--available);}
+  .insur-pill.soon{background:var(--maintenance-soft);color:#B5720B;}
+  .insur-pill.expired{background:var(--danger-soft);color:var(--danger);}
+  .insur-pill svg{width:12px;height:12px;}
+
+  .ins-track{height:5px;border-radius:100px;background:var(--border);overflow:hidden;}
+  .ins-fill{height:100%;border-radius:100px;background:var(--available);}
+  .ins-fill.soon{background:var(--maintenance);}
+  .ins-fill.expired{background:var(--danger);}
+
+  .fleet-edit-btn{
+    width:32px;height:32px;border-radius:9px;border:none;background:var(--surface-2);
+    color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .fleet-edit-btn:hover{color:var(--primary);background:var(--primary-soft);}
+  .fleet-edit-btn svg{width:14px;height:14px;}
+
+  /* ---------- TABLE PANEL ---------- */
   .panel{background:var(--surface);border-radius:20px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);overflow:hidden;}
   .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
   .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
   .panel-title svg{width:17px;height:17px;color:var(--primary);}
   .panel-link{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;text-decoration:none;background:none;border:none;}
-  .panel-body{padding:10px 14px 14px;}
 
-  .session-row{display:flex;align-items:center;gap:14px;padding:12px 10px;border-radius:14px;transition:background .15s;}
-  .session-row:hover{background:var(--surface-2);}
-  .session-time{width:56px;flex-shrink:0;font-weight:700;font-size:13px;color:var(--ink);text-align:center;}
-  .session-type-icon{width:38px;height:38px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .session-type-icon.theory{background:var(--assigned-soft);color:var(--assigned);}
-  .session-type-icon.practice{background:var(--star-soft);color:#B5720B;}
-  .session-type-icon svg{width:18px;height:18px;}
-  .session-info{flex:1;min-width:0;}
-  .session-title{font-size:13.5px;font-weight:700;color:var(--ink);}
-  .session-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
-  .session-status{font-size:11px;font-weight:700;padding:5px 10px;border-radius:100px;flex-shrink:0;}
-  .session-status.done{background:var(--available-soft);color:var(--available);}
-  .session-status.progress{background:var(--star-soft);color:#B5720B;}
-  .session-status.upcoming{background:var(--surface-2);color:var(--ink-pale);}
-
-  .alert-item{display:flex;gap:12px;padding:14px 10px;border-radius:14px;}
-  .alert-item:hover{background:var(--surface-2);}
-  .alert-icon{width:36px;height:36px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-  .alert-icon.amber{background:var(--maintenance-soft);color:#B5720B;}
-  .alert-icon.red{background:var(--danger-soft);color:var(--danger);}
-  .alert-icon.blue{background:var(--assigned-soft);color:var(--assigned);}
-  .alert-icon svg{width:17px;height:17px;}
-  .alert-title{font-size:13px;font-weight:700;color:var(--ink);}
-  .alert-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;line-height:1.5;}
-
-  /* ---------- TABLE ---------- */
   .table-scroll{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;min-width:820px;}
+  table{width:100%;border-collapse:collapse;min-width:760px;}
   thead th{
-    text-align:left;font-size:11px;font-weight:700;color:var(--ink-pale);text-transform:uppercase;letter-spacing:.04em;
-    padding:12px 22px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap;
+    text-align:left;font-size:11px;font-weight:700;color:var(--ink-pale);
+    text-transform:uppercase;letter-spacing:.04em;padding:12px 22px;border-bottom:1px solid var(--border);
+    background:var(--surface-2);white-space:nowrap;
   }
   tbody td{padding:14px 22px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;white-space:nowrap;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:var(--surface-2);}
 
-  .candidate-cell{display:flex;align-items:center;gap:10px;}
-  .avatar-xs{
-    width:34px;height:34px;border-radius:11px;flex-shrink:0;color:#fff;
-    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;
+  .veh-cell{display:flex;align-items:center;gap:10px;}
+  .veh-avatar{
+    width:36px;height:36px;border-radius:11px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;
   }
-  .cand-name{font-weight:700;color:var(--ink);}
-  .cand-id{font-size:11.5px;color:var(--ink-pale);}
+  .veh-name{font-weight:700;color:var(--ink);}
+  .veh-plate{font-size:11.5px;color:var(--ink-soft);}
 
-  .permit-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;background:var(--primary-soft);color:var(--primary);}
-
-  .doc-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;}
-  .doc-badge.ok{color:var(--available);}
-  .doc-badge.pending{color:#B5720B;}
-  .doc-badge svg{width:14px;height:14px;}
-
-  .progress-wrap{display:flex;align-items:center;gap:8px;min-width:110px;}
-  .progress-track{flex:1;height:6px;border-radius:100px;background:var(--border);overflow:hidden;}
-  .progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--primary),var(--primary-2));}
-  .progress-pct{font-size:11.5px;font-weight:700;color:var(--ink-soft);width:32px;}
-
-  .status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;}
-  .status-badge.active{background:var(--available-soft);color:var(--available);}
-  .status-badge.graduated{background:var(--assigned-soft);color:var(--assigned);}
-  .status-badge.suspended{background:var(--danger-soft);color:var(--danger);}
+  .permit-badge{
+    font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;
+    background:var(--primary-soft);color:var(--primary);
+  }
 
   .row-actions{display:flex;align-items:center;gap:4px;}
   .row-actions button{
@@ -280,13 +277,65 @@
   .row-actions button.danger:hover{color:var(--danger);background:var(--danger-soft);}
   .row-actions svg{width:15px;height:15px;}
 
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(19,21,43,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    background:var(--surface);border-radius:22px;width:100%;max-width:480px;
+    max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px -20px rgba(19,21,43,.5);
+    animation:modal-in .18s cubic-bezier(.2,.8,.25,1);
+  }
+  @keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:22px 24px 18px;}
+  .modal-title{display:flex;align-items:center;gap:12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:16.5px;color:var(--ink);}
+  .modal-title-icon{
+    width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .modal-title-icon svg{width:17px;height:17px;}
+  .modal-close{
+    width:34px;height:34px;border-radius:10px;border:none;background:var(--surface-2);color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+  }
+  .modal-close:hover{color:var(--danger);background:var(--danger-soft);}
+  .modal-close svg{width:16px;height:16px;}
+  .modal-body{padding:4px 24px 22px;display:flex;flex-direction:column;gap:16px;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);}
+  .field input,.field select{
+    border:1.5px solid var(--border);border-radius:11px;padding:10px 13px;
+    font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);background:var(--surface-2);
+    outline:none;transition:border-color .15s;width:100%;
+  }
+  .field input:focus,.field select:focus{border-color:var(--primary);}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:6px 24px 24px;}
+  .btn-ghost{
+    padding:10px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);
+    color:var(--ink-soft);font-weight:700;font-size:13.5px;
+    cursor:pointer;
+  }
+  .btn-ghost:hover{background:var(--surface-2);}
+  .btn-confirm{
+    padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
+    font-weight:700;font-size:13.5px;
+    cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
+  }
+  .btn-confirm:hover{transform:translateY(-1px);}
+  .btn-confirm svg{width:15px;height:15px;}
+
   @media (max-width:760px){
     .content{padding:6px 16px 40px;}
     .topbar{padding:14px 16px;flex-wrap:wrap;}
     .page-title-mini{width:100%;order:1;}
     .search-wrap{order:3;width:100%;}
     .btn-primary{order:2;}
-    .status-pill{display:none;}
+    .topbar-profile{order:4;margin-inline-start:auto;}
+    .field-row{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -306,7 +355,7 @@
 
     <div class="sb-scroll">
       <div class="sb-cat">Vue d'ensemble</div>
-      <a href="rihanio-tableau-de-bord.html" class="sb-item active">
+      <a href="rihanio-tableau-de-bord.html" class="sb-item">
         <i data-lucide="layout-dashboard"></i>
         <span class="sb-item-label">Tableau de bord</span>
       </a>
@@ -334,7 +383,7 @@
         <i data-lucide="user-cog"></i>
         <span class="sb-item-label">Moniteurs</span>
       </a>
-      <a href="rihanio-vehicules.html" class="sb-item">
+      <a href="rihanio-vehicules.html" class="sb-item active">
         <i data-lucide="car"></i>
         <span class="sb-item-label">Véhicules</span>
       </a>
@@ -366,143 +415,133 @@
   <div class="main">
     <header class="topbar">
       <div class="page-title-mini">
-        <h1>Tableau de bord</h1>
-        <p>Vue d'ensemble de votre centre aujourd'hui</p>
+        <h1>Parc de véhicules</h1>
+        <p id="headingCount">8 véhicules enregistrés</p>
       </div>
 
       <div class="search-wrap">
         <i data-lucide="search"></i>
-        <input type="text" placeholder="Rechercher un candidat, un véhicule, un moniteur...">
+        <input type="text" id="searchInput" placeholder="Rechercher un véhicule...">
       </div>
 
-      <a href="inscrire-candidat.html" class="btn-primary">
-        <i data-lucide="user-plus"></i>
-        Inscrire un candidat
-      </a>
-
-      <div class="status-pill"><span class="dot"></span>Système opérationnel</div>
-
       <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
-      <button class="icon-btn" id="themeToggle" title="Mode sombre"><i data-lucide="moon"></i></button>
+
+      <button class="btn-primary" id="btnAddVehicle">
+        <i data-lucide="plus"></i>
+        Ajouter un véhicule
+      </button>
+
+      <div class="topbar-profile">
+        <div class="topbar-profile-avatar">SI</div>
+      </div>
     </header>
 
     <div class="content">
 
       <!-- METRICS -->
-      <section class="metrics-grid">
-        <div class="metric-card c-1">
-          <div class="metric-card-top">
-            <div class="metric-card-icon"><i data-lucide="users"></i></div>
-          </div>
-          <div>
-            <div class="metric-card-count num" id="kpiCandidats">—</div>
-            <div class="metric-card-label">Candidats actifs</div>
-          </div>
-          <div class="metric-card-sub" id="kpiCandidatsSub">—</div>
-        </div>
+      <section class="metrics-grid" id="metricsGrid"></section>
 
-        <div class="metric-card c-2">
-          <div class="metric-card-top">
-            <div class="metric-card-icon"><i data-lucide="clipboard-check"></i></div>
-          </div>
-          <div>
-            <div class="metric-card-count num" id="kpiExamens">—</div>
-            <div class="metric-card-label">Examens cette semaine</div>
-          </div>
-          <div class="metric-card-sub" id="kpiExamensSub">—</div>
-        </div>
-
-        <div class="metric-card c-3">
-          <div class="metric-card-top">
-            <div class="metric-card-icon"><i data-lucide="car"></i></div>
-          </div>
-          <div>
-            <div class="metric-card-count num" id="kpiVehicules">—</div>
-            <div class="metric-card-label">Véhicules disponibles</div>
-          </div>
-          <div class="metric-card-sub" id="kpiVehiculesSub">—</div>
-        </div>
-
-        <div class="metric-card c-4">
-          <div class="metric-card-top">
-            <div class="metric-card-icon"><i data-lucide="wallet"></i></div>
-          </div>
-          <div>
-            <div class="metric-card-count num" id="kpiRevenus">—</div>
-            <div class="metric-card-label">Revenus mensuels</div>
-          </div>
-          <div class="metric-card-sub">vs 38 900 DH le mois dernier</div>
-        </div>
-      </section>
-
-      <!-- SPLIT -->
-      <section class="split">
-        <!-- SCHEDULE -->
-        <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title"><i data-lucide="calendar-clock"></i>Planning du jour</div>
-            <button class="panel-link">Voir la semaine complète →</button>
-          </div>
-          <div class="panel-body" id="planningBody">
-            <div style="text-align:center;padding:32px 16px;color:var(--ink-pale);font-size:13px;">
-              <i data-lucide="calendar-clock" style="width:28px;height:28px;margin-bottom:10px;display:inline-block;"></i><br>
-              La planification des séances n'est pas encore disponible.<br>Cette fonctionnalité arrivera dans une prochaine mise à jour.
-            </div>
-          </div>
-        </div>
-
-        <!-- ALERTS -->
-        <div class="panel">
-          <div class="panel-head">
-            <div class="panel-title"><i data-lucide="bell-ring"></i>Alertes &amp; rappels</div>
-          </div>
-          <div class="panel-body" id="alertsBody">
-            <div style="text-align:center;padding:20px;color:var(--ink-pale);font-size:13px;">Chargement...</div>
-          </div>
-        </div>
+      <!-- FLEET CARDS -->
+      <section>
+        <div class="section-heading"><h2>Véhicules <span class="num" id="listCount"></span></h2></div>
+        <div class="fleet-grid" id="fleetGrid"></div>
       </section>
 
       <!-- TABLE -->
       <section class="panel">
         <div class="panel-head">
-          <div class="panel-title"><i data-lucide="users-round"></i>Derniers candidats inscrits</div>
-          <button class="panel-link">Voir tous les candidats →</button>
+          <div class="panel-title"><i data-lucide="car-front"></i>Liste complète des véhicules</div>
+          <button class="panel-link">Voir l'historique d'entretien →</button>
         </div>
-
         <div class="table-scroll">
           <table>
             <thead>
               <tr>
-                <th>Candidat</th>
+                <th>Véhicule</th>
                 <th>Type de permis</th>
-                <th>Promotion</th>
-                <th>Dossier médical &amp; documents</th>
-                <th>Progression paiement</th>
+                <th>Moniteur assigné</th>
+                <th>Assurance</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="candidatsTbody">
-              <tr id="candidatsLoadingRow"><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Chargement des candidats...</td></tr>
-            </tbody>
+            <tbody id="vehiclesTableBody"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- CHART: revenus & pertes mensuels -->
-      <section class="panel">
-        <div class="panel-head">
-          <div class="panel-title"><i data-lucide="trending-up"></i>Revenus &amp; pertes mensuels</div>
-          <div class="chart-legend">
-            <div class="legend-item"><span class="legend-dot rev"></span>Revenus</div>
-            <div class="legend-item"><span class="legend-dot loss"></span>Pertes</div>
-          </div>
-        </div>
-        <div class="chart-wrap">
-          <canvas id="revenueChart"></canvas>
-        </div>
-      </section>
+    </div>
+  </div>
+</div>
 
+<!-- MODAL : Ajouter / Modifier un véhicule -->
+<div class="modal-overlay" id="vehicleModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-icon"><i data-lucide="car"></i></div>
+        <span id="vehicleModalTitle">Ajouter un véhicule</span>
+      </div>
+      <button class="modal-close" id="vehicleModalClose" title="Fermer"><i data-lucide="x"></i></button>
+    </div>
+
+    <div class="modal-body">
+      <input type="hidden" id="vehId" value="">
+
+      <div class="field-row">
+        <div class="field">
+          <label for="vehName">Marque &amp; modèle</label>
+          <input type="text" id="vehName" placeholder="Ex : Dacia Sandero">
+        </div>
+        <div class="field">
+          <label for="vehPlate">Immatriculation</label>
+          <input type="text" id="vehPlate" placeholder="Ex : 45210-A-6">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="vehPermit">Type de permis</label>
+        <select id="vehPermit">
+          <option value="B">B</option>
+          <option value="A">A</option>
+          <option value="C">C</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="vehMoniteur">Moniteur assigné</label>
+        <select id="vehMoniteur">
+          <option value="">Non assigné</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="vehInsuranceStart">Assurance — date de début</label>
+          <input type="date" id="vehInsuranceStart">
+        </div>
+        <div class="field">
+          <label for="vehInsuranceEnd">Assurance — date de fin</label>
+          <input type="date" id="vehInsuranceEnd">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="vehStatus">Statut</label>
+        <select id="vehStatus">
+          <option value="Disponible">Disponible</option>
+          <option value="En service">En service</option>
+          <option value="Maintenance">Maintenance</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-ghost" id="vehicleCancelBtn">Annuler</button>
+      <button class="btn-confirm" id="vehicleSaveBtn">
+        <i data-lucide="check"></i>
+        <span id="vehicleSaveBtnLabel">Enregistrer le véhicule</span>
+      </button>
     </div>
   </div>
 </div>
@@ -519,293 +558,7 @@
     const displayName = profile.full_name || profile.email;
     if (nameEl) nameEl.textContent = displayName;
     if (avatarEl) avatarEl.textContent = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    loadDashboardData();
-    loadRealAlerts();
-    loadRevenueChart();
-  });
-
-  function initials(prenom, nom){
-    return ((prenom?.[0] || '') + (nom?.[0] || '')).toUpperCase();
-  }
-
-  function statusBadge(statut){
-    const map = {
-      actif: '<span class="status-badge active">Actif</span>',
-      suspendu: '<span class="status-badge suspended">Suspendu</span>',
-      diplome: '<span class="status-badge graduated">Reçu(e)</span>',
-      abandonne: '<span class="status-badge suspended">Abandonné</span>'
-    };
-    return map[statut] || map.actif;
-  }
-
-  async function loadDashboardData(){
-    const companyId = currentProfile.company_id;
-
-    // ---- KPI : candidats ----
-    const { data: candidats, error: candErr } = await supabaseClient
-      .from('candidats')
-      .select('*')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false });
-
-    if (!candErr && candidats) {
-      const actifs = candidats.filter(c => c.statut === 'actif').length;
-      document.getElementById('kpiCandidats').textContent = actifs;
-      document.getElementById('kpiCandidatsSub').textContent = candidats.length + ' candidat(s) au total';
-      renderCandidats(candidats.slice(0, 8));
-    }
-
-    // ---- KPI : examens de la semaine ----
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    const startISO = startOfWeek.toISOString().split('T')[0];
-    const { data: examens } = await supabaseClient
-      .from('examens')
-      .select('type_examen')
-      .eq('company_id', companyId)
-      .gte('date_examen', startISO);
-
-    if (examens) {
-      const code = examens.filter(e => e.type_examen === 'code').length;
-      const conduite = examens.filter(e => e.type_examen === 'conduite').length;
-      document.getElementById('kpiExamens').textContent = examens.length;
-      document.getElementById('kpiExamensSub').textContent = code + ' Code · ' + conduite + ' Conduite';
-    }
-
-    // ---- KPI : véhicules ----
-    const { data: vehicules } = await supabaseClient
-      .from('vehicules')
-      .select('statut')
-      .eq('company_id', companyId);
-
-    if (vehicules) {
-      const dispo = vehicules.filter(v => v.statut === 'disponible').length;
-      const maint = vehicules.filter(v => v.statut === 'en_maintenance').length;
-      document.getElementById('kpiVehicules').textContent = dispo + '/' + vehicules.length;
-      document.getElementById('kpiVehiculesSub').textContent = maint + ' en maintenance';
-    }
-
-    // ---- KPI : revenus du mois ----
-    const now = new Date();
-    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const { data: paiements } = await supabaseClient
-      .from('paiements')
-      .select('montant')
-      .eq('company_id', companyId)
-      .gte('date_paiement', firstOfMonth);
-
-    if (paiements) {
-      const total = paiements.reduce((sum, p) => sum + Number(p.montant), 0);
-      document.getElementById('kpiRevenus').textContent = total.toLocaleString('fr-FR') + ' DH';
-    }
-  }
-
-  async function loadRealAlerts(){
-    const companyId = currentProfile.company_id;
-    const alerts = [];
-
-    // ---- Assurances véhicules qui expirent bientôt ou déjà expirées ----
-    const { data: vehicules } = await supabaseClient
-      .from('vehicules')
-      .select('nom_vehicule, immatriculation, assurance_fin, statut')
-      .eq('company_id', companyId);
-
-    const today = new Date();
-    (vehicules || []).forEach(v => {
-      if (!v.assurance_fin) return;
-      const end = new Date(v.assurance_fin);
-      const daysLeft = Math.round((end - today) / 86400000);
-      if (daysLeft <= 15){
-        alerts.push({
-          icon: daysLeft <= 0 ? 'shield-x' : 'shield-alert',
-          cls: daysLeft <= 0 ? 'red' : 'amber',
-          title: daysLeft <= 0 ? 'Assurance véhicule expirée' : 'Assurance véhicule bientôt expirée',
-          sub: `${v.nom_vehicule || 'Véhicule'} (${v.immatriculation}) — ` +
-               (daysLeft <= 0 ? `expirée depuis ${Math.abs(daysLeft)} j` : `renouvellement dans ${daysLeft} j`)
-        });
-      }
-      if (v.statut === 'en_maintenance' || v.statut === 'Maintenance'){
-        alerts.push({
-          icon: 'wrench', cls: 'amber',
-          title: 'Véhicule en maintenance',
-          sub: `${v.nom_vehicule || 'Véhicule'} (${v.immatriculation}) est actuellement indisponible`
-        });
-      }
-    });
-
-    // ---- Candidats avec un solde impayé ----
-    const { data: candidats } = await supabaseClient
-      .from('candidats')
-      .select('id, nom, prenom, prix_formation')
-      .eq('company_id', companyId)
-      .neq('statut', 'diplome');
-
-    const { data: paiements } = await supabaseClient
-      .from('paiements')
-      .select('candidat_id, montant')
-      .eq('company_id', companyId);
-
-    const paidByCandidat = {};
-    (paiements || []).forEach(p => {
-      paidByCandidat[p.candidat_id] = (paidByCandidat[p.candidat_id] || 0) + Number(p.montant);
-    });
-
-    (candidats || []).forEach(c => {
-      const prix = Number(c.prix_formation) || 0;
-      const paid = paidByCandidat[c.id] || 0;
-      const reste = prix - paid;
-      if (prix > 0 && reste > 0){
-        alerts.push({
-          icon: 'banknote', cls: 'red',
-          title: 'Solde impayé',
-          sub: `${c.prenom} ${c.nom} — reste ${reste.toLocaleString('fr-FR')} DH à payer`
-        });
-      }
-    });
-
-    const body = document.getElementById('alertsBody');
-    if (!alerts.length){
-      body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--ink-pale);font-size:13px;">Aucune alerte pour le moment.</div>`;
-      return;
-    }
-    body.innerHTML = alerts.slice(0, 6).map(a => `
-      <div class="alert-item">
-        <div class="alert-icon ${a.cls}"><i data-lucide="${a.icon}"></i></div>
-        <div>
-          <div class="alert-title">${a.title}</div>
-          <div class="alert-sub">${a.sub}</div>
-        </div>
-      </div>
-    `).join('');
-    lucide.createIcons();
-  }
-
-  async function loadRevenueChart(){
-    const companyId = currentProfile.company_id;
-
-    // آخر 6 أشهر (بما فيهم الشهر الحالي)
-    const now = new Date();
-    const months = [];
-    for (let i = 5; i >= 0; i--){
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR', { month: 'short' }) });
-    }
-    const rangeStart = new Date(months[0].year, months[0].month, 1).toISOString().split('T')[0];
-
-    const { data: paiements } = await supabaseClient
-      .from('paiements')
-      .select('montant, date_paiement')
-      .eq('company_id', companyId)
-      .gte('date_paiement', rangeStart);
-
-    const revenueByMonth = months.map(m => {
-      const total = (paiements || [])
-        .filter(p => {
-          const d = new Date(p.date_paiement);
-          return d.getFullYear() === m.year && d.getMonth() === m.month;
-        })
-        .reduce((sum, p) => sum + Number(p.montant), 0);
-      return total;
-    });
-
-    // TODO: الخسائر/المصاريف — رابط جدول "depenses" لي غادي يتزاد من بعد
-    const lossByMonth = months.map(() => 0);
-
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: months.map(m => m.label),
-        datasets: [
-          {
-            label: 'Revenus',
-            data: revenueByMonth,
-            borderColor: '#18B368',
-            backgroundColor: 'rgba(24,179,104,.12)',
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#18B368',
-            pointRadius: 4,
-            borderWidth: 2.5,
-          },
-          {
-            label: 'Pertes',
-            data: lossByMonth,
-            borderColor: '#F0473F',
-            backgroundColor: 'rgba(240,71,63,.10)',
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#F0473F',
-            pointRadius: 4,
-            borderWidth: 2.5,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { color: getComputedStyle(document.body).getPropertyValue('--border') },
-            ticks: { callback: v => v.toLocaleString('fr-FR') + ' DH', font: { size: 11 } }
-          },
-          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
-        }
-      }
-    });
-  }
-
-  function renderCandidats(candidats){
-    const tbody = document.getElementById('candidatsTbody');
-    if (!candidats.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucun candidat inscrit pour le moment.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = candidats.map(c => {
-      const prix = Number(c.prix_formation) || 0;
-      const avance = Number(c.avance_payee) || 0;
-      const pct = prix > 0 ? Math.min(Math.round((avance / prix) * 100), 100) : 0;
-      return `
-        <tr>
-          <td>
-            <div class="candidate-cell">
-              <div class="avatar-xs" style="background:#5B62F4;">${initials(c.prenom, c.nom)}</div>
-              <div>
-                <div class="cand-name">${c.prenom} ${c.nom}</div>
-                <div class="cand-id">#${c.id.slice(0,8)}</div>
-              </div>
-            </div>
-          </td>
-          <td><span class="permit-badge">${c.categorie_permis || 'B'}</span></td>
-          <td>${c.date_inscription ? new Date(c.date_inscription).toLocaleDateString('fr-FR') : '—'}</td>
-          <td><span class="doc-badge ok"><i data-lucide="check-circle-2"></i>—</span></td>
-          <td>
-            <div class="progress-wrap">
-              <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
-              <span class="progress-pct num">${pct}%</span>
-            </div>
-          </td>
-          <td>${statusBadge(c.statut)}</td>
-          <td>
-            <div class="row-actions">
-              <button title="Voir le profil"><i data-lucide="eye"></i></button>
-              <button title="Modifier"><i data-lucide="pencil"></i></button>
-              <button class="danger" title="Supprimer"><i data-lucide="trash-2"></i></button>
-            </div>
-          </td>
-        </tr>`;
-    }).join('');
-    lucide.createIcons();
-  }
-
-  const themeToggle = document.getElementById('themeToggle');
-  themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    themeToggle.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
-    lucide.createIcons();
+    loadVehicles();
   });
 
   document.querySelectorAll('.sb-item').forEach(item => {
@@ -814,6 +567,341 @@
       item.classList.add('active');
     });
   });
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // ---------- Vehicle data store (chargé depuis Supabase) ----------
+  let vehicles = [];
+  let moniteursMap = {}; // { id: nom_complet }
+  let searchTerm = '';
+
+  function dbToVehicle(row){
+    return {
+      id: row.id,
+      name: row.nom_vehicule || `${row.marque || ''} ${row.modele || ''}`.trim() || 'Véhicule',
+      plate: row.immatriculation,
+      permit: row.categorie || 'B',
+      moniteurId: row.moniteur_id || '',
+      moniteur: row.moniteur_id ? (moniteursMap[row.moniteur_id] || 'Moniteur inconnu') : 'Non assigné',
+      insuranceStart: row.assurance_debut || '',
+      insuranceEnd: row.assurance_fin || '',
+      status: row.statut || 'Disponible'
+    };
+  }
+
+  async function loadMoniteursOptions(){
+    const { data } = await supabaseClient
+      .from('moniteurs')
+      .select('id, nom_complet')
+      .eq('company_id', currentProfile.company_id);
+    moniteursMap = {};
+    const select = document.getElementById('vehMoniteur');
+    select.innerHTML = '<option value="">Non assigné</option>';
+    (data || []).forEach(m => {
+      moniteursMap[m.id] = m.nom_complet;
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nom_complet;
+      select.appendChild(opt);
+    });
+  }
+
+  async function loadVehicles(){
+    await loadMoniteursOptions();
+    const { data, error } = await supabaseClient
+      .from('vehicules')
+      .select('*')
+      .eq('company_id', currentProfile.company_id)
+      .order('created_at', { ascending: false });
+    if (error) { console.error(error.message); return; }
+    vehicles = (data || []).map(dbToVehicle);
+    renderAll();
+  }
+
+  const vehicleIcon = { 'B':'car', 'A':'bike', 'C':'truck' };
+  const statusClass = { 'Disponible':'available', 'En service':'assigned', 'Maintenance':'maintenance' };
+  const avatarColors = ['#5B62F4','#8B6FF2','#18B368','#F0A93C','#3B7CF6','#F0473F'];
+
+  function insuranceCalc(v){
+    if (!v.insuranceStart || !v.insuranceEnd){
+      return { status:'none', daysLeft:null, pct:0 };
+    }
+    const start = new Date(v.insuranceStart);
+    const end = new Date(v.insuranceEnd);
+    const now = new Date(todayStr());
+    const totalDays = Math.max(1, Math.round((end - start) / 86400000));
+    const elapsedDays = Math.round((now - start) / 86400000);
+    const daysLeft = Math.round((end - now) / 86400000);
+    const pct = Math.max(0, Math.min(100, Math.round((elapsedDays / totalDays) * 100)));
+
+    let status = 'ok';
+    if (daysLeft <= 0) status = 'expired';
+    else if (daysLeft <= 15) status = 'soon';
+
+    return { status, daysLeft, pct };
+  }
+
+  function insurancePill(v){
+    const c = insuranceCalc(v);
+    if (c.status === 'none') return `<span class="insur-pill soon"><i data-lucide="calendar-x"></i>Non renseignée</span>`;
+    if (c.status === 'expired') return `<span class="insur-pill expired"><i data-lucide="shield-x"></i>Expirée depuis ${Math.abs(c.daysLeft)} j</span>`;
+    if (c.status === 'soon') return `<span class="insur-pill soon"><i data-lucide="shield-alert"></i>Expire dans ${c.daysLeft} j</span>`;
+    return `<span class="insur-pill ok"><i data-lucide="shield-check"></i>À jour · ${c.daysLeft} j restants</span>`;
+  }
+
+  function insuranceBar(v){
+    const c = insuranceCalc(v);
+    if (c.status === 'none') return '';
+    const cls = c.status === 'ok' ? '' : ' ' + c.status;
+    const label = c.status === 'expired'
+      ? `Expirée le ${fmtDate(v.insuranceEnd)}`
+      : `Valide jusqu'au ${fmtDate(v.insuranceEnd)}`;
+    return `
+      <div>
+        <div class="fleet-meta-row"><span><i data-lucide="shield"></i>Assurance</span><span>${label}</span></div>
+        <div class="ins-track" style="margin-top:6px;"><div class="ins-fill${cls}" style="width:${c.pct}%;"></div></div>
+      </div>
+    `;
+  }
+
+  function filteredVehicles(){
+    if (!searchTerm) return vehicles;
+    const q = searchTerm.toLowerCase();
+    return vehicles.filter(v => v.name.toLowerCase().includes(q) || v.plate.toLowerCase().includes(q) || v.moniteur.toLowerCase().includes(q));
+  }
+
+  function renderMetrics(){
+    const total = vehicles.length;
+    const available = vehicles.filter(v => v.status === 'Disponible').length;
+    const maintenance = vehicles.filter(v => v.status === 'Maintenance').length;
+    const insuranceSoon = vehicles.filter(v => {
+      const c = insuranceCalc(v);
+      return c.status === 'soon' || c.status === 'expired';
+    }).length;
+
+    document.getElementById('headingCount').textContent = `${total} véhicules enregistrés`;
+
+    document.getElementById('metricsGrid').innerHTML = `
+      <div class="metric-card c-total">
+        <div class="metric-card-icon"><i data-lucide="car"></i></div>
+        <div>
+          <div class="metric-card-count num">${total}</div>
+          <div class="metric-card-label">Total véhicules</div>
+        </div>
+        <div class="metric-card-sub">Toute la flotte</div>
+      </div>
+      <div class="metric-card c-available">
+        <div class="metric-card-icon"><i data-lucide="circle-check-big"></i></div>
+        <div>
+          <div class="metric-card-count num">${available}/${total}</div>
+          <div class="metric-card-label">Disponibles</div>
+        </div>
+        <div class="metric-card-sub">Prêts à l'emploi aujourd'hui</div>
+      </div>
+      <div class="metric-card c-maintenance">
+        <div class="metric-card-icon"><i data-lucide="wrench"></i></div>
+        <div>
+          <div class="metric-card-count num">${maintenance}</div>
+          <div class="metric-card-label">En maintenance</div>
+        </div>
+        <div class="metric-card-sub">Retour prévu sous 3 jours</div>
+      </div>
+      <div class="metric-card c-insurance">
+        <div class="metric-card-icon"><i data-lucide="shield-alert"></i></div>
+        <div>
+          <div class="metric-card-count num">${insuranceSoon}</div>
+          <div class="metric-card-label">Assurances à renouveler</div>
+        </div>
+        <div class="metric-card-sub">Dans les 15 prochains jours</div>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function renderFleetCards(){
+    const list = filteredVehicles();
+    document.getElementById('listCount').textContent = `(${list.length})`;
+    const grid = document.getElementById('fleetGrid');
+
+    if (!list.length){
+      grid.innerHTML = `<div class="panel" style="grid-column:1/-1;padding:40px 10px;text-align:center;color:var(--ink-soft);font-size:13px;">Aucun véhicule ne correspond à votre recherche.</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(v => `
+        <div class="fleet-card" data-id="${v.id}">
+          <div class="fleet-card-top">
+            <div class="fleet-thumb"><i data-lucide="${vehicleIcon[v.permit] || 'car'}"></i></div>
+            <span class="status-pill ${statusClass[v.status]}">${v.status}</span>
+          </div>
+          <div>
+            <div class="fleet-name">${v.name}</div>
+            <div class="fleet-plate">${v.plate} · Permis ${v.permit}</div>
+          </div>
+          <div class="fleet-meta-row" style="font-weight:700;color:var(--ink);">
+            <span><i data-lucide="user-cog"></i>${v.moniteur}</span>
+            ${insurancePill(v)}
+          </div>
+          ${insuranceBar(v)}
+          <div class="fleet-foot" style="justify-content:flex-end;">
+            <button class="fleet-edit-btn edit-btn" data-id="${v.id}" title="Modifier"><i data-lucide="pencil"></i></button>
+          </div>
+        </div>
+      `).join('');
+    lucide.createIcons();
+    attachRowHandlers();
+  }
+
+  function renderTable(){
+    const tbody = document.getElementById('vehiclesTableBody');
+    tbody.innerHTML = vehicles.map((v, i) => `
+      <tr data-id="${v.id}">
+        <td>
+          <div class="veh-cell">
+            <div class="veh-avatar" style="background:${avatarColors[i % avatarColors.length]};"><i data-lucide="${vehicleIcon[v.permit] || 'car'}" style="width:16px;height:16px;"></i></div>
+            <div>
+              <div class="veh-name">${v.name}</div>
+              <div class="veh-plate">${v.plate}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="permit-badge">${v.permit}</span></td>
+        <td>${v.moniteur}</td>
+        <td>${insurancePill(v)}</td>
+        <td><span class="status-pill ${statusClass[v.status]}">${v.status}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="edit-btn" data-id="${v.id}" title="Modifier"><i data-lucide="pencil"></i></button>
+            <button class="danger delete-btn" data-id="${v.id}" title="Retirer"><i data-lucide="trash-2"></i></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    lucide.createIcons();
+    attachRowHandlers();
+  }
+
+  function renderAll(){
+    renderMetrics();
+    renderFleetCards();
+    renderTable();
+  }
+
+  function attachRowHandlers(){
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openVehicleModal(btn.dataset.id));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const v = vehicles.find(x => x.id === id);
+        if (v && confirm(`Retirer "${v.name}" (${v.plate}) de la flotte ?`)) {
+          const { error } = await supabaseClient.from('vehicules').delete().eq('id', id);
+          if (error) { alert('Erreur lors de la suppression : ' + error.message); return; }
+          vehicles = vehicles.filter(x => x.id !== id);
+          renderAll();
+        }
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    renderFleetCards();
+  });
+
+  // ---------- Modal : Ajouter / Modifier un véhicule ----------
+  const vehicleModal      = document.getElementById('vehicleModal');
+  const vehicleModalTitle = document.getElementById('vehicleModalTitle');
+  const vehicleSaveBtnLabel = document.getElementById('vehicleSaveBtnLabel');
+  const btnAddVehicle     = document.getElementById('btnAddVehicle');
+  const vehicleModalClose = document.getElementById('vehicleModalClose');
+  const vehicleCancelBtn  = document.getElementById('vehicleCancelBtn');
+  const vehicleSaveBtn    = document.getElementById('vehicleSaveBtn');
+  const vehId             = document.getElementById('vehId');
+  const vehName           = document.getElementById('vehName');
+  const vehPlate          = document.getElementById('vehPlate');
+  const vehPermit         = document.getElementById('vehPermit');
+  const vehMoniteur       = document.getElementById('vehMoniteur');
+  const vehInsuranceStart = document.getElementById('vehInsuranceStart');
+  const vehInsuranceEnd   = document.getElementById('vehInsuranceEnd');
+  const vehStatus         = document.getElementById('vehStatus');
+
+  function openVehicleModal(editId){
+    if (editId){
+      const v = vehicles.find(x => x.id === editId);
+      if (!v) return;
+      vehicleModalTitle.textContent = 'Modifier le véhicule';
+      vehicleSaveBtnLabel.textContent = 'Enregistrer les modifications';
+      vehId.value = v.id;
+      vehName.value = v.name;
+      vehPlate.value = v.plate;
+      vehPermit.value = v.permit;
+      vehMoniteur.value = v.moniteurId || '';
+      vehInsuranceStart.value = v.insuranceStart || '';
+      vehInsuranceEnd.value = v.insuranceEnd || '';
+      vehStatus.value = v.status;
+    } else {
+      vehicleModalTitle.textContent = 'Ajouter un véhicule';
+      vehicleSaveBtnLabel.textContent = 'Enregistrer le véhicule';
+      vehId.value = '';
+      vehName.value = ''; vehPlate.value = ''; vehPermit.value = 'B';
+      vehMoniteur.value = '';
+      vehInsuranceStart.value = ''; vehInsuranceEnd.value = ''; vehStatus.value = 'Disponible';
+    }
+    vehicleModal.classList.add('open');
+  }
+  function closeVehicleModal(){ vehicleModal.classList.remove('open'); }
+
+  if (btnAddVehicle) btnAddVehicle.addEventListener('click', () => openVehicleModal(null));
+  vehicleModalClose.addEventListener('click', closeVehicleModal);
+  vehicleCancelBtn.addEventListener('click', closeVehicleModal);
+  vehicleModal.addEventListener('click', (e) => { if (e.target === vehicleModal) closeVehicleModal(); });
+
+  vehicleSaveBtn.addEventListener('click', async () => {
+    const name = vehName.value.trim() || 'Nouveau véhicule';
+    const plate = vehPlate.value.trim() || '—';
+    const permit = vehPermit.value;
+    const moniteurId = vehMoniteur.value || null;
+    const insuranceStart = vehInsuranceStart.value || null;
+    const insuranceEnd = vehInsuranceEnd.value || null;
+    const status = vehStatus.value;
+    const editId = vehId.value ? vehId.value : null;
+
+    vehicleSaveBtn.disabled = true;
+
+    const payload = {
+      company_id: currentProfile.company_id,
+      nom_vehicule: name,
+      marque: name,
+      immatriculation: plate,
+      categorie: permit,
+      moniteur_id: moniteurId,
+      assurance_debut: insuranceStart,
+      assurance_fin: insuranceEnd,
+      statut: status
+    };
+
+    if (editId){
+      const { error } = await supabaseClient.from('vehicules').update(payload).eq('id', editId);
+      if (error) { alert('Erreur : ' + error.message); vehicleSaveBtn.disabled = false; return; }
+    } else {
+      const { error } = await supabaseClient.from('vehicules').insert(payload);
+      if (error) { alert('Erreur : ' + error.message); vehicleSaveBtn.disabled = false; return; }
+    }
+
+    vehicleSaveBtn.disabled = false;
+    await loadVehicles();
+    closeVehicleModal();
+  });
+
+  // ---------- Initial render ----------
+  renderAll();
 </script>
 
 </body>
