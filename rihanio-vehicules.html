@@ -511,10 +511,7 @@
       <div class="field">
         <label for="vehMoniteur">Moniteur assigné</label>
         <select id="vehMoniteur">
-          <option value="Non assigné">Non assigné</option>
-          <option value="Omar Chergaoui">Omar Chergaoui</option>
-          <option value="Youssef Bennali">Youssef Bennali</option>
-          <option value="Rachid El Mrabet">Rachid El Mrabet</option>
+          <option value="">Non assigné</option>
         </select>
       </div>
 
@@ -556,6 +553,7 @@
     if (!profile) return;
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    loadVehicles();
   });
 
   document.querySelectorAll('.sb-item').forEach(item => {
@@ -572,28 +570,53 @@
     return `${d}/${m}/${y}`;
   }
 
-  // ---------- Vehicle data store ----------
-  let vehicles = [
-    { id:1, name:'Renault Clio 3', plate:'12458-A-4', permit:'B',
-      moniteur:'Omar Chergaoui', insuranceStart:'2026-01-15', insuranceEnd:'2027-01-14', status:'En service' },
-
-    { id:2, name:'Peugeot 208', plate:'33017-B-6', permit:'B',
-      moniteur:'Omar Chergaoui', insuranceStart:'2025-08-01', insuranceEnd:'2026-07-31', status:'En service' },
-
-    { id:3, name:'Camion Tracteur B2', plate:'50214-C-2', permit:'C',
-      moniteur:'Rachid El Mrabet', insuranceStart:'2025-07-27', insuranceEnd:'2026-07-27', status:'Maintenance' },
-
-    { id:4, name:'Dacia Logan', plate:'67890-A-4', permit:'B',
-      moniteur:'Youssef Bennali', insuranceStart:'2026-03-01', insuranceEnd:'2027-02-28', status:'Disponible' },
-
-    { id:5, name:'Moto Yamaha YBR', plate:'14522-D-8', permit:'A',
-      moniteur:'Non assigné', insuranceStart:'2026-05-10', insuranceEnd:'2027-05-09', status:'Disponible' },
-
-    { id:6, name:'Renault Symbol', plate:'29304-B-6', permit:'B',
-      moniteur:'Youssef Bennali', insuranceStart:'2025-09-01', insuranceEnd:'2026-08-31', status:'Maintenance' },
-  ];
-  let nextId = 7;
+  // ---------- Vehicle data store (chargé depuis Supabase) ----------
+  let vehicles = [];
+  let moniteursMap = {}; // { id: nom_complet }
   let searchTerm = '';
+
+  function dbToVehicle(row){
+    return {
+      id: row.id,
+      name: row.nom_vehicule || `${row.marque || ''} ${row.modele || ''}`.trim() || 'Véhicule',
+      plate: row.immatriculation,
+      permit: row.categorie || 'B',
+      moniteurId: row.moniteur_id || '',
+      moniteur: row.moniteur_id ? (moniteursMap[row.moniteur_id] || 'Moniteur inconnu') : 'Non assigné',
+      insuranceStart: row.assurance_debut || '',
+      insuranceEnd: row.assurance_fin || '',
+      status: row.statut || 'Disponible'
+    };
+  }
+
+  async function loadMoniteursOptions(){
+    const { data } = await supabaseClient
+      .from('moniteurs')
+      .select('id, nom_complet')
+      .eq('company_id', currentProfile.company_id);
+    moniteursMap = {};
+    const select = document.getElementById('vehMoniteur');
+    select.innerHTML = '<option value="">Non assigné</option>';
+    (data || []).forEach(m => {
+      moniteursMap[m.id] = m.nom_complet;
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.nom_complet;
+      select.appendChild(opt);
+    });
+  }
+
+  async function loadVehicles(){
+    await loadMoniteursOptions();
+    const { data, error } = await supabaseClient
+      .from('vehicules')
+      .select('*')
+      .eq('company_id', currentProfile.company_id)
+      .order('created_at', { ascending: false });
+    if (error) { console.error(error.message); return; }
+    vehicles = (data || []).map(dbToVehicle);
+    renderAll();
+  }
 
   const vehicleIcon = { 'B':'car', 'A':'bike', 'C':'truck' };
   const statusClass = { 'Disponible':'available', 'En service':'assigned', 'Maintenance':'maintenance' };
@@ -766,13 +789,15 @@
 
   function attachRowHandlers(){
     document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => openVehicleModal(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', () => openVehicleModal(btn.dataset.id));
     });
     document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
         const v = vehicles.find(x => x.id === id);
         if (v && confirm(`Retirer "${v.name}" (${v.plate}) de la flotte ?`)) {
+          const { error } = await supabaseClient.from('vehicules').delete().eq('id', id);
+          if (error) { alert('Erreur lors de la suppression : ' + error.message); return; }
           vehicles = vehicles.filter(x => x.id !== id);
           renderAll();
         }
@@ -812,7 +837,7 @@
       vehName.value = v.name;
       vehPlate.value = v.plate;
       vehPermit.value = v.permit;
-      vehMoniteur.value = v.moniteur;
+      vehMoniteur.value = v.moniteurId || '';
       vehInsuranceStart.value = v.insuranceStart || '';
       vehInsuranceEnd.value = v.insuranceEnd || '';
       vehStatus.value = v.status;
@@ -821,7 +846,7 @@
       vehicleSaveBtnLabel.textContent = 'Enregistrer le véhicule';
       vehId.value = '';
       vehName.value = ''; vehPlate.value = ''; vehPermit.value = 'B';
-      vehMoniteur.value = 'Non assigné';
+      vehMoniteur.value = '';
       vehInsuranceStart.value = ''; vehInsuranceEnd.value = ''; vehStatus.value = 'Disponible';
     }
     vehicleModal.classList.add('open');
@@ -833,28 +858,39 @@
   vehicleCancelBtn.addEventListener('click', closeVehicleModal);
   vehicleModal.addEventListener('click', (e) => { if (e.target === vehicleModal) closeVehicleModal(); });
 
-  vehicleSaveBtn.addEventListener('click', () => {
+  vehicleSaveBtn.addEventListener('click', async () => {
     const name = vehName.value.trim() || 'Nouveau véhicule';
     const plate = vehPlate.value.trim() || '—';
     const permit = vehPermit.value;
-    const moniteur = vehMoniteur.value;
-    const insuranceStart = vehInsuranceStart.value;
-    const insuranceEnd = vehInsuranceEnd.value;
+    const moniteurId = vehMoniteur.value || null;
+    const insuranceStart = vehInsuranceStart.value || null;
+    const insuranceEnd = vehInsuranceEnd.value || null;
     const status = vehStatus.value;
-    const editId = vehId.value ? parseInt(vehId.value) : null;
+    const editId = vehId.value ? vehId.value : null;
+
+    vehicleSaveBtn.disabled = true;
+
+    const payload = {
+      company_id: currentProfile.company_id,
+      nom_vehicule: name,
+      immatriculation: plate,
+      categorie: permit,
+      moniteur_id: moniteurId,
+      assurance_debut: insuranceStart,
+      assurance_fin: insuranceEnd,
+      statut: status
+    };
 
     if (editId){
-      const v = vehicles.find(x => x.id === editId);
-      if (v){
-        Object.assign(v, { name, plate, permit, moniteur, insuranceStart, insuranceEnd, status });
-      }
+      const { error } = await supabaseClient.from('vehicules').update(payload).eq('id', editId);
+      if (error) { alert('Erreur : ' + error.message); vehicleSaveBtn.disabled = false; return; }
     } else {
-      vehicles.push({
-        id: nextId++, name, plate, permit,
-        moniteur, insuranceStart, insuranceEnd, status
-      });
+      const { error } = await supabaseClient.from('vehicules').insert(payload);
+      if (error) { alert('Erreur : ' + error.message); vehicleSaveBtn.disabled = false; return; }
     }
-    renderAll();
+
+    vehicleSaveBtn.disabled = false;
+    await loadVehicles();
     closeVehicleModal();
   });
 
