@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="rihanio-config.js"></script>
 <style>
   :root{
@@ -160,6 +161,14 @@
   .btn-primary svg{width:16px;height:16px;}
 
   .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  /* ---------- CHART PANEL ---------- */
+  .chart-legend{display:flex;align-items:center;gap:16px;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-soft);}
+  .legend-dot{width:9px;height:9px;border-radius:3px;}
+  .legend-dot.rev{background:var(--available);}
+  .legend-dot.loss{background:var(--danger);}
+  .chart-wrap{position:relative;height:280px;width:100%;}
 
   /* ---------- METRICS GRID ---------- */
   .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
@@ -480,6 +489,20 @@
         </div>
       </section>
 
+      <!-- CHART: revenus & pertes mensuels -->
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="trending-up"></i>Revenus &amp; pertes mensuels</div>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot rev"></span>Revenus</div>
+            <div class="legend-item"><span class="legend-dot loss"></span>Pertes</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </section>
+
     </div>
   </div>
 </div>
@@ -498,6 +521,7 @@
     if (avatarEl) avatarEl.textContent = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     loadDashboardData();
     loadRealAlerts();
+    loadRevenueChart();
   });
 
   function initials(prenom, nom){
@@ -654,6 +678,83 @@
       </div>
     `).join('');
     lucide.createIcons();
+  }
+
+  async function loadRevenueChart(){
+    const companyId = currentProfile.company_id;
+
+    // آخر 6 أشهر (بما فيهم الشهر الحالي)
+    const now = new Date();
+    const months = [];
+    for (let i = 5; i >= 0; i--){
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ year: d.getFullYear(), month: d.getMonth(), label: d.toLocaleDateString('fr-FR', { month: 'short' }) });
+    }
+    const rangeStart = new Date(months[0].year, months[0].month, 1).toISOString().split('T')[0];
+
+    const { data: paiements } = await supabaseClient
+      .from('paiements')
+      .select('montant, date_paiement')
+      .eq('company_id', companyId)
+      .gte('date_paiement', rangeStart);
+
+    const revenueByMonth = months.map(m => {
+      const total = (paiements || [])
+        .filter(p => {
+          const d = new Date(p.date_paiement);
+          return d.getFullYear() === m.year && d.getMonth() === m.month;
+        })
+        .reduce((sum, p) => sum + Number(p.montant), 0);
+      return total;
+    });
+
+    // TODO: الخسائر/المصاريف — رابط جدول "depenses" لي غادي يتزاد من بعد
+    const lossByMonth = months.map(() => 0);
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: months.map(m => m.label),
+        datasets: [
+          {
+            label: 'Revenus',
+            data: revenueByMonth,
+            borderColor: '#18B368',
+            backgroundColor: 'rgba(24,179,104,.12)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#18B368',
+            pointRadius: 4,
+            borderWidth: 2.5,
+          },
+          {
+            label: 'Pertes',
+            data: lossByMonth,
+            borderColor: '#F0473F',
+            backgroundColor: 'rgba(240,71,63,.10)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#F0473F',
+            pointRadius: 4,
+            borderWidth: 2.5,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: getComputedStyle(document.body).getPropertyValue('--border') },
+            ticks: { callback: v => v.toLocaleString('fr-FR') + ' DH', font: { size: 11 } }
+          },
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+        }
+      }
+    });
   }
 
   function renderCandidats(candidats){
