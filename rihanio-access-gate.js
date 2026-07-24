@@ -1,18 +1,7 @@
-// ============================================================
-// RIHANIO — Verrouillage de compte (abonnement expiré / suspendu)
-// + formulaire d'envoi de justificatif de paiement
-// À inclure sur chaque page protégée, APRÈS rihanio-config.js
-// Utilisation (après requireAuth) :
-//     if (!profile) return;
-//     checkAccountAccess(profile);
-// ============================================================
-
-// ⚠️ عدّل هاد المعلومات بالمعلومات الحقيقية ديال الحساب البنكي
 const RH_PAYMENT_BANK_NAME = 'Attijariwafa Bank';
-const RH_PAYMENT_ACCOUNT_NUMBER = '000 000 0000000000000000 00'; // <-- بدّل برقم الحساب الحقيقي (RIB)
-const RH_PAYMENT_ACCOUNT_HOLDER = 'RIHANIO AUTO-ÉCOLE SARL';      // <-- بدّل باسم صاحب الحساب الحقيقي
+const RH_PAYMENT_ACCOUNT_NUMBER = '000 000 0000000000000000 00'; // <-- Remplacez par le numéro de compte réel (RIB)
+const RH_PAYMENT_ACCOUNT_HOLDER = 'RIHANIO AUTO-ÉCOLE SARL';      // <-- Remplacez par le nom du titulaire du compte
 
-// عدد أيام مهلة السماح بعد انتهاء الاشتراك، قبل ما يتبلوكا الحساب بالكامل
 const RH_GRACE_DAYS = 4;
 
 (function injectGateStyles() {
@@ -49,7 +38,7 @@ const RH_GRACE_DAYS = 4;
     }
     .rh-gate-btn-logout:hover{color:var(--danger,#F0473F);}
 
-    .rh-gate-pay-form{text-align:right;direction:rtl;}
+    .rh-gate-pay-form{text-align:left;direction:ltr;}
     .rh-gate-bank-info{
       background:var(--surface-2,#F7F8FD);border:1px solid var(--border,#EBECF7);border-radius:14px;padding:14px 16px;margin-bottom:16px;
     }
@@ -57,7 +46,7 @@ const RH_GRACE_DAYS = 4;
     .rh-gate-bank-row + .rh-gate-bank-row{border-top:1px dashed var(--border,#EBECF7);}
     .rh-gate-bank-row span{color:var(--ink-soft,#6E7191);}
     .rh-gate-bank-row b{color:var(--ink,#171933);font-family:'Plus Jakarta Sans',sans-serif;direction:ltr;unicode-bidi:embed;}
-    .rh-gate-field{margin-bottom:12px;text-align:right;}
+    .rh-gate-field{margin-bottom:12px;text-align:left;}
     .rh-gate-field label{display:block;font-size:12px;font-weight:700;color:var(--ink-soft,#6E7191);margin-bottom:6px;}
     .rh-gate-field input[type="file"]{
       width:100%;border:1.5px dashed var(--border,#EBECF7);border-radius:12px;padding:10px 12px;font-size:12px;
@@ -92,7 +81,7 @@ const RH_GRACE_DAYS = 4;
 })();
 
 /**
- * يتحقق من حالة اشتراك الشركة، وإلا كانت موقوفة أو ماشي فعالة، كيبلوكي الصفحة كاملة.
+ * Vérifie le statut de l'abonnement de la société, sinon s'il est suspendu ou inactif, il bloque toute la page.
  */
 async function checkAccountAccess(profile) {
   if (!profile || profile.role === 'super_admin' || !profile.company_id) return;
@@ -120,7 +109,7 @@ async function checkAccountAccess(profile) {
 }
 
 function showAccessGate(profile) {
-  if (document.querySelector('.rh-gate-overlay')) return; // ما تكررش النافدة
+  if (document.querySelector('.rh-gate-overlay')) return; // Ne pas répéter la fenêtre
 
   document.documentElement.style.overflow = 'hidden';
 
@@ -129,38 +118,38 @@ function showAccessGate(profile) {
   overlay.innerHTML = `
     <div class="rh-gate-card">
       <div class="rh-gate-icon"><i data-lucide="lock"></i></div>
-      <h2>تم انتهاء صلاحية اشتراككم</h2>
-      <p>لإعادة تفعيل الحساب، يمكنكم دفع الاشتراك عبر الحساب البنكي أسفله وإرسال إثبات الأداء، وسيتم تفعيل الحساب من طرف الإدارة بعد التحقق.</p>
+      <h2>Votre abonnement a expiré</h2>
+      <p>Pour réactiver votre compte, vous pouvez régler votre abonnement via le compte bancaire ci-dessous et envoyer une preuve de paiement. Le compte sera réactivé par l'administration après vérification.</p>
 
       <div class="rh-gate-actions" id="rhGateStep1">
-        <button type="button" class="rh-gate-btn-pay" id="rhGatePayBtn"><i data-lucide="credit-card"></i>دفع الاشتراك</button>
-        <button type="button" class="rh-gate-btn-logout" id="rhGateLogoutBtn">تسجيل الخروج</button>
+        <button type="button" class="rh-gate-btn-pay" id="rhGatePayBtn"><i data-lucide="credit-card"></i>Payer l'abonnement</button>
+        <button type="button" class="rh-gate-btn-logout" id="rhGateLogoutBtn">Se déconnecter</button>
       </div>
 
       <form class="rh-gate-pay-form" id="rhGatePayForm" style="display:none;">
         <div class="rh-gate-bank-info">
-          <div class="rh-gate-bank-row"><span>البنك</span><b>${RH_PAYMENT_BANK_NAME}</b></div>
-          <div class="rh-gate-bank-row"><span>رقم الحساب</span><b>${RH_PAYMENT_ACCOUNT_NUMBER}</b></div>
-          <div class="rh-gate-bank-row"><span>الاسم</span><b>${RH_PAYMENT_ACCOUNT_HOLDER}</b></div>
+          <div class="rh-gate-bank-row"><span>Banque</span><b>${RH_PAYMENT_BANK_NAME}</b></div>
+          <div class="rh-gate-bank-row"><span>Numéro de compte</span><b>${RH_PAYMENT_ACCOUNT_NUMBER}</b></div>
+          <div class="rh-gate-bank-row"><span>Titulaire du compte</span><b>${RH_PAYMENT_ACCOUNT_HOLDER}</b></div>
         </div>
         <div class="rh-gate-field">
-          <label>صورة إثبات الأداء *</label>
+          <label>Preuve de paiement (Image) *</label>
           <input type="file" accept="image/*" id="rhGateProofFile" required>
         </div>
         <div class="rh-gate-field">
-          <label>ملاحظة (اختياري)</label>
-          <textarea id="rhGateNote" rows="2" placeholder="مثال: رقم العملية، التاريخ..."></textarea>
+          <label>Note (optionnel)</label>
+          <textarea id="rhGateNote" rows="2" placeholder="Exemple : Numéro de transaction, Date..."></textarea>
         </div>
         <div class="rh-gate-msg" id="rhGateMsg"></div>
         <div class="rh-gate-form-actions">
-          <button type="button" class="rh-gate-btn-back" id="rhGateBackBtn">رجوع</button>
-          <button type="submit" class="rh-gate-btn-confirm" id="rhGateConfirmBtn"><i data-lucide="check"></i>موافقة</button>
+          <button type="button" class="rh-gate-btn-back" id="rhGateBackBtn">Retour</button>
+          <button type="submit" class="rh-gate-btn-confirm" id="rhGateConfirmBtn"><i data-lucide="check"></i>Confirmer</button>
         </div>
       </form>
 
       <div class="rh-gate-success" id="rhGateSuccess" style="display:none;">
         <i data-lucide="check-circle-2"></i>
-        <p>تم إرسال طلبكم بنجاح.<br>سيتم تفعيل الاشتراك بعد التحقق من الإدارة.</p>
+        <p>Votre demande a été envoyée avec succès.<br>L'abonnement sera activé après vérification par l'administration.</p>
       </div>
     </div>
   `;
@@ -195,12 +184,12 @@ function showAccessGate(profile) {
     const file = fileInput.files[0];
     if (!file) {
       msg.classList.add('err');
-      msg.textContent = 'خاصك تزيد صورة إثبات الأداء';
+      msg.textContent = 'Veuillez ajouter une photo de la preuve de paiement';
       return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = 'جاري الإرسال...';
+    btn.innerHTML = 'Envoi en cours...';
 
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -225,9 +214,9 @@ function showAccessGate(profile) {
       if (window.lucide) lucide.createIcons();
     } catch (err) {
       msg.classList.add('err');
-      msg.textContent = err.message || 'حدث خطأ، حاول مرة أخرى';
+      msg.textContent = err.message || 'Une erreur est survenue, veuillez réessayer';
       btn.disabled = false;
-      btn.innerHTML = '<i data-lucide="check"></i>موافقة';
+      btn.innerHTML = '<i data-lucide="check"></i>Confirmer';
       if (window.lucide) lucide.createIcons();
     }
   });
