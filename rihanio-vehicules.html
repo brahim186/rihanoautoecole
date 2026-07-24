@@ -402,9 +402,9 @@
     </div>
 
     <div class="sb-profile">
-      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-avatar" id="sbProfileAvatar">—</div>
       <div class="sb-profile-text">
-        <div class="sb-profile-name">Saïd El Idrissi</div>
+        <div class="sb-profile-name" id="sbProfileName">—</div>
         <div class="sb-profile-role">Administrateur</div>
       </div>
       <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
@@ -553,6 +553,11 @@
     if (!profile) return;
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    const nameEl = document.getElementById('sbProfileName');
+    const avatarEl = document.getElementById('sbProfileAvatar');
+    const displayName = profile.full_name || profile.email;
+    if (nameEl) nameEl.textContent = displayName;
+    if (avatarEl) avatarEl.textContent = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     loadVehicles();
   });
 
