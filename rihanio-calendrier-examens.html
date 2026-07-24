@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="rihanio-config.js"></script>
 <style>
   :root{
@@ -143,6 +144,13 @@
 
   .section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
   .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
+  .btn-secondary{
+    display:flex;align-items:center;gap:8px;background:var(--surface-2);color:var(--ink-soft);border:1.5px solid var(--border);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+    padding:10px 16px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;
+  }
+  .btn-secondary:hover{background:var(--surface);color:var(--primary);}
+  .btn-secondary svg{width:15px;height:15px;}
 
   /* ---------- METRICS GRID ---------- */
   .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
@@ -398,7 +406,20 @@
 
       <!-- CANDIDATE LIST -->
       <section>
-        <div class="section-heading"><h2>Candidats en attente d'examen <span class="num" id="listCount"></span></h2></div>
+        <div class="section-heading">
+          <h2>Candidats en attente d'examen <span class="num" id="listCount"></span></h2>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none">
+            <button class="btn-secondary" id="btnImportXls" title="Importer depuis Excel">
+              <i data-lucide="upload"></i>
+              Importer
+            </button>
+            <button class="btn-secondary" id="btnExportXls" title="Exporter en Excel">
+              <i data-lucide="download"></i>
+              Exporter
+            </button>
+          </div>
+        </div>
         <div class="exam-list" id="examList"></div>
       </section>
 
@@ -657,6 +678,81 @@
       return data.id;
     }
   }
+
+  // ---------- Import / Export Excel ----------
+  function parseImportDate(val){
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0,10);
+    const s = String(val).trim();
+    if (!s) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    return '';
+  }
+
+  document.getElementById('btnExportXls').addEventListener('click', () => {
+    const rows = candidates.map(c => ({
+      'Nom complet': c.name,
+      'CIN': c.cin === '—' ? '' : c.cin,
+      'Téléphone': c.phone === '—' ? '' : c.phone,
+      'Permis': c.permit,
+      'Promotion': c.promo,
+      "Date d'examen": c.examDate,
+      'Note /20': c.score
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Examens');
+    XLSX.writeFile(wb, `examens_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
+  document.getElementById('btnImportXls').addEventListener('click', () => {
+    document.getElementById('importFileInput').click();
+  });
+
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!rows.length){ alert('Le fichier est vide.'); e.target.value = ''; return; }
+
+    const btn = document.getElementById('btnImportXls');
+    btn.disabled = true;
+
+    let updated = 0, skipped = 0;
+    for (const r of rows){
+      const cin = String(r['CIN'] || '').trim().toLowerCase();
+      const name = String(r['Nom complet'] || r['Nom'] || '').trim().toLowerCase();
+      const match = candidates.find(c =>
+        (cin && c.cin && c.cin !== '—' && c.cin.toLowerCase() === cin) ||
+        (!cin && name && c.name.toLowerCase() === name)
+      );
+      if (!match){ skipped++; continue; }
+
+      const fields = {};
+      const examDate = parseImportDate(r["Date d'examen"]);
+      if (examDate) fields.date_examen = examDate;
+      const noteRaw = r['Note /20'];
+      if (noteRaw !== '' && noteRaw !== undefined && !isNaN(parseFloat(noteRaw))) fields.note = parseFloat(noteRaw);
+
+      if (Object.keys(fields).length === 0){ skipped++; continue; }
+
+      const examId = await upsertExamRow(match, fields);
+      if (examId){ match.examId = examId; updated++; } else { skipped++; }
+    }
+
+    btn.disabled = false;
+    e.target.value = '';
+
+    alert(`${updated} ligne(s) mise(s) à jour.` + (skipped ? ` ${skipped} ligne(s) ignorée(s) (candidat non trouvé ou données vides).` : ''));
+    await loadExamCandidates();
+  });
 
   function attachHandlers(){
     document.querySelectorAll('.exam-date-input').forEach(input => {
