@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio | Connexion Super Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
+<style>
+  :root{
+    --bg:#0E0F22; --surface:#171933; --surface-2:#1F2140;
+    --primary:#5B62F4; --primary-2:#8B6FF2;
+    --ink:#F1F1FB; --ink-soft:#A6A9C8; --ink-pale:#6E7191; --border:#2A2C52;
+    --danger:#F0473F; --danger-soft:rgba(240,71,63,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    background-image:radial-gradient(circle at 15% 15%, rgba(91,98,244,.18), transparent 40%),
+                      radial-gradient(circle at 85% 85%, rgba(139,111,242,.16), transparent 40%);
+  }
+  .card{
+    width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);
+    border-radius:22px;padding:38px 32px;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);
+  }
+  .mark{
+    width:52px;height:52px;border-radius:16px;margin:0 auto 18px;
+    background:linear-gradient(135deg,var(--primary),var(--primary-2));
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 10px 24px -6px rgba(91,98,244,.6);
+  }
+  .mark svg{width:24px;height:24px;}
+  h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;text-align:center;}
+  p.sub{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:6px;margin-bottom:28px;}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  .field .input-wrap{position:relative;}
+  .field svg.ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);}
+  .field input{
+    width:100%;border:1.5px solid var(--border);border-radius:12px;background:var(--surface-2);
+    padding:12px 14px 12px 40px;font-size:13.5px;color:var(--ink);outline:none;
+  }
+  .field input:focus{border-color:var(--primary);}
+  .btn-login{
+    width:100%;margin-top:8px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 12px 24px -8px rgba(91,98,244,.6);
+  }
+  .btn-login:disabled{opacity:.6;cursor:not-allowed;}
+  .msg{font-size:12.5px;margin-top:16px;padding:11px 13px;border-radius:10px;display:none;text-align:center;line-height:1.6;}
+  .msg.err{display:block;background:var(--danger-soft);color:#FF8B85;}
+  .footer-note{text-align:center;font-size:11px;color:var(--ink-pale);margin-top:22px;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="mark"><i data-lucide="shield-check"></i></div>
+  <h1>Espace Super Admin</h1>
+  <p class="sub">مخصص فقط للإدارة العامة ديال المنصة</p>
+
+  <form id="loginForm">
+    <div class="field">
+      <label>Email</label>
+      <div class="input-wrap">
+        <i data-lucide="mail" class="ic"></i>
+        <input type="email" id="email" required autocomplete="username" placeholder="admin@rihanioautoecole.ma">
+      </div>
+    </div>
+    <div class="field">
+      <label>Mot de passe</label>
+      <div class="input-wrap">
+        <i data-lucide="lock" class="ic"></i>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+    </div>
+    <button type="submit" class="btn-login" id="loginBtn"><i data-lucide="log-in"></i>Se connecter</button>
+    <div class="msg" id="loginMsg"></div>
+  </form>
+
+  <div class="footer-note">© Rihanio — Accès strictement réservé</div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  // إلى كان فيه سيسيون ديال سوبر أدمن مفتوحة من قبل، صيفطو مباشرة
+  (async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      const { data: profile } = await supabaseClient
+        .from('user_profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      if (profile && profile.role === 'super_admin') {
+        window.location.href = 'rihanio-super-admin.html';
+      }
+    }
+  })();
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('loginMsg');
+    msg.className = 'msg';
+    btn.disabled = true;
+    btn.innerHTML = 'Connexion...';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw new Error('البريد الإلكتروني أو كلمة السر غير صحيحة');
+
+      const { data: profile, error: profErr } = await supabaseClient
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profErr || !profile || profile.role !== 'super_admin') {
+        await supabaseClient.auth.signOut();
+        throw new Error('هاد الحساب ماعندوش صلاحية السوبر أدمن');
+      }
+
+      window.location.href = 'rihanio-super-admin.html';
+    } catch (err) {
+      msg.classList.add('err');
+      msg.textContent = err.message || 'حدث خطأ، حاول مرة أخرى';
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="log-in"></i>Se connecter';
+      lucide.createIcons();
+    }
+  });
+</script>
+</body>
+</html>

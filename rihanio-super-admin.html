@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rihanio | Super Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="rihanio-config.js"></script>
+<style>
+  :root{
+    --bg:#F2F3FA; --surface:#FFFFFF; --surface-2:#F7F8FD;
+    --sidebar:#13152B; --sidebar-2:#1B1D3C; --sidebar-3:#272A52;
+    --primary:#5B62F4; --primary-2:#8B6FF2; --primary-dark:#454BDB; --primary-soft:#EEEEFE;
+    --ink:#171933; --ink-soft:#6E7191; --ink-pale:#A6A9C8; --border:#EBECF7;
+    --available:#18B368; --available-soft:#E5F9EF;
+    --maintenance:#F0A93C; --maintenance-soft:#FDF1DD;
+    --assigned:#3B7CF6; --assigned-soft:#EAF0FE;
+    --danger:#F0473F; --danger-soft:#FDECEB;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  body.dark{--bg:#0E0F22;--surface:#171933;--surface-2:#1F2140;--border:#2A2C52;--ink:#F1F1FB;--ink-soft:#A6A9C8;--ink-pale:#6E7191;--primary-soft:#232559;}
+  .display{font-family:'Plus Jakarta Sans',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+  .shell{display:flex;min-height:100vh;}
+
+  .sidebar{width:80px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;transition:width .2s ease;overflow:hidden;z-index:40;border-right:1px solid rgba(255,255,255,.04);}
+  .sidebar:hover{width:246px;}
+  .sb-brand{display:flex;align-items:center;gap:12px;padding:0 20px;height:74px;flex-shrink:0;}
+  .sb-brand-mark{width:38px;height:38px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 16px -4px rgba(91,98,244,.65);}
+  .sb-brand-mark svg{width:19px;height:19px;}
+  .sb-brand-text{white-space:nowrap;opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-brand-text{opacity:1;transform:translateX(0);}
+  .sb-brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#fff;letter-spacing:.01em;}
+  .sb-brand-sub{font-size:10.5px;color:var(--ink-pale);margin-top:1px;letter-spacing:.03em;}
+  .sb-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 12px;}
+  .sb-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#585B82;padding:16px 10px 6px;white-space:nowrap;opacity:0;transition:opacity .15s;}
+  .sidebar:hover .sb-cat{opacity:1;}
+  .sb-item{display:flex;align-items:center;gap:14px;padding:11px 12px;margin-bottom:2px;border-radius:12px;color:#8688AC;text-decoration:none;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;position:relative;}
+  .sb-item svg{width:19px;height:19px;flex-shrink:0;}
+  .sb-item:hover{background:var(--sidebar-3);color:#fff;}
+  .sb-item.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 8px 18px -6px rgba(91,98,244,.6);}
+  .sb-item-label{opacity:0;transform:translateX(-6px);transition:opacity .15s,transform .15s;}
+  .sidebar:hover .sb-item-label{opacity:1;transform:translateX(0);}
+  .sb-profile{display:flex;align-items:center;gap:11px;padding:16px 20px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .sb-profile-avatar{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4C51BF,#6B46C1);color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;}
+  .sb-profile-name{font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;}
+  .sb-profile-role{font-size:10.5px;color:var(--ink-pale);white-space:nowrap;}
+  .sb-profile-text{opacity:0;transition:opacity .15s;overflow:hidden;}
+  .sidebar:hover .sb-profile-text{opacity:1;}
+  .sb-logout{margin-inline-start:auto;color:var(--ink-pale);opacity:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;flex-shrink:0;}
+  .sidebar:hover .sb-logout{opacity:1;}
+  .sb-logout:hover{color:var(--danger);background:rgba(240,71,63,.15);}
+  .sb-logout svg{width:15px;height:15px;}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;}
+  .page-title-mini{display:flex;flex-direction:column;margin-inline-end:auto;}
+  .page-title-mini h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:22px;color:var(--ink);}
+  .page-title-mini p{font-size:12.5px;color:var(--ink-soft);margin-top:1px;}
+  .search-wrap{position:relative;width:260px;flex-shrink:0;}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-pale);}
+  .search-wrap input{width:100%;border:1.5px solid transparent;border-radius:12px;background:var(--surface);padding:11px 14px 11px 40px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);outline:none;box-shadow:0 2px 10px -4px rgba(23,25,51,.08);}
+  .search-wrap input:focus{border-color:var(--primary);}
+  .icon-btn{width:42px;height:42px;border-radius:12px;border:none;background:var(--surface);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 2px 10px -4px rgba(23,25,51,.08);}
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn:hover{color:var(--primary);}
+  .btn-primary{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s;flex-shrink:0;box-shadow:0 10px 20px -8px rgba(91,98,244,.65);white-space:nowrap;}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-primary svg{width:16px;height:16px;}
+
+  .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
+
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  @media (max-width:1100px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.metrics-grid{grid-template-columns:1fr;}}
+  .metric-card{border-radius:20px;padding:20px;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden;}
+  .metric-card.c-1{background:linear-gradient(150deg,var(--primary),var(--primary-2));}
+  .metric-card.c-2{background:linear-gradient(150deg,#18B368,#0E8F52);}
+  .metric-card.c-3{background:linear-gradient(150deg,#F0A93C,#C97F14);}
+  .metric-card.c-4{background:linear-gradient(150deg,#F0473F,#C43530);}
+  .metric-card::after{content:'';position:absolute;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);right:-40px;top:-50px;}
+  .metric-card-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+  .metric-card-icon svg{width:17px;height:17px;}
+  .metric-card-count{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:28px;margin-top:10px;}
+  .metric-card-label{font-size:12.5px;opacity:.9;margin-top:2px;}
+
+  .panel{background:var(--surface);border-radius:20px;padding:22px;box-shadow:0 2px 14px -6px rgba(23,25,51,.06);}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .panel-title{display:flex;align-items:center;gap:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;}
+  .panel-title svg{width:18px;height:18px;color:var(--primary);}
+
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:960px;}
+  thead th{text-align:left;font-size:11px;font-weight:700;color:var(--ink-pale);text-transform:uppercase;letter-spacing:.04em;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface-2);white-space:nowrap;}
+  tbody td{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  .co-name{font-weight:700;color:var(--ink);}
+  .co-addr{font-size:11.5px;color:var(--ink-pale);margin-top:2px;}
+  .co-email{font-size:11.5px;color:var(--ink-soft);}
+
+  .status-badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:100px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+  .status-badge.active{background:var(--available-soft);color:var(--available);}
+  .status-badge.expired_grace{background:var(--maintenance-soft);color:#B5720B;}
+  .status-badge.locked{background:var(--danger-soft);color:var(--danger);}
+  .status-badge.suspended{background:var(--border);color:var(--ink-soft);}
+  .status-badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .row-actions{display:flex;align-items:center;gap:4px;}
+  .row-actions button{width:30px;height:30px;border-radius:9px;border:none;background:transparent;color:var(--ink-pale);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .row-actions button:hover{background:var(--primary-soft);color:var(--primary);}
+  .row-actions button.danger:hover{color:var(--danger);background:var(--danger-soft);}
+  .row-actions svg{width:15px;height:15px;}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,16,35,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border-radius:20px;padding:26px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+  .modal h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;}
+  .modal p.sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-grid .full{grid-column:1/-1;}
+  .field label{font-size:12px;font-weight:700;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  .field input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;background:var(--surface-2);color:var(--ink);outline:none;}
+  .field input:focus{border-color:var(--primary);}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .btn-ghost{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:none;font-weight:700;font-size:13px;color:var(--ink-soft);cursor:pointer;}
+  .modal-actions .btn-primary{flex:1;justify-content:center;}
+  .form-msg{font-size:12.5px;margin-top:12px;padding:10px 12px;border-radius:10px;display:none;}
+  .form-msg.err{display:block;background:var(--danger-soft);color:var(--danger);}
+  .form-msg.ok{display:block;background:var(--available-soft);color:var(--available);}
+
+  @media (max-width:760px){
+    .content{padding:6px 16px 40px;}
+    .topbar{padding:14px 16px;flex-wrap:wrap;}
+    .page-title-mini{width:100%;order:1;}
+    .search-wrap{order:3;width:100%;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-mark"><i data-lucide="shield-check"></i></div>
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">RIHANIO</div>
+        <div class="sb-brand-sub">Super Admin</div>
+      </div>
+    </div>
+    <div class="sb-scroll">
+      <div class="sb-cat">Plateforme</div>
+      <a href="rihanio-super-admin.html" class="sb-item active">
+        <i data-lucide="building-2"></i><span class="sb-item-label">Entreprises</span>
+      </a>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+        <i data-lucide="settings"></i><span class="sb-item-label">Paramètres</span>
+      </div>
+    </div>
+    <div class="sb-profile">
+      <div class="sb-profile-avatar" id="sbProfileAvatar">—</div>
+      <div class="sb-profile-text">
+        <div class="sb-profile-name" id="sbProfileName">—</div>
+        <div class="sb-profile-role">Super Admin</div>
+      </div>
+      <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="page-title-mini">
+        <h1>Entreprises &amp; abonnements</h1>
+        <p>Gestion globale de toutes les auto-écoles sur la plateforme</p>
+      </div>
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Rechercher une entreprise...">
+      </div>
+      <button class="btn-primary" id="openAddModal"><i data-lucide="plus"></i>Ajouter une entreprise</button>
+      <button class="icon-btn" id="themeToggle" title="Mode sombre"><i data-lucide="moon"></i></button>
+    </header>
+
+    <div class="content">
+      <section class="metrics-grid">
+        <div class="metric-card c-1">
+          <div class="metric-card-icon"><i data-lucide="building-2"></i></div>
+          <div><div class="metric-card-count num" id="kpiTotal">—</div><div class="metric-card-label">Total entreprises</div></div>
+        </div>
+        <div class="metric-card c-2">
+          <div class="metric-card-icon"><i data-lucide="check-circle-2"></i></div>
+          <div><div class="metric-card-count num" id="kpiActive">—</div><div class="metric-card-label">Abonnements actifs</div></div>
+        </div>
+        <div class="metric-card c-3">
+          <div class="metric-card-icon"><i data-lucide="clock-alert"></i></div>
+          <div><div class="metric-card-count num" id="kpiGrace">—</div><div class="metric-card-label">Expirés (délai de grâce)</div></div>
+        </div>
+        <div class="metric-card c-4">
+          <div class="metric-card-icon"><i data-lucide="lock"></i></div>
+          <div><div class="metric-card-count num" id="kpiLocked">—</div><div class="metric-card-label">Verrouillés</div></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="building-2"></i>Toutes les entreprises</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Entreprise</th>
+                <th>Propriétaire</th>
+                <th>Début abonnement</th>
+                <th>Durée</th>
+                <th>Prix</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="companiesTbody">
+              <tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Ajouter entreprise -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>Ajouter une nouvelle entreprise</h2>
+    <p class="sub">Un compte admin sera créé automatiquement pour cette entreprise.</p>
+    <form id="addCompanyForm">
+      <div class="form-grid">
+        <div class="field full"><label>Nom de l'entreprise</label><input type="text" id="f_name" required></div>
+        <div class="field full"><label>Adresse</label><input type="text" id="f_address"></div>
+        <div class="field"><label>Nom du propriétaire</label><input type="text" id="f_owner"></div>
+        <div class="field"><label>Prix de l'abonnement (DH)</label><input type="number" id="f_price" min="0" step="0.01"></div>
+        <div class="field"><label>Date de début</label><input type="date" id="f_start" required></div>
+        <div class="field"><label>Durée (jours)</label><input type="number" id="f_duration" value="30" min="1" required></div>
+        <div class="field full"><label>Email de l'admin</label><input type="email" id="f_email" required></div>
+        <div class="field full"><label>Mot de passe initial</label><input type="text" id="f_password" required></div>
+        <div class="field full"><label>Nom complet de l'admin</label><input type="text" id="f_admin_name"></div>
+      </div>
+      <div class="form-msg" id="formMsg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="closeAddModal">Annuler</button>
+        <button type="submit" class="btn-primary" id="submitBtn"><i data-lucide="check"></i>Créer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+  let allCompanies = [];
+
+  // حارس دخول خاص بالسوبر أدمن — مستقل عن requireAuth العامة ديال الشركات
+  async function superAdminGuard(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'rihanio-super-admin-login.html'; return null; }
+
+    const { data: profile, error } = await supabaseClient
+      .from('user_profiles')
+      .select('full_name, role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !profile || profile.role !== 'super_admin') {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'rihanio-super-admin-login.html';
+      return null;
+    }
+    return { ...profile, email: session.user.email };
+  }
+
+  superAdminGuard().then(profile => {
+    if (!profile) return;
+    document.querySelector('.sb-logout').addEventListener('click', async () => {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'rihanio-super-admin-login.html';
+    });
+    const displayName = profile.full_name || profile.email;
+    document.getElementById('sbProfileName').textContent = displayName;
+    document.getElementById('sbProfileAvatar').textContent = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('f_start').value = new Date().toISOString().split('T')[0];
+    loadCompanies();
+  });
+
+  function computeStatus(c){
+    if (c.is_suspended) return 'suspended';
+    const start = new Date(c.subscription_start_date);
+    const end = new Date(start); end.setDate(end.getDate() + (c.subscription_duration_days || 30));
+    const graceEnd = new Date(end); graceEnd.setDate(graceEnd.getDate() + 4);
+    const now = new Date();
+    if (now <= end) return 'active';
+    if (now <= graceEnd) return 'expired_grace';
+    return 'locked';
+  }
+
+  const statusMeta = {
+    active: {label:'Actif', icon:'check-circle-2'},
+    expired_grace: {label:'Expiré (grâce)', icon:'clock-alert'},
+    locked: {label:'Verrouillé', icon:'lock'},
+    suspended: {label:'Suspendu', icon:'pause-circle'}
+  };
+
+  async function loadCompanies(){
+    const { data, error } = await supabaseClient.from('companies').select('*').order('created_at', { ascending:false });
+    if (error) {
+      document.getElementById('companiesTbody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger);padding:24px;">${error.message}</td></tr>`;
+      return;
+    }
+    allCompanies = data || [];
+    renderCompanies(allCompanies);
+    renderKpis(allCompanies);
+  }
+
+  function renderKpis(list){
+    const statuses = list.map(computeStatus);
+    document.getElementById('kpiTotal').textContent = list.length;
+    document.getElementById('kpiActive').textContent = statuses.filter(s=>s==='active').length;
+    document.getElementById('kpiGrace').textContent = statuses.filter(s=>s==='expired_grace').length;
+    document.getElementById('kpiLocked').textContent = statuses.filter(s=>s==='locked').length;
+  }
+
+  function renderCompanies(list){
+    const tbody = document.getElementById('companiesTbody');
+    if (!list.length){
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucune entreprise pour le moment.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(c => {
+      const status = computeStatus(c);
+      const meta = statusMeta[status];
+      const isPaused = c.is_suspended;
+      return `
+        <tr>
+          <td>
+            <div class="co-name">${c.name || '—'}</div>
+            <div class="co-addr">${c.address || ''}</div>
+          </td>
+          <td>
+            <div>${c.owner_name || '—'}</div>
+            <div class="co-email">${c.admin_email || ''}</div>
+          </td>
+          <td>${c.subscription_start_date ? new Date(c.subscription_start_date).toLocaleDateString('fr-FR') : '—'}</td>
+          <td>${c.subscription_duration_days || 30} j</td>
+          <td>${Number(c.subscription_price || 0).toLocaleString('fr-FR')} DH</td>
+          <td><span class="status-badge ${status}"><span class="dot"></span>${meta.label}</span></td>
+          <td>
+            <div class="row-actions">
+              <button title="${isPaused ? 'Activer' : 'Suspendre'}" onclick="toggleSuspend('${c.id}', ${isPaused})">
+                <i data-lucide="${isPaused ? 'play' : 'pause'}"></i>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  window.toggleSuspend = async function(id, isPaused){
+    const { error } = await supabaseClient.from('companies').update({ is_suspended: !isPaused }).eq('id', id);
+    if (error) { alert('خطأ: ' + error.message); return; }
+    loadCompanies();
+  };
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    const filtered = allCompanies.filter(c =>
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.owner_name || '').toLowerCase().includes(q) ||
+      (c.admin_email || '').toLowerCase().includes(q)
+    );
+    renderCompanies(filtered);
+  });
+
+  const addModal = document.getElementById('addModal');
+  document.getElementById('openAddModal').addEventListener('click', () => addModal.classList.add('open'));
+  document.getElementById('closeAddModal').addEventListener('click', () => addModal.classList.remove('open'));
+
+  document.getElementById('addCompanyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    msg.className = 'form-msg';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Création en cours...';
+
+    const payload = {
+      name: document.getElementById('f_name').value,
+      address: document.getElementById('f_address').value,
+      owner_name: document.getElementById('f_owner').value,
+      subscription_start_date: document.getElementById('f_start').value,
+      subscription_duration_days: parseInt(document.getElementById('f_duration').value, 10),
+      subscription_price: parseFloat(document.getElementById('f_price').value || '0'),
+      admin_email: document.getElementById('f_email').value,
+      admin_password: document.getElementById('f_password').value,
+      admin_full_name: document.getElementById('f_admin_name').value
+    };
+
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('create-company', { body: payload });
+      if (error) throw error;
+      if (data && data.error) throw new Error(data.error);
+      msg.classList.add('ok');
+      msg.textContent = 'تم إنشاء الشركة والحساب بنجاح ✅';
+      document.getElementById('addCompanyForm').reset();
+      document.getElementById('f_start').value = new Date().toISOString().split('T')[0];
+      document.getElementById('f_duration').value = 30;
+      loadCompanies();
+      setTimeout(() => { addModal.classList.remove('open'); msg.className='form-msg'; }, 1200);
+    } catch (err) {
+      msg.classList.add('err');
+      msg.textContent = err.message || 'حدث خطأ غير متوقع';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i data-lucide="check"></i>Créer';
+      lucide.createIcons();
+    }
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    themeToggle.innerHTML = isDark ? '<i data-lucide="sun"></i>' : '<i data-lucide="moon"></i>';
+    lucide.createIcons();
+  });
+</script>
+</body>
+</html>
