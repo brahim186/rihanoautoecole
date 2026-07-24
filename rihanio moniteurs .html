@@ -605,6 +605,7 @@
     if (!profile) return;
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    loadMoniteurs();
   });
 
   // Nav active state
@@ -615,30 +616,37 @@
     });
   });
 
-  // ---------- Moniteur data store ----------
-  let moniteurs = [
-    { id:1, name:'Omar Chergaoui', phone:'06 12 34 56 78', email:'omar.chergaoui@rihanio-autoecole.ma',
-      cin:'BE482910', cnss:'5487123', bank:'007 780 0001234567890 12',
-      permits:['B'], experience:9, sessionsWeek:14, rating:4.8, status:'En session' },
-
-    { id:2, name:'Youssef Bennali', phone:'06 21 45 67 89', email:'youssef.bennali@rihanio-autoecole.ma',
-      cin:'BK317755', cnss:'6612348', bank:'011 450 0009876543210 45',
-      permits:['B','A'], experience:6, sessionsWeek:11, rating:4.6, status:'Disponible' },
-
-    { id:3, name:'Rachid El Mrabet', phone:'06 34 56 78 90', email:'rachid.elmrabet@rihanio-autoecole.ma',
-      cin:'A205841', cnss:'4471209', bank:'022 610 0004561237890 78',
-      permits:['C','B'], experience:12, sessionsWeek:9, rating:4.9, status:'En session' },
-
-    { id:4, name:'Nadia Zerhouni', phone:'06 45 67 89 01', email:'nadia.zerhouni@rihanio-autoecole.ma',
-      cin:'BJ660124', cnss:'7734561', bank:'190 730 0003216549870 33',
-      permits:['B'], experience:4, sessionsWeek:13, rating:4.5, status:'Disponible' },
-
-    { id:5, name:'Hicham Bouziane', phone:'06 56 78 90 12', email:'hicham.bouziane@rihanio-autoecole.ma',
-      cin:'BL903327', cnss:'3390871', bank:'230 890 0007894561230 61',
-      permits:['A'], experience:3, sessionsWeek:7, rating:4.4, status:'Hors service' },
-  ];
-  let nextId = 6;
+  // ---------- Moniteur data store (chargé depuis Supabase) ----------
+  let moniteurs = [];
   let searchTerm = '';
+
+  function dbToMoniteur(row){
+    return {
+      id: row.id,
+      name: row.nom_complet || `${row.prenom || ''} ${row.nom || ''}`.trim(),
+      phone: row.telephone || '—',
+      email: row.email || '—',
+      cin: row.cin || '',
+      cnss: row.cnss || '',
+      bank: row.banque || '',
+      permits: row.categories || ['B'],
+      experience: row.experience_annees || 0,
+      sessionsWeek: row.sessions_semaine || 0,
+      rating: Number(row.note) || 5.0,
+      status: row.statut || 'Disponible'
+    };
+  }
+
+  async function loadMoniteurs(){
+    const { data, error } = await supabaseClient
+      .from('moniteurs')
+      .select('*')
+      .eq('company_id', currentProfile.company_id)
+      .order('created_at', { ascending: false });
+    if (error) { console.error(error.message); return; }
+    moniteurs = (data || []).map(dbToMoniteur);
+    renderAll();
+  }
 
   const statusMap = {
     'Disponible':  { cls:'available', icon:'circle-check-big', label:'Disponible' },
@@ -815,7 +823,7 @@
     document.getElementById('schedList').innerHTML = rows;
     lucide.createIcons();
     document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', () => openMoniteurModal(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', () => openMoniteurModal(btn.dataset.id));
     });
   }
 
@@ -829,13 +837,15 @@
 
   function attachRowHandlers(){
     document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => openMoniteurModal(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', () => openMoniteurModal(btn.dataset.id));
     });
     document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
         const v = moniteurs.find(x => x.id === id);
         if (v && confirm(`Retirer "${v.name}" de la liste des moniteurs ?`)) {
+          const { error } = await supabaseClient.from('moniteurs').delete().eq('id', id);
+          if (error) { alert('Erreur lors de la suppression : ' + error.message); return; }
           moniteurs = moniteurs.filter(x => x.id !== id);
           renderAll();
         }
@@ -901,7 +911,7 @@
   moniteurCancelBtn.addEventListener('click', closeMoniteurModal);
   moniteurModal.addEventListener('click', (e) => { if (e.target === moniteurModal) closeMoniteurModal(); });
 
-  moniteurSaveBtn.addEventListener('click', () => {
+  moniteurSaveBtn.addEventListener('click', async () => {
     const name = monName.value.trim() || 'Nouveau moniteur';
     const phone = monPhone.value.trim() || '—';
     const email = monEmail.value.trim() || '—';
@@ -911,25 +921,38 @@
     const cnss = monCnss.value.trim() || '—';
     const bank = monBank.value.trim() || '—';
     const permits = Array.from(permitCheckboxes()).filter(cb => cb.checked).map(cb => cb.value);
-    const editId = monId.value ? parseInt(monId.value) : null;
+    const editId = monId.value ? monId.value : null;
 
     if (permits.length === 0){
       alert('Veuillez sélectionner au moins un permis enseigné.');
       return;
     }
 
+    moniteurSaveBtn.disabled = true;
+
+    const payload = {
+      company_id: currentProfile.company_id,
+      nom_complet: name,
+      telephone: phone,
+      email: email,
+      experience_annees: experience,
+      statut: status,
+      cin: cin,
+      cnss: cnss,
+      banque: bank,
+      categories: permits
+    };
+
     if (editId){
-      const v = moniteurs.find(x => x.id === editId);
-      if (v){
-        Object.assign(v, { name, phone, email, experience, status, permits, cin, cnss, bank });
-      }
+      const { error } = await supabaseClient.from('moniteurs').update(payload).eq('id', editId);
+      if (error) { alert('Erreur : ' + error.message); moniteurSaveBtn.disabled = false; return; }
     } else {
-      moniteurs.push({
-        id: nextId++, name, phone, email, experience, status, permits, cin, cnss, bank,
-        sessionsWeek: 0, rating: 5.0
-      });
+      const { error } = await supabaseClient.from('moniteurs').insert(payload);
+      if (error) { alert('Erreur : ' + error.message); moniteurSaveBtn.disabled = false; return; }
     }
-    renderAll();
+
+    moniteurSaveBtn.disabled = false;
+    await loadMoniteurs();
     closeMoniteurModal();
   });
 
