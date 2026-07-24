@@ -157,8 +157,6 @@
     display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;
     box-shadow:0 2px 10px -4px rgba(23,25,51,.15);
   }
-  .topbar-profile-name{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;}
-  .topbar-profile-role{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
 
   .content{padding:6px 32px 50px;display:flex;flex-direction:column;gap:26px;max-width:1440px;width:100%;margin:0 auto;}
 
@@ -166,7 +164,7 @@
   .section-heading h2{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15.5px;color:var(--ink);}
   .section-heading .see-all{font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;background:none;border:none;}
 
-  /* ---------- STATUS GRID (top cards) ---------- */
+  /* ---------- STATUS GRID ---------- */
   .status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
   @media (max-width:1100px){ .status-grid{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:560px){ .status-grid{grid-template-columns:1fr;} }
@@ -219,7 +217,6 @@
 
   .panel{background:var(--surface);border-radius:20px;padding:18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);}
 
-  /* Notifications column */
   .notif-list{display:flex;flex-direction:column;gap:10px;}
   .notif-item{
     display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;cursor:default;
@@ -240,7 +237,7 @@
   .notif-title{font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .notif-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  /* Moniteur list column */
+  /* Moniteur list */
   .mon-list{display:flex;flex-direction:column;gap:10px;}
   .mon-card{
     background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 4px 20px -10px rgba(23,25,51,.08);
@@ -265,13 +262,13 @@
   .mon-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .mon-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);}
   .mon-cin{font-size:11px;color:var(--ink-pale);font-weight:600;}
-  .mon-permits{display:flex;gap:4px;}
+  .mon-permits{display:flex;gap:4px;flex-wrap:wrap;}
   .mon-permit-badge{
-    width:19px;height:19px;border-radius:6px;background:var(--primary-soft);color:var(--primary);
-    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    padding:2px 6px;border-radius:6px;background:var(--primary-soft);color:var(--primary);
+    font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;
   }
-  .mon-sub{font-size:12px;color:var(--ink-soft);margin-top:3px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-  .mon-sub span{display:flex;align-items:center;gap:5px;}
+  .mon-sub{font-size:12px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .mon-sub span{display:flex;align-items:center;gap:4px;}
   .mon-sub svg{width:12px;height:12px;color:var(--ink-pale);}
 
   .mon-status-pill{
@@ -292,7 +289,7 @@
 
   .empty-state{padding:40px 10px;text-align:center;color:var(--ink-soft);font-size:13px;}
 
-  /* Schedule column */
+  /* Schedule */
   .sched-list{display:flex;flex-direction:column;}
   .sched-row{display:flex;gap:12px;padding:10px 0;}
   .sched-time{width:44px;flex-shrink:0;font-size:11.5px;color:var(--ink-pale);font-weight:600;padding-top:12px;}
@@ -313,7 +310,6 @@
   }
   .sched-btn:hover{background:rgba(255,255,255,.28);}
   .sched-btn svg{width:12px;height:12px;}
-  .sched-divider{height:1px;background:var(--border);margin:0 0 0 56px;}
 
   /* ---------- MODAL ---------- */
   .modal-overlay{
@@ -322,7 +318,7 @@
   }
   .modal-overlay.open{display:flex;}
   .modal-card{
-    background:var(--surface);border-radius:22px;width:100%;max-width:480px;
+    background:var(--surface);border-radius:22px;width:100%;max-width:520px;
     max-height:90vh;overflow-y:auto;box-shadow:0 30px 70px -20px rgba(19,21,43,.5);
     animation:modal-in .18s cubic-bezier(.2,.8,.25,1);
   }
@@ -351,23 +347,21 @@
     outline:none;transition:border-color .15s;width:100%;
   }
   .field input:focus,.field select:focus{border-color:var(--primary);}
-  .checkbox-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .checkbox-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
   .checkbox-pill{
-    display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;
-    color:var(--ink-soft);border:1.5px solid var(--border);border-radius:11px;padding:8px 14px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;
+    color:var(--ink-soft);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;cursor:pointer;
   }
   .checkbox-pill input{width:15px;height:15px;accent-color:var(--primary);cursor:pointer;}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:6px 24px 24px;}
   .btn-ghost{
     padding:10px 18px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface);
-    color:var(--ink-soft);font-weight:700;font-size:13.5px;
-    cursor:pointer;
+    color:var(--ink-soft);font-weight:700;font-size:13.5px;cursor:pointer;
   }
   .btn-ghost:hover{background:var(--surface-2);}
   .btn-confirm{
     padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;
-    font-weight:700;font-size:13.5px;
-    cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
+    font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 10px 20px -8px rgba(91,98,244,.6);
   }
   .btn-confirm:hover{transform:translateY(-1px);}
   .btn-confirm svg{width:15px;height:15px;}
@@ -380,6 +374,7 @@
     .btn-primary{order:2;}
     .topbar-profile{order:4;margin-inline-start:auto;}
     .field-row{grid-template-columns:1fr;}
+    .checkbox-grid{grid-template-columns:repeat(2, 1fr);}
   }
 </style>
 </head>
@@ -460,7 +455,7 @@
     <header class="topbar">
       <div class="page-title-mini">
         <h1>Équipe pédagogique</h1>
-        <p id="headingCount">5 moniteurs actifs</p>
+        <p id="headingCount">0 moniteurs actifs</p>
       </div>
 
       <div class="search-wrap">
@@ -542,9 +537,15 @@
         </div>
       </div>
 
-      <div class="field">
-        <label for="monEmail">Email</label>
-        <input type="email" id="monEmail" placeholder="Ex : omar.chergaoui@rihanio-autoecole.ma">
+      <div class="field-row">
+        <div class="field">
+          <label for="monEmail">Email</label>
+          <input type="email" id="monEmail" placeholder="Ex : omar@example.com">
+        </div>
+        <div class="field">
+          <label for="monSalaire">Salaire mensuel (DH)</label>
+          <input type="number" id="monSalaire" placeholder="Ex : 4500" min="0" step="100">
+        </div>
       </div>
 
       <div class="field-row">
@@ -563,12 +564,19 @@
         <input type="text" id="monBank" placeholder="Ex : 007 780 0001234567890 12">
       </div>
 
+      <!-- قائمة جميع أنواع رخص السياقة حسب الصورة -->
       <div class="field">
         <label>Permis enseignés</label>
-        <div class="checkbox-row">
+        <div class="checkbox-grid">
+          <label class="checkbox-pill"><input type="checkbox" value="AM" class="monPermitBox"> Permis AM</label>
+          <label class="checkbox-pill"><input type="checkbox" value="A1" class="monPermitBox"> Permis A1</label>
           <label class="checkbox-pill"><input type="checkbox" value="A" class="monPermitBox"> Permis A</label>
           <label class="checkbox-pill"><input type="checkbox" value="B" class="monPermitBox"> Permis B</label>
+          <label class="checkbox-pill"><input type="checkbox" value="EB" class="monPermitBox"> Permis EB</label>
           <label class="checkbox-pill"><input type="checkbox" value="C" class="monPermitBox"> Permis C</label>
+          <label class="checkbox-pill"><input type="checkbox" value="EC" class="monPermitBox"> Permis EC</label>
+          <label class="checkbox-pill"><input type="checkbox" value="D" class="monPermitBox"> Permis D</label>
+          <label class="checkbox-pill"><input type="checkbox" value="ED" class="monPermitBox"> Permis ED</label>
         </div>
       </div>
 
@@ -613,7 +621,6 @@
     loadMoniteurs();
   });
 
-  // Nav active state
   document.querySelectorAll('.sb-item').forEach(item => {
     item.addEventListener('click', () => {
       document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
@@ -621,7 +628,6 @@
     });
   });
 
-  // ---------- Moniteur data store (chargé depuis Supabase) ----------
   let moniteurs = [];
   let searchTerm = '';
 
@@ -631,6 +637,7 @@
       name: row.nom_complet || `${row.prenom || ''} ${row.nom || ''}`.trim(),
       phone: row.telephone || '—',
       email: row.email || '—',
+      salaire: Number(row.salaire) || 0,
       cin: row.cin || '',
       cnss: row.cnss || '',
       bank: row.banque || '',
@@ -780,7 +787,7 @@
             </div>
             <div class="mon-sub">
               <span><i data-lucide="phone"></i>${v.phone}</span>
-              <span><i data-lucide="calendar"></i>${v.sessionsWeek} sessions / sem.</span>
+              <span><i data-lucide="banknote"></i>${v.salaire ? v.salaire.toLocaleString('fr-FR') + ' DH' : '—'}</span>
               <span><i data-lucide="star"></i>${v.rating.toFixed(1)}</span>
               <span><i data-lucide="award"></i>${v.experience} ans d'exp.</span>
               <span><i data-lucide="shield"></i>CNSS ${v.cnss || '—'}</span>
@@ -863,7 +870,7 @@
     renderMonList();
   });
 
-  // ---------- Modal ----------
+  /* ---------- Modal Controller ---------- */
   const moniteurModal      = document.getElementById('moniteurModal');
   const moniteurModalTitle = document.getElementById('moniteurModalTitle');
   const moniteurSaveBtnLabel = document.getElementById('moniteurSaveBtnLabel');
@@ -875,6 +882,7 @@
   const monName            = document.getElementById('monName');
   const monPhone           = document.getElementById('monPhone');
   const monEmail           = document.getElementById('monEmail');
+  const monSalaire         = document.getElementById('monSalaire');
   const monExperience      = document.getElementById('monExperience');
   const monStatus          = document.getElementById('monStatus');
   const monCin             = document.getElementById('monCin');
@@ -892,6 +900,7 @@
       monName.value = v.name;
       monPhone.value = v.phone;
       monEmail.value = v.email;
+      monSalaire.value = v.salaire || '';
       monExperience.value = v.experience;
       monStatus.value = v.status;
       monCin.value = v.cin || '';
@@ -902,7 +911,7 @@
       moniteurModalTitle.textContent = 'Ajouter un moniteur';
       moniteurSaveBtnLabel.textContent = 'Enregistrer';
       monId.value = '';
-      monName.value = ''; monPhone.value = ''; monEmail.value = '';
+      monName.value = ''; monPhone.value = ''; monEmail.value = ''; monSalaire.value = '';
       monExperience.value = ''; monStatus.value = 'Disponible';
       monCin.value = ''; monCnss.value = ''; monBank.value = '';
       permitCheckboxes().forEach(cb => { cb.checked = false; });
@@ -920,6 +929,7 @@
     const name = monName.value.trim() || 'Nouveau moniteur';
     const phone = monPhone.value.trim() || '—';
     const email = monEmail.value.trim() || '—';
+    const salaire = parseFloat(monSalaire.value) || 0;
     const experience = parseInt(monExperience.value) || 0;
     const status = monStatus.value;
     const cin = monCin.value.trim() || '—';
@@ -941,6 +951,7 @@
       nom: name,
       telephone: phone,
       email: email,
+      salaire: salaire,
       experience_annees: experience,
       statut: status,
       cin: cin,
@@ -961,9 +972,6 @@
     await loadMoniteurs();
     closeMoniteurModal();
   });
-
-  // ---------- Initial render ----------
-  renderAll();
 </script>
 
 </body>
