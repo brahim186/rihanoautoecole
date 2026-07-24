@@ -297,57 +297,57 @@
 
     <div class="sb-scroll">
       <div class="sb-cat">Vue d'ensemble</div>
-      <div class="sb-item active">
+      <a href="rihanio-tableau-de-bord.html" class="sb-item active">
         <i data-lucide="layout-dashboard"></i>
         <span class="sb-item-label">Tableau de bord</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Candidats &amp; formation</div>
-      <div class="sb-item">
+      <a href="rihanio-inscrire-candidat.html" class="sb-item">
         <i data-lucide="users"></i>
         <span class="sb-item-label">Candidats</span>
-      </div>
-      <div class="sb-item">
+      </a>
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="book-open"></i>
         <span class="sb-item-label">Cours théoriques</span>
       </div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="car-front"></i>
         <span class="sb-item-label">Cours pratiques</span>
       </div>
-      <div class="sb-item">
+      <a href="rihanio-calendrier-examens.html" class="sb-item">
         <i data-lucide="clipboard-check"></i>
         <span class="sb-item-label">Examens</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Ressources</div>
-      <div class="sb-item">
+      <a href="rihanio-moniteurs.html" class="sb-item">
         <i data-lucide="user-cog"></i>
         <span class="sb-item-label">Moniteurs</span>
-      </div>
-      <div class="sb-item">
+      </a>
+      <a href="rihanio-vehicules.html" class="sb-item">
         <i data-lucide="car"></i>
         <span class="sb-item-label">Véhicules</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Finance</div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="wallet"></i>
         <span class="sb-item-label">Finances &amp; paiements</span>
       </div>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
       </div>
     </div>
 
     <div class="sb-profile">
-      <div class="sb-profile-avatar">SI</div>
+      <div class="sb-profile-avatar" id="sbProfileAvatar">—</div>
       <div class="sb-profile-text">
-        <div class="sb-profile-name">Saïd El Idrissi</div>
-        <div class="sb-profile-role">Directeur du centre</div>
+        <div class="sb-profile-name" id="sbProfileName">—</div>
+        <div class="sb-profile-role">Administrateur</div>
       </div>
       <button class="sb-logout" title="Déconnexion"><i data-lucide="log-out"></i></button>
     </div>
@@ -384,7 +384,6 @@
         <div class="metric-card c-1">
           <div class="metric-card-top">
             <div class="metric-card-icon"><i data-lucide="users"></i></div>
-            <span class="metric-card-badge"><i data-lucide="trending-up"></i>+12%</span>
           </div>
           <div>
             <div class="metric-card-count num" id="kpiCandidats">—</div>
@@ -435,58 +434,11 @@
             <div class="panel-title"><i data-lucide="calendar-clock"></i>Planning du jour</div>
             <button class="panel-link">Voir la semaine complète →</button>
           </div>
-          <div class="panel-body">
-
-            <div class="session-row">
-              <div class="session-time num">08:30</div>
-              <div class="session-type-icon theory"><i data-lucide="book-open"></i></div>
-              <div class="session-info">
-                <div class="session-title">Code de la route — Signalisation et priorités</div>
-                <div class="session-meta">Moniteur : Youssef Bennali · Salle 2</div>
-              </div>
-              <span class="session-status done">Terminée</span>
+          <div class="panel-body" id="planningBody">
+            <div style="text-align:center;padding:32px 16px;color:var(--ink-pale);font-size:13px;">
+              <i data-lucide="calendar-clock" style="width:28px;height:28px;margin-bottom:10px;display:inline-block;"></i><br>
+              La planification des séances n'est pas encore disponible.<br>Cette fonctionnalité arrivera dans une prochaine mise à jour.
             </div>
-
-            <div class="session-row">
-              <div class="session-time num">10:00</div>
-              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
-              <div class="session-info">
-                <div class="session-title">Cours pratique — Maryam El Fassi</div>
-                <div class="session-meta">Moniteur : Omar Chergaoui · Véhicule Clio 3 (12458-A-4)</div>
-              </div>
-              <span class="session-status progress">En cours</span>
-            </div>
-
-            <div class="session-row">
-              <div class="session-time num">11:15</div>
-              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
-              <div class="session-info">
-                <div class="session-title">Cours pratique — Ayoub El Hassani</div>
-                <div class="session-meta">Moniteur : Omar Chergaoui · Véhicule 208 (33017-B-6)</div>
-              </div>
-              <span class="session-status upcoming">À venir</span>
-            </div>
-
-            <div class="session-row">
-              <div class="session-time num">13:00</div>
-              <div class="session-type-icon theory"><i data-lucide="book-open"></i></div>
-              <div class="session-info">
-                <div class="session-title">Code de la route — Techniques de stationnement</div>
-                <div class="session-meta">Moniteur : Youssef Bennali · Salle 1</div>
-              </div>
-              <span class="session-status upcoming">À venir</span>
-            </div>
-
-            <div class="session-row">
-              <div class="session-time num">15:30</div>
-              <div class="session-type-icon practice"><i data-lucide="car-front"></i></div>
-              <div class="session-info">
-                <div class="session-title">Cours pratique — Kenza Alaoui</div>
-                <div class="session-meta">Moniteur : Rachid El Mrabet · Véhicule Clio 3 (12458-A-4)</div>
-              </div>
-              <span class="session-status upcoming">À venir</span>
-            </div>
-
           </div>
         </div>
 
@@ -495,40 +447,8 @@
           <div class="panel-head">
             <div class="panel-title"><i data-lucide="bell-ring"></i>Alertes &amp; rappels</div>
           </div>
-          <div class="panel-body">
-
-            <div class="alert-item">
-              <div class="alert-icon amber"><i data-lucide="shield-alert"></i></div>
-              <div>
-                <div class="alert-title">Assurance véhicule bientôt expirée</div>
-                <div class="alert-sub">Véhicule Tracteur B2 — renouvellement dans 5 jours</div>
-              </div>
-            </div>
-
-            <div class="alert-item">
-              <div class="alert-icon red"><i data-lucide="banknote"></i></div>
-              <div>
-                <div class="alert-title">Retard de paiement</div>
-                <div class="alert-sub">3 candidats ont une tranche impayée depuis plus de 15 jours</div>
-              </div>
-            </div>
-
-            <div class="alert-item">
-              <div class="alert-icon blue"><i data-lucide="badge-check"></i></div>
-              <div>
-                <div class="alert-title">Renouvellement de licence</div>
-                <div class="alert-sub">La licence du moniteur Rachid El Mrabet expire fin de mois</div>
-              </div>
-            </div>
-
-            <div class="alert-item">
-              <div class="alert-icon amber"><i data-lucide="wrench"></i></div>
-              <div>
-                <div class="alert-title">Entretien périodique dû</div>
-                <div class="alert-sub">Le véhicule 208 (33017-B-6) dépasse 5 000 km depuis le dernier entretien</div>
-              </div>
-            </div>
-
+          <div class="panel-body" id="alertsBody">
+            <div style="text-align:center;padding:20px;color:var(--ink-pale);font-size:13px;">Chargement...</div>
           </div>
         </div>
       </section>
@@ -571,7 +491,13 @@
     if (!profile) return;
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    const nameEl = document.getElementById('sbProfileName');
+    const avatarEl = document.getElementById('sbProfileAvatar');
+    const displayName = profile.full_name || profile.email;
+    if (nameEl) nameEl.textContent = displayName;
+    if (avatarEl) avatarEl.textContent = displayName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     loadDashboardData();
+    loadRealAlerts();
   });
 
   function initials(prenom, nom){
@@ -648,6 +574,86 @@
       const total = paiements.reduce((sum, p) => sum + Number(p.montant), 0);
       document.getElementById('kpiRevenus').textContent = total.toLocaleString('fr-FR') + ' DH';
     }
+  }
+
+  async function loadRealAlerts(){
+    const companyId = currentProfile.company_id;
+    const alerts = [];
+
+    // ---- Assurances véhicules qui expirent bientôt ou déjà expirées ----
+    const { data: vehicules } = await supabaseClient
+      .from('vehicules')
+      .select('nom_vehicule, immatriculation, assurance_fin, statut')
+      .eq('company_id', companyId);
+
+    const today = new Date();
+    (vehicules || []).forEach(v => {
+      if (!v.assurance_fin) return;
+      const end = new Date(v.assurance_fin);
+      const daysLeft = Math.round((end - today) / 86400000);
+      if (daysLeft <= 15){
+        alerts.push({
+          icon: daysLeft <= 0 ? 'shield-x' : 'shield-alert',
+          cls: daysLeft <= 0 ? 'red' : 'amber',
+          title: daysLeft <= 0 ? 'Assurance véhicule expirée' : 'Assurance véhicule bientôt expirée',
+          sub: `${v.nom_vehicule || 'Véhicule'} (${v.immatriculation}) — ` +
+               (daysLeft <= 0 ? `expirée depuis ${Math.abs(daysLeft)} j` : `renouvellement dans ${daysLeft} j`)
+        });
+      }
+      if (v.statut === 'en_maintenance' || v.statut === 'Maintenance'){
+        alerts.push({
+          icon: 'wrench', cls: 'amber',
+          title: 'Véhicule en maintenance',
+          sub: `${v.nom_vehicule || 'Véhicule'} (${v.immatriculation}) est actuellement indisponible`
+        });
+      }
+    });
+
+    // ---- Candidats avec un solde impayé ----
+    const { data: candidats } = await supabaseClient
+      .from('candidats')
+      .select('id, nom, prenom, prix_formation')
+      .eq('company_id', companyId)
+      .neq('statut', 'diplome');
+
+    const { data: paiements } = await supabaseClient
+      .from('paiements')
+      .select('candidat_id, montant')
+      .eq('company_id', companyId);
+
+    const paidByCandidat = {};
+    (paiements || []).forEach(p => {
+      paidByCandidat[p.candidat_id] = (paidByCandidat[p.candidat_id] || 0) + Number(p.montant);
+    });
+
+    (candidats || []).forEach(c => {
+      const prix = Number(c.prix_formation) || 0;
+      const paid = paidByCandidat[c.id] || 0;
+      const reste = prix - paid;
+      if (prix > 0 && reste > 0){
+        alerts.push({
+          icon: 'banknote', cls: 'red',
+          title: 'Solde impayé',
+          sub: `${c.prenom} ${c.nom} — reste ${reste.toLocaleString('fr-FR')} DH à payer`
+        });
+      }
+    });
+
+    const body = document.getElementById('alertsBody');
+    if (!alerts.length){
+      body.innerHTML = `<div style="text-align:center;padding:24px;color:var(--ink-pale);font-size:13px;">Aucune alerte pour le moment.</div>`;
+      return;
+    }
+    body.innerHTML = alerts.slice(0, 6).map(a => `
+      <div class="alert-item">
+        <div class="alert-icon ${a.cls}"><i data-lucide="${a.icon}"></i></div>
+        <div>
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-sub">${a.sub}</div>
+        </div>
+      </div>
+    `).join('');
+    lucide.createIcons();
   }
 
   function renderCandidats(candidats){
