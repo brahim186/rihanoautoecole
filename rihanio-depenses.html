@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="rihanio-config.js"></script>
 <style>
   :root{
@@ -184,6 +185,13 @@
   .panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
   .panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14.5px;display:flex;align-items:center;gap:9px;}
   .panel-title svg{width:17px;height:17px;color:var(--primary);}
+  .btn-secondary{
+    display:flex;align-items:center;gap:8px;background:var(--surface-2);color:var(--ink-soft);border:1.5px solid var(--border);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;
+    padding:10px 16px;border-radius:11px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;
+  }
+  .btn-secondary:hover{background:var(--surface);color:var(--primary);}
+  .btn-secondary svg{width:15px;height:15px;}
   .panel-body{padding:22px;}
 
   .chart-wrap{display:flex;align-items:flex-end;gap:10px;height:220px;padding:10px 4px 0;}
@@ -304,6 +312,12 @@
     </div>
 
     <div class="sb-scroll">
+      <div class="sb-cat">Actions</div>
+      <a href="rihanio-inscrire-candidat.html" class="sb-item">
+        <i data-lucide="user-plus"></i>
+        <span class="sb-item-label">Inscrire un candidat</span>
+      </a>
+
       <div class="sb-cat">Vue d'ensemble</div>
       <a href="rihanio-tableau-de-bord.html" class="sb-item">
         <i data-lucide="layout-dashboard"></i>
@@ -311,9 +325,13 @@
       </a>
 
       <div class="sb-cat">Candidats &amp; formation</div>
-      <a href="rihanio-inscrire-candidat.html" class="sb-item">
+      <a href="rihanio-candidats.html" class="sb-item">
         <i data-lucide="users"></i>
         <span class="sb-item-label">Candidats</span>
+      </a>
+      <a href="archive.html" class="sb-item">
+        <i data-lucide="archive"></i>
+        <span class="sb-item-label">Archive candidats</span>
       </a>
       <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="book-open"></i>
@@ -353,10 +371,10 @@
       </a>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <a href="rihanio-parametres.html" class="sb-item">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
-      </div>
+      </a>
     </div>
 
     <div class="sb-profile">
@@ -451,6 +469,17 @@
       <section class="panel">
         <div class="panel-head">
           <div class="panel-title"><i data-lucide="list"></i>Historique des dépenses <span class="num" id="listCount"></span></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none">
+            <button class="btn-secondary" id="btnImportXls" title="Importer depuis Excel">
+              <i data-lucide="upload"></i>
+              Importer
+            </button>
+            <button class="btn-secondary" id="btnExportXls" title="Exporter en Excel">
+              <i data-lucide="download"></i>
+              Exporter
+            </button>
+          </div>
         </div>
         <div class="table-scroll">
           <table>
@@ -579,6 +608,72 @@
     renderChart();
     renderTable();
   }
+
+  // ---------- Import / Export Excel ----------
+  function parseImportDate(val){
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0,10);
+    const s = String(val).trim();
+    if (!s) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    return '';
+  }
+
+  document.getElementById('btnExportXls').addEventListener('click', () => {
+    const rows = paiements.map(p => ({
+      'Catégorie': p.categorie,
+      'Montant': p.montant,
+      'Date': p.date,
+      'Description': p.description
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Dépenses');
+    XLSX.writeFile(wb, `depenses_${new Date().toISOString().slice(0,10)}.xlsx`);
+  });
+
+  document.getElementById('btnImportXls').addEventListener('click', () => {
+    document.getElementById('importFileInput').click();
+  });
+
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!rows.length){ alert('Le fichier est vide.'); e.target.value = ''; return; }
+
+    const payload = rows.map(r => ({
+      company_id: currentProfile.company_id,
+      categorie: String(r['Catégorie'] || r['Categorie'] || 'Autres').trim(),
+      montant: parseFloat(r['Montant']) || 0,
+      date_depense: parseImportDate(r['Date']) || new Date().toISOString().slice(0,10),
+      description: String(r['Description'] || '').trim() || null
+    })).filter(p => p.montant > 0);
+
+    if (!payload.length){
+      alert('Aucune ligne valide trouvée (le montant doit être supérieur à 0).');
+      e.target.value = '';
+      return;
+    }
+
+    const btn = document.getElementById('btnImportXls');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('depenses').insert(payload);
+    btn.disabled = false;
+    e.target.value = '';
+
+    if (error){ alert("Erreur lors de l'import : " + error.message); return; }
+
+    alert(`${payload.length} dépense(s) importée(s) avec succès.`);
+    await loadDepensesData();
+  });
 
   function renderMetrics(){
     const now = new Date();
