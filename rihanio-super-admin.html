@@ -108,6 +108,7 @@
   .status-badge.expired_grace{background:var(--maintenance-soft);color:#B5720B;}
   .status-badge.locked{background:var(--danger-soft);color:var(--danger);}
   .status-badge.suspended{background:var(--border);color:var(--ink-soft);}
+  .status-badge.assigned{background:var(--assigned-soft);color:var(--assigned);}
   .status-badge .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
   .row-actions{display:flex;align-items:center;gap:4px;}
@@ -183,6 +184,7 @@
         <i data-lucide="search"></i>
         <input type="text" id="searchInput" placeholder="Rechercher une entreprise...">
       </div>
+      <button class="btn-primary" id="openNotifModal" style="background:linear-gradient(135deg,#18B368,#0E8F52);box-shadow:0 10px 20px -8px rgba(24,179,104,.55);"><i data-lucide="megaphone"></i>Envoyer une notification</button>
       <button class="btn-primary" id="openAddModal"><i data-lucide="plus"></i>Ajouter une entreprise</button>
       <button class="icon-btn" id="themeToggle" title="Mode sombre"><i data-lucide="moon"></i></button>
     </header>
@@ -230,7 +232,57 @@
           </table>
         </div>
       </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i data-lucide="megaphone"></i>Notifications envoyées</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Notification</th>
+                <th>Destinataire</th>
+                <th>Envoyée le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sentNotifTbody">
+              <tr><td colspan="4" style="text-align:center;color:var(--ink-pale);padding:24px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: Envoyer une notification -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal">
+    <h2>Envoyer une notification</h2>
+    <p class="sub">Elle apparaîtra dans la cloche de notifications de l'entreprise ciblée (ou de toutes les entreprises).</p>
+    <form id="sendNotifForm">
+      <div class="field full" style="margin-bottom:12px;">
+        <label>Destinataire</label>
+        <select id="n_target" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;background:var(--surface-2);color:var(--ink);">
+          <option value="">Toutes les entreprises</option>
+        </select>
+      </div>
+      <div class="field full" style="margin-bottom:12px;">
+        <label>Titre</label>
+        <input type="text" id="n_title" required maxlength="120">
+      </div>
+      <div class="field full">
+        <label>Message</label>
+        <textarea id="n_message" required maxlength="600" rows="4" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;background:var(--surface-2);color:var(--ink);font-family:'Inter',sans-serif;resize:vertical;"></textarea>
+      </div>
+      <div class="form-msg" id="notifFormMsg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="closeNotifModal">Annuler</button>
+        <button type="submit" class="btn-primary" id="sendNotifBtn"><i data-lucide="send"></i>Envoyer</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -294,6 +346,7 @@
     document.getElementById('sbProfileAvatar').textContent = displayName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
     document.getElementById('f_start').value = new Date().toISOString().split('T')[0];
     loadCompanies();
+    loadSentNotifications();
   });
 
   function computeStatus(c){
@@ -429,6 +482,101 @@
       lucide.createIcons();
     }
   });
+
+  // ===================== Notifications =====================
+  const notifModal = document.getElementById('notifModal');
+
+  function populateNotifTargets(){
+    const sel = document.getElementById('n_target');
+    sel.innerHTML = '<option value="">Toutes les entreprises</option>' +
+      allCompanies.map(c => `<option value="${c.id}">${c.name || '—'}</option>`).join('');
+  }
+
+  document.getElementById('openNotifModal').addEventListener('click', () => {
+    populateNotifTargets();
+    notifModal.classList.add('open');
+  });
+  document.getElementById('closeNotifModal').addEventListener('click', () => notifModal.classList.remove('open'));
+
+  document.getElementById('sendNotifForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('notifFormMsg');
+    const btn = document.getElementById('sendNotifBtn');
+    msg.className = 'form-msg';
+    btn.disabled = true;
+    btn.textContent = 'إرسال...';
+
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const targetVal = document.getElementById('n_target').value;
+
+      const payload = {
+        company_id: targetVal || null,
+        title: document.getElementById('n_title').value.trim(),
+        message: document.getElementById('n_message').value.trim(),
+        created_by: session.user.id
+      };
+
+      const { error } = await supabaseClient.from('notifications').insert(payload);
+      if (error) throw error;
+
+      msg.classList.add('ok');
+      msg.textContent = 'تم إرسال الإشعار بنجاح ✅';
+      document.getElementById('sendNotifForm').reset();
+      loadSentNotifications();
+      setTimeout(() => { notifModal.classList.remove('open'); msg.className = 'form-msg'; }, 1000);
+    } catch (err) {
+      msg.classList.add('err');
+      msg.textContent = err.message || 'حدث خطأ غير متوقع';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="send"></i>Envoyer';
+      lucide.createIcons();
+    }
+  });
+
+  async function loadSentNotifications(){
+    const tbody = document.getElementById('sentNotifTbody');
+    const { data, error } = await supabaseClient
+      .from('notifications')
+      .select('id, title, message, company_id, created_at, companies(name)')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);padding:24px;">${error.message}</td></tr>`;
+      return;
+    }
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--ink-pale);padding:24px;">Aucune notification envoyée.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(n => {
+      const preview = (n.message || '').length > 70 ? n.message.slice(0, 70) + '…' : (n.message || '');
+      const target = n.company_id
+        ? `<span class="status-badge assigned"><span class="dot"></span>${(n.companies && n.companies.name) || '—'}</span>`
+        : `<span class="status-badge active"><span class="dot"></span>Toutes</span>`;
+      return `
+        <tr>
+          <td><div class="co-name">${n.title}</div><div class="co-addr">${preview}</div></td>
+          <td>${target}</td>
+          <td>${new Date(n.created_at).toLocaleString('fr-FR')}</td>
+          <td>
+            <div class="row-actions">
+              <button class="danger" title="Supprimer" onclick="deleteNotif('${n.id}')"><i data-lucide="trash-2"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  window.deleteNotif = async function(id){
+    if (!confirm('واش متأكد باغي تحذف هاد الإشعار؟')) return;
+    const { error } = await supabaseClient.from('notifications').delete().eq('id', id);
+    if (error) { alert('خطأ: ' + error.message); return; }
+    loadSentNotifications();
+  };
 
   const themeToggle = document.getElementById('themeToggle');
   themeToggle.addEventListener('click', () => {
