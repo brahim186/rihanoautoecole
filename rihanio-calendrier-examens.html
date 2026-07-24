@@ -400,6 +400,7 @@
     if (!profile) return;
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
+    loadExamCandidates();
   });
 
   document.querySelectorAll('.sb-item').forEach(item => {
@@ -419,26 +420,68 @@
 
   const avatarColors = ['#5B62F4','#8B6FF2','#18B368','#F0A93C','#3B7CF6','#F0473F','#0E8F52','#C97F14'];
 
-  // Only candidates who have paid in full appear here.
-  let candidates = [
-    { id:1, name:'Maryam El Fassi', cin:'BE482910', phone:'06 61 22 33 44', permit:'B',
-      promo:'Promo janvier 2026', examDate:'2026-08-04', score:'' },
+  // Only candidates who have paid in full appear here (chargé depuis Supabase).
+  let candidates = [];
 
-    { id:2, name:'Ayoub El Hassani', cin:'BK317755', phone:'06 72 33 44 55', permit:'A',
-      promo:'Promo décembre 2025', examDate:'', score:'' },
+  function promoLabel(dateInscription){
+    if (!dateInscription) return 'Promotion inconnue';
+    const d = new Date(dateInscription);
+    const mois = d.toLocaleDateString('fr-FR', { month: 'long' });
+    return `Promo ${mois} ${d.getFullYear()}`;
+  }
 
-    { id:3, name:'Kenza Alaoui', cin:'A205841', phone:'06 83 44 55 66', permit:'B',
-      promo:'Promo janvier 2026', examDate:'2026-08-06', score:'18' },
+  async function loadExamCandidates(){
+    const companyId = currentProfile.company_id;
 
-    { id:4, name:'Yassine Bourada', cin:'BJ660124', phone:'06 94 55 66 77', permit:'C',
-      promo:'Promo décembre 2025', examDate:'', score:'' },
+    const { data: candidats, error: candErr } = await supabaseClient
+      .from('candidats')
+      .select('*')
+      .eq('company_id', companyId)
+      .neq('statut', 'diplome');
+    if (candErr) { console.error(candErr.message); return; }
 
-    { id:5, name:'Salma Nassiri', cin:'BL903327', phone:'06 15 66 77 88', permit:'B',
-      promo:'Promo novembre 2025', examDate:'2026-07-29', score:'' },
+    const { data: paiements } = await supabaseClient
+      .from('paiements')
+      .select('candidat_id, montant')
+      .eq('company_id', companyId);
 
-    { id:6, name:'Hamza Idrissi', cin:'BM117744', phone:'06 26 77 88 99', permit:'A',
-      promo:'Promo novembre 2025', examDate:'', score:'' },
-  ];
+    const totalPaidByCandidat = {};
+    (paiements || []).forEach(p => {
+      totalPaidByCandidat[p.candidat_id] = (totalPaidByCandidat[p.candidat_id] || 0) + Number(p.montant);
+    });
+
+    const { data: examens } = await supabaseClient
+      .from('examens')
+      .select('*')
+      .eq('company_id', companyId);
+
+    const examByCandidat = {};
+    (examens || []).forEach(e => { examByCandidat[e.candidat_id] = e; });
+
+    candidates = (candidats || [])
+      .filter(c => {
+        const prix = Number(c.prix_formation) || 0;
+        const paid = totalPaidByCandidat[c.id] || 0;
+        return prix > 0 && paid >= prix;
+      })
+      .map(c => {
+        const exam = examByCandidat[c.id];
+        return {
+          id: c.id,
+          examId: exam ? exam.id : null,
+          name: `${c.prenom} ${c.nom}`,
+          cin: c.cin || '—',
+          phone: c.telephone || '—',
+          permit: c.categorie_permis || 'B',
+          promo: promoLabel(c.date_inscription),
+          examDate: exam && exam.date_examen ? exam.date_examen : '',
+          score: exam && exam.note !== null && exam.note !== undefined ? String(exam.note) : ''
+        };
+      });
+
+    renderMetrics();
+    renderList();
+  }
 
   let searchTerm = '';
   let activeFilter = 'all';
@@ -570,28 +613,64 @@
     attachHandlers();
   }
 
+  // Crée ou met à jour la ligne "examens" liée à un candidat, retourne l'id de l'examen.
+  async function upsertExamRow(candidat, fields){
+    if (candidat.examId){
+      const { error } = await supabaseClient.from('examens').update(fields).eq('id', candidat.examId);
+      if (error) { alert('Erreur : ' + error.message); return null; }
+      return candidat.examId;
+    } else {
+      const { data, error } = await supabaseClient
+        .from('examens')
+        .insert({
+          company_id: currentProfile.company_id,
+          candidat_id: candidat.id,
+          type_examen: 'conduite',
+          ...fields
+        })
+        .select()
+        .single();
+      if (error) { alert('Erreur : ' + error.message); return null; }
+      return data.id;
+    }
+  }
+
   function attachHandlers(){
     document.querySelectorAll('.exam-date-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const id = parseInt(input.dataset.id);
+      input.addEventListener('change', async () => {
+        const id = input.dataset.id;
         const c = candidates.find(x => x.id === id);
-        if (c){ c.examDate = input.value; renderMetrics(); renderList(); }
+        if (!c) return;
+        const newExamId = await upsertExamRow(c, { date_examen: input.value || null });
+        if (newExamId){ c.examId = newExamId; c.examDate = input.value; renderMetrics(); renderList(); }
       });
     });
 
     document.querySelectorAll('.exam-score-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const id = parseInt(input.dataset.id);
+      input.addEventListener('change', async () => {
+        const id = input.dataset.id;
         const c = candidates.find(x => x.id === id);
-        if (c){ c.score = input.value; renderMetrics(); }
+        if (!c) return;
+        const noteVal = input.value === '' ? null : parseFloat(input.value);
+        const newExamId = await upsertExamRow(c, { note: noteVal });
+        if (newExamId){ c.examId = newExamId; c.score = input.value; renderMetrics(); }
       });
     });
 
     document.querySelectorAll('.pass-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
         const c = candidates.find(x => x.id === id);
         if (!c) return;
+
+        const newExamId = await upsertExamRow(c, { resultat: 'reussi' });
+        if (!newExamId) return;
+
+        const { error: candErr } = await supabaseClient
+          .from('candidats')
+          .update({ statut: 'diplome' })
+          .eq('id', id);
+        if (candErr) { alert('Erreur : ' + candErr.message); return; }
 
         const card = document.querySelector(`.exam-card[data-id="${id}"]`);
         if (card) card.classList.add('removing');
@@ -602,24 +681,24 @@
           candidates = candidates.filter(x => x.id !== id);
           renderMetrics();
           renderList();
-
-          // Send the candidate to the graduates / candidates page once defined.
-          if (PASS_REDIRECT_URL){
-            window.location.href = `${PASS_REDIRECT_URL}?candidat=${id}`;
-          }
         }, 300);
       });
     });
 
     document.querySelectorAll('.btn-fail').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = parseInt(btn.dataset.id);
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
         const c = candidates.find(x => x.id === id);
-        if (c && confirm(`Retirer "${c.name}" de la liste des examens ?`)){
-          candidates = candidates.filter(x => x.id !== id);
-          renderMetrics();
-          renderList();
+        if (!c) return;
+        if (!confirm(`Annuler la programmation d'examen de "${c.name}" ?`)) return;
+
+        if (c.examId){
+          const { error } = await supabaseClient.from('examens').delete().eq('id', c.examId);
+          if (error) { alert('Erreur : ' + error.message); return; }
         }
+        c.examId = null; c.examDate = ''; c.score = '';
+        renderMetrics();
+        renderList();
       });
     });
   }
