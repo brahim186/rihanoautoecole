@@ -9,6 +9,7 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="rihanio-config.js"></script>
+<script src="rihanio-notifications.js"></script>
 <style>
   :root{
     --bg:#F2F3FA;
@@ -696,6 +697,8 @@
   // ---------- Profil connecté (sidebar / topbar) — connexion réelle ----------
   requireAuth().then(profile => {
     if (!profile) return;
+    initNotificationsBell(profile);
+    checkSubscriptionExpiryPopup(profile);
     const logoutBtn = document.querySelector('.sb-logout');
     if (logoutBtn) logoutBtn.addEventListener('click', logout);
     const displayName = profile.full_name || profile.email;
