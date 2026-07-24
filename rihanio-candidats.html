@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="rihanio-config.js"></script>
 <style>
   :root{
@@ -383,11 +384,11 @@
         <i data-lucide="archive"></i>
         <span class="sb-item-label">Archive candidats</span>
       </a>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="book-open"></i>
         <span class="sb-item-label">Cours théoriques</span>
       </div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
         <i data-lucide="car-front"></i>
         <span class="sb-item-label">Cours pratiques</span>
       </div>
@@ -421,10 +422,10 @@
       </a>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
+      <a href="rihanio-parametres.html" class="sb-item">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
-      </div>
+      </a>
     </div>
 
     <div class="sb-profile">
@@ -452,6 +453,8 @@
 
       <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
 
+      <input type="file" id="importFileInput" accept=".xlsx,.xls" style="display:none">
+
       <a class="btn-primary" href="rihanio-inscrire-candidat.html">
         <i data-lucide="user-plus"></i>
         Inscrire un candidat
@@ -471,6 +474,16 @@
       <section class="panel">
         <div class="panel-head">
           <div class="panel-title"><i data-lucide="users"></i>Liste des candidats <span class="num" id="listCount"></span></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn-secondary" id="btnImportXls" title="Importer depuis Excel">
+              <i data-lucide="upload"></i>
+              Importer
+            </button>
+            <button class="btn-secondary" id="btnExportXls" title="Exporter en Excel">
+              <i data-lucide="download"></i>
+              Exporter
+            </button>
+          </div>
         </div>
         <div class="table-scroll">
           <table>
@@ -856,6 +869,92 @@
     candidats = (data || []).map(dbToCandidat);
     renderAll();
   }
+
+  // ---------- Import / Export Excel ----------
+  function parseImportDate(val){
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0,10);
+    const s = String(val).trim();
+    if (!s) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    return '';
+  }
+
+  document.getElementById('btnExportXls').addEventListener('click', () => {
+    const rows = candidats.map(c => ({
+      'Prénom': c.prenom,
+      'Nom': c.nom,
+      'CIN': c.cin === '—' ? '' : c.cin,
+      'Expiration CIN': c.cinExpiration,
+      'Téléphone': c.telephone === '—' ? '' : c.telephone,
+      'Email': c.email === '—' ? '' : c.email,
+      'Adresse': c.adresse === '—' ? '' : c.adresse,
+      'Date de naissance': c.dateNaissance,
+      "Date d'inscription": c.dateInscription,
+      'Catégorie permis': c.categoriePermis,
+      'Statut': c.statut,
+      'Prix formation': c.prixFormation,
+      'Avance payée': c.avancePayee,
+      "Date d'examen prévue": c.dateExamenPrevue
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Candidats');
+    XLSX.writeFile(wb, `candidats_${todayStr()}.xlsx`);
+  });
+
+  document.getElementById('btnImportXls').addEventListener('click', () => {
+    document.getElementById('importFileInput').click();
+  });
+
+  document.getElementById('importFileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+    if (!rows.length){ alert('Le fichier est vide.'); e.target.value = ''; return; }
+
+    const payload = rows.map(r => ({
+      company_id: currentProfile.company_id,
+      prenom: String(r['Prénom'] || r['Prenom'] || '').trim(),
+      nom: String(r['Nom'] || '').trim(),
+      cin: String(r['CIN'] || '').trim() || null,
+      cin_expiration: parseImportDate(r['Expiration CIN']) || null,
+      telephone: String(r['Téléphone'] || r['Telephone'] || '').trim() || null,
+      email: String(r['Email'] || '').trim() || null,
+      adresse: String(r['Adresse'] || '').trim() || null,
+      date_naissance: parseImportDate(r['Date de naissance']) || null,
+      date_inscription: parseImportDate(r["Date d'inscription"]) || todayStr(),
+      categorie_permis: String(r['Catégorie permis'] || 'B').trim(),
+      statut: String(r['Statut'] || 'actif').trim(),
+      prix_formation: parseFloat(r['Prix formation']) || 0,
+      avance_payee: parseFloat(r['Avance payée']) || 0,
+      date_examen_prevue: parseImportDate(r["Date d'examen prévue"]) || null
+    })).filter(p => p.nom && p.prenom);
+
+    if (!payload.length){
+      alert('Aucune ligne valide trouvée (Nom et Prénom sont obligatoires).');
+      e.target.value = '';
+      return;
+    }
+
+    const btn = document.getElementById('btnImportXls');
+    btn.disabled = true;
+    const { error } = await supabaseClient.from('candidats').insert(payload);
+    btn.disabled = false;
+    e.target.value = '';
+
+    if (error){ alert("Erreur lors de l'import : " + error.message); return; }
+
+    alert(`${payload.length} candidat(s) importé(s) avec succès.`);
+    await loadCandidats();
+  });
 
   function filteredCandidats(){
     if (!searchTerm) return candidats;
