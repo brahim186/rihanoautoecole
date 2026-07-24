@@ -280,10 +280,10 @@
 
     <div class="sb-scroll">
       <div class="sb-cat">Actions</div>
-      <div class="sb-item active">
+      <a href="rihanio-inscrire-candidat.html" class="sb-item active">
         <i data-lucide="user-plus"></i>
         <span class="sb-item-label">Inscrire un candidat</span>
-      </div>
+      </a>
 
       <div class="sb-cat">Vue d'ensemble</div>
       <a href="rihanio-tableau-de-bord.html" class="sb-item">
@@ -300,11 +300,11 @@
         <i data-lucide="archive"></i>
         <span class="sb-item-label">Archive candidats</span>
       </a>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="book-open"></i>
         <span class="sb-item-label">Cours théoriques</span>
       </div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="car-front"></i>
         <span class="sb-item-label">Cours pratiques</span>
       </div>
@@ -324,13 +324,21 @@
       </a>
 
       <div class="sb-cat">Finance</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <a href="rihanio-finances.html" class="sb-item">
         <i data-lucide="wallet"></i>
         <span class="sb-item-label">Finances &amp; paiements</span>
-      </div>
+      </a>
+      <a href="rihanio-salaires.html" class="sb-item">
+        <i data-lucide="banknote"></i>
+        <span class="sb-item-label">Salaires</span>
+      </a>
+      <a href="rihanio-depenses.html" class="sb-item">
+        <i data-lucide="receipt"></i>
+        <span class="sb-item-label">Dépenses</span>
+      </a>
 
       <div class="sb-cat">Système</div>
-      <div class="sb-item" style="opacity:.45;cursor:not-allowed;" title="Bientôt disponible">
+      <div class="sb-item" style="opacity:.45;cursor:not-allowed;">
         <i data-lucide="settings"></i>
         <span class="sb-item-label">Paramètres</span>
       </div>
@@ -392,13 +400,13 @@
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label" for="fPrenom">Prénom <span class="req-star">*</span></label>
-                <input type="text" class="form-input" id="fPrenom" placeholder="Ex : Maryam" required>
+                <input type="text" class="form-input" id="fPrenom" required>
                 <span class="field-error" id="errPrenom"><i data-lucide="alert-circle"></i>Le prénom est obligatoire.</span>
               </div>
 
               <div class="form-group">
                 <label class="form-label" for="fNom">Nom <span class="req-star">*</span></label>
-                <input type="text" class="form-input" id="fNom" placeholder="Ex : El Fassi" required>
+                <input type="text" class="form-input" id="fNom" required>
                 <span class="field-error" id="errNom"><i data-lucide="alert-circle"></i>Le nom est obligatoire.</span>
               </div>
 
