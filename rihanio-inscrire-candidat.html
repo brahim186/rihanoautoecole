@@ -913,8 +913,10 @@
       .order('date_paiement', { ascending: false });
     currentPayments = error ? [] : (data || []);
 
-    const paidFromTable = currentPayments.reduce((sum, p) => sum + Number(p.montant || 0), 0);
-    const totalPaid = c.avancePayee + paidFromTable;
+    // Le montant de "avance_payee" saisi à l'inscription est déjà inséré comme
+    // ligne réelle dans la table paiements (visible dans l'historique ci-dessous).
+    // On ne l'additionne donc pas une 2e fois ici, pour éviter les doublons.
+    const totalPaid = currentPayments.reduce((sum, p) => sum + Number(p.montant || 0), 0);
     const due = Math.max(c.prixFormation - totalPaid, 0);
 
     document.getElementById('ficheTotal').textContent = fmtMoney(c.prixFormation);
@@ -925,16 +927,6 @@
     const modeIcons  = { especes:'banknote', carte:'credit-card', virement:'landmark', cheque:'file-text' };
 
     const rows = [];
-    if (c.avancePayee > 0){
-      rows.push(`
-        <tr>
-          <td>${fmtDate(c.dateInscription)}</td>
-          <td class="num" style="font-weight:700;">${fmtMoney(c.avancePayee)}</td>
-          <td><span class="pay-mode"><i data-lucide="banknote"></i>Espèces</span></td>
-          <td>Avance à l'inscription</td>
-        </tr>
-      `);
-    }
     currentPayments.forEach(p => {
       rows.push(`
         <tr>
