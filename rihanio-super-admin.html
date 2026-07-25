@@ -378,9 +378,19 @@
         <div class="field"><label>Durée (jours)</label><input type="number" id="e_duration" min="1" required></div>
       </div>
       <div class="form-msg" id="editFormMsg"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" id="closeEditModal">Annuler</button>
-        <button type="submit" class="btn-primary" id="saveEditBtn"><i data-lucide="check"></i>Enregistrer</button>
+      <div id="generatedPasswordBox" style="display:none;margin-bottom:14px;background:var(--surface-2);border:1.5px dashed var(--primary);border-radius:12px;padding:12px 14px;align-items:center;justify-content:space-between;gap:10px;">
+        <div>
+          <div style="font-size:10.5px;color:var(--ink-soft);margin-bottom:3px;">كلمة السر الجديدة (صيفطها للزبون يدويا، ماغاتبانش من بعد):</div>
+          <div id="generatedPasswordText" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:var(--primary);direction:ltr;letter-spacing:.5px;"></div>
+        </div>
+        <button type="button" class="copy-btn" id="copyGeneratedPassword" title="نسخ"><i data-lucide="copy"></i></button>
+      </div>
+      <div class="modal-actions" style="justify-content:space-between;flex-wrap:wrap;">
+        <button type="button" class="btn-ghost" id="sendResetPasswordBtn" style="color:var(--primary);border-color:var(--primary);"><i data-lucide="key-round"></i>Générer un nouveau mot de passe</button>
+        <div style="display:flex;gap:10px;">
+          <button type="button" class="btn-ghost" id="closeEditModal">Annuler</button>
+          <button type="submit" class="btn-primary" id="saveEditBtn"><i data-lucide="check"></i>Enregistrer</button>
+        </div>
       </div>
     </form>
   </div>
@@ -624,9 +634,50 @@
     document.getElementById('e_start').value = c.subscription_start_date ? new Date(c.subscription_start_date).toISOString().split('T')[0] : '';
     document.getElementById('e_duration').value = c.subscription_duration_days || 30;
     document.getElementById('editFormMsg').className = 'form-msg';
+    document.getElementById('generatedPasswordBox').style.display = 'none';
     editModal.classList.add('open');
   };
   document.getElementById('closeEditModal').addEventListener('click', () => editModal.classList.remove('open'));
+
+  document.getElementById('sendResetPasswordBtn').addEventListener('click', async () => {
+    const companyId = document.getElementById('e_id').value;
+    if (!companyId) return;
+    if (!confirm('واش متأكد باغي تولد كلمة سر جديدة لهاد الشركة؟ كلمة السر القديمة غادي تتبطل مباشرة.')) return;
+
+    const btn = document.getElementById('sendResetPasswordBtn');
+    btn.disabled = true;
+    const original = btn.innerHTML;
+    btn.innerHTML = 'جاري التوليد...';
+
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-set-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ company_id: companyId })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'حدث خطأ غير متوقع');
+
+      document.getElementById('generatedPasswordText').textContent = result.password;
+      document.getElementById('generatedPasswordBox').style.display = 'flex';
+      lucide.createIcons();
+    } catch (err) {
+      alert('خطأ: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = original;
+      lucide.createIcons();
+    }
+  });
+
+  document.getElementById('copyGeneratedPassword').addEventListener('click', (e) => {
+    copyToClipboard(document.getElementById('generatedPasswordText').textContent, e.currentTarget);
+  });
 
   document.getElementById('editCompanyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
