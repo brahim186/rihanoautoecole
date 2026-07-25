@@ -1,7 +1,3 @@
-// ============================================================
-// RIHANIO AUTO-ÉCOLE — Configuration Supabase partagée
-// À inclure dans toutes les pages protégées (après le script Supabase CDN)
-// ============================================================
 
 const SUPABASE_URL = 'https://zenisqrgaiemicfqzudr.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_I5721kHC1W91CwMTY4GkZg_Tm2vWD5g';
