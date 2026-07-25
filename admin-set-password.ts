@@ -1,16 +1,3 @@
-// ============================================================
-// RIHANIO — Edge Function: admin-set-password
-// كتولد كلمة سر جديدة لصاحب شركة معينة وتبدلها مباشرة (بلا ما
-// تحتاج البريد الإلكتروني يخدم)، وترجعها للسوبر أدمن باش يشوفها
-// ويصيفطها للزبون يدويا.
-//
-// طريقة النشر (Deploy):
-//   1. فمشروع Supabase ديالك، دوز لـ Edge Functions.
-//   2. دير "Deploy a new function"، سميها بالضبط: admin-set-password
-//   3. لصق هاد الكود كامل وانشرو (Deploy).
-//   (SUPABASE_URL و SUPABASE_ANON_KEY و SUPABASE_SERVICE_ROLE_KEY
-//    كاينين أوتوماتيكيا فكل Edge Function، ماخصكش تزيدهم يدويا)
-// ============================================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
