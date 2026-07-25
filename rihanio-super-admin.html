@@ -117,6 +117,12 @@
   .row-actions button.danger:hover{color:var(--danger);background:var(--danger-soft);}
   .row-actions svg{width:15px;height:15px;}
 
+  .copy-btn{width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink-pale);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;vertical-align:middle;margin-inline-start:8px;}
+  .copy-btn:hover{color:var(--primary);border-color:var(--primary);}
+  .copy-btn svg{width:13px;height:13px;}
+  .copy-btn.copied{color:var(--available);border-color:var(--available);}
+  .field-value-row{display:flex;align-items:center;}
+
   /* MODAL */
   .modal-overlay{position:fixed;inset:0;background:rgba(15,16,35,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
   .modal-overlay.open{display:flex;}
@@ -319,6 +325,67 @@
   </div>
 </div>
 
+<!-- MODAL: Voir entreprise -->
+<div class="modal-overlay" id="viewModal">
+  <div class="modal">
+    <h2 id="view_name">—</h2>
+    <p class="sub" id="view_address">—</p>
+    <div class="form-grid">
+      <div class="field"><label>Propriétaire</label><div id="view_owner" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;">—</div></div>
+      <div class="field"><label>Email admin</label><div id="view_email" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;word-break:break-all;">—</div></div>
+      <div class="field full">
+        <label>Code de paiement (Motif)</label>
+        <div class="field-value-row">
+          <div id="view_code" style="font-size:14px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:var(--primary);padding:8px 0;">—</div>
+          <button type="button" class="copy-btn" id="copyViewCode" title="نسخ"><i data-lucide="copy"></i></button>
+        </div>
+      </div>
+      <div class="field"><label>Statut</label><div id="view_status" style="padding:8px 0;">—</div></div>
+      <div class="field"><label>Prix abonnement</label><div id="view_price" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;">—</div></div>
+      <div class="field"><label>Début abonnement</label><div id="view_start" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;">—</div></div>
+      <div class="field"><label>Durée</label><div id="view_duration" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;">—</div></div>
+      <div class="field full"><label>Créée le</label><div id="view_created" style="font-size:13px;font-weight:600;color:var(--ink);padding:10px 0;">—</div></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-ghost" id="closeViewModal">Fermer</button>
+      <button type="button" class="btn-primary" id="viewToEditBtn"><i data-lucide="pencil"></i>Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Modifier entreprise -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h2>Modifier l'entreprise</h2>
+    <p class="sub">L'email de connexion n'est pas modifié ici, seulement les informations de la fiche.</p>
+    <form id="editCompanyForm">
+      <input type="hidden" id="e_id">
+      <div class="form-grid">
+        <div class="field full"><label>Nom de l'entreprise</label><input type="text" id="e_name" required></div>
+        <div class="field full"><label>Adresse</label><input type="text" id="e_address"></div>
+        <div class="field"><label>Nom du propriétaire</label><input type="text" id="e_owner"></div>
+        <div class="field"><label>Email admin (affichage)</label><input type="email" id="e_email"></div>
+        <div class="field full">
+          <label>Code de paiement (Motif)</label>
+          <div class="field-value-row">
+            <input type="text" id="e_payment_code" readonly style="flex:1;background:var(--surface-2);color:var(--ink-pale);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;">
+            <button type="button" class="copy-btn" id="copyEditCode" title="نسخ"><i data-lucide="copy"></i></button>
+            <button type="button" class="copy-btn" id="regenerateCodeBtn" title="توليد كود جديد"><i data-lucide="refresh-cw"></i></button>
+          </div>
+        </div>
+        <div class="field"><label>Prix de l'abonnement (DH)</label><input type="number" id="e_price" min="0" step="0.01"></div>
+        <div class="field"><label>Date de début</label><input type="date" id="e_start" required></div>
+        <div class="field"><label>Durée (jours)</label><input type="number" id="e_duration" min="1" required></div>
+      </div>
+      <div class="form-msg" id="editFormMsg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="closeEditModal">Annuler</button>
+        <button type="submit" class="btn-primary" id="saveEditBtn"><i data-lucide="check"></i>Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- MODAL: Ajouter entreprise -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
@@ -435,6 +502,7 @@
           <td>
             <div class="co-name">${c.name || '—'}</div>
             <div class="co-addr">${c.address || ''}</div>
+            <div class="co-addr" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--primary);margin-top:3px;">Motif: ${c.payment_code || '—'}</div>
           </td>
           <td>
             <div>${c.owner_name || '—'}</div>
@@ -446,6 +514,12 @@
           <td><span class="status-badge ${status}"><span class="dot"></span>${meta.label}</span></td>
           <td>
             <div class="row-actions">
+              <button title="Voir les détails" onclick="viewCompany('${c.id}')">
+                <i data-lucide="eye"></i>
+              </button>
+              <button title="Modifier" onclick="openEditCompany('${c.id}')">
+                <i data-lucide="pencil"></i>
+              </button>
               <button title="${isPaused ? 'Activer' : 'Suspendre'}" onclick="toggleSuspend('${c.id}', ${isPaused})">
                 <i data-lucide="${isPaused ? 'play' : 'pause'}"></i>
               </button>
@@ -461,6 +535,134 @@
     if (error) { alert('خطأ: ' + error.message); return; }
     loadCompanies();
   };
+
+  // ============ نسخ للـ clipboard ============
+  async function copyToClipboard(text, btn){
+    if (!text || text === '—') return;
+    try {
+      await navigator.clipboard.writeText(text);
+      if (btn) {
+        btn.classList.add('copied');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check"></i>';
+        lucide.createIcons();
+        setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; lucide.createIcons(); }, 1400);
+      }
+    } catch (err) {
+      alert('ماقدرش يتنسخ، نسخو يدويا: ' + text);
+    }
+  }
+
+  document.getElementById('copyViewCode').addEventListener('click', (e) => {
+    copyToClipboard(document.getElementById('view_code').textContent, e.currentTarget);
+  });
+  document.getElementById('copyEditCode').addEventListener('click', (e) => {
+    copyToClipboard(document.getElementById('e_payment_code').value, e.currentTarget);
+  });
+  document.getElementById('regenerateCodeBtn').addEventListener('click', async (e) => {
+    const id = document.getElementById('e_id').value;
+    if (!id) return;
+    if (!confirm('واش متأكد باغي تولد كود جديد؟ الكود القديم غادي يتبدل.')) return;
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    try {
+      const { data: newCode, error: rpcError } = await supabaseClient.rpc('generate_unique_payment_code');
+      if (rpcError) throw rpcError;
+      const { error: updError } = await supabaseClient.from('companies').update({ payment_code: newCode }).eq('id', id);
+      if (updError) throw updError;
+      document.getElementById('e_payment_code').value = newCode;
+      loadCompanies();
+    } catch (err) {
+      alert('خطأ: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ============ Voir / Modifier une entreprise ============
+  const viewModal = document.getElementById('viewModal');
+  const editModal = document.getElementById('editModal');
+  let viewingCompanyId = null;
+
+  window.viewCompany = function(id){
+    const c = allCompanies.find(x => x.id === id);
+    if (!c) return;
+    viewingCompanyId = id;
+    const status = computeStatus(c);
+    const meta = statusMeta[status];
+
+    document.getElementById('view_name').textContent = c.name || '—';
+    document.getElementById('view_address').textContent = c.address || 'Aucune adresse renseignée';
+    document.getElementById('view_owner').textContent = c.owner_name || '—';
+    document.getElementById('view_email').textContent = c.admin_email || '—';
+    document.getElementById('view_code').textContent = c.payment_code || '—';
+    document.getElementById('view_status').innerHTML = `<span class="status-badge ${status}"><span class="dot"></span>${meta.label}</span>`;
+    document.getElementById('view_price').textContent = Number(c.subscription_price || 0).toLocaleString('fr-FR') + ' DH';
+    document.getElementById('view_start').textContent = c.subscription_start_date ? new Date(c.subscription_start_date).toLocaleDateString('fr-FR') : '—';
+    document.getElementById('view_duration').textContent = (c.subscription_duration_days || 30) + ' jours';
+    document.getElementById('view_created').textContent = c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : '—';
+
+    viewModal.classList.add('open');
+    lucide.createIcons();
+  };
+  document.getElementById('closeViewModal').addEventListener('click', () => viewModal.classList.remove('open'));
+  document.getElementById('viewToEditBtn').addEventListener('click', () => {
+    viewModal.classList.remove('open');
+    if (viewingCompanyId) openEditCompany(viewingCompanyId);
+  });
+
+  window.openEditCompany = function(id){
+    const c = allCompanies.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('e_id').value = c.id;
+    document.getElementById('e_name').value = c.name || '';
+    document.getElementById('e_address').value = c.address || '';
+    document.getElementById('e_owner').value = c.owner_name || '';
+    document.getElementById('e_email').value = c.admin_email || '';
+    document.getElementById('e_payment_code').value = c.payment_code || '';
+    document.getElementById('e_price').value = c.subscription_price || 0;
+    document.getElementById('e_start').value = c.subscription_start_date ? new Date(c.subscription_start_date).toISOString().split('T')[0] : '';
+    document.getElementById('e_duration').value = c.subscription_duration_days || 30;
+    document.getElementById('editFormMsg').className = 'form-msg';
+    editModal.classList.add('open');
+  };
+  document.getElementById('closeEditModal').addEventListener('click', () => editModal.classList.remove('open'));
+
+  document.getElementById('editCompanyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('editFormMsg');
+    const btn = document.getElementById('saveEditBtn');
+    msg.className = 'form-msg';
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ...';
+
+    const id = document.getElementById('e_id').value;
+    const payload = {
+      name: document.getElementById('e_name').value,
+      address: document.getElementById('e_address').value,
+      owner_name: document.getElementById('e_owner').value,
+      admin_email: document.getElementById('e_email').value,
+      subscription_price: parseFloat(document.getElementById('e_price').value || '0'),
+      subscription_start_date: document.getElementById('e_start').value,
+      subscription_duration_days: parseInt(document.getElementById('e_duration').value, 10)
+    };
+
+    try {
+      const { error } = await supabaseClient.from('companies').update(payload).eq('id', id);
+      if (error) throw error;
+      msg.classList.add('ok');
+      msg.textContent = 'تم تحديث المعلومات بنجاح ✅';
+      loadCompanies();
+      setTimeout(() => { editModal.classList.remove('open'); msg.className = 'form-msg'; }, 900);
+    } catch (err) {
+      msg.classList.add('err');
+      msg.textContent = err.message || 'حدث خطأ غير متوقع';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="check"></i>Enregistrer';
+      lucide.createIcons();
+    }
+  });
 
   document.getElementById('searchInput').addEventListener('input', (e) => {
     const q = e.target.value.trim().toLowerCase();
